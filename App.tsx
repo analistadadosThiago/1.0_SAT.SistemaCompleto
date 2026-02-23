@@ -422,7 +422,7 @@ export default function App() {
              </div>
              <div className="space-y-1">
                 <button onClick={() => setIsNotasOpen(!isNotasOpen)} className="w-full px-4 py-3 flex items-center justify-between text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
-                  <div className="flex items-center gap-2 font-black text-[10px] tracking-widest uppercase"><MessageSquareWarning className="w-4 h-4"/> Notas Am_Divinopolis</div>
+                  <div className="flex items-center gap-2 font-black text-[10px] tracking-widest uppercase"><MessageSquareWarning className="w-4 h-4"/> Notas AM: Contrato de Divinopolis</div>
                   <ChevronDown className={`w-3 h-3 transition-transform ${isNotasOpen ? '' : '-rotate-90'}`} />
                 </button>
                 <div className={`space-y-1 pl-4 overflow-hidden transition-all ${isNotasOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
@@ -448,7 +448,7 @@ export default function App() {
                   </span>
                 )}
                 <h1 className="text-xl font-black text-gray-900 uppercase tracking-tighter">
-                  {activeSection === 'transmissao' ? 'Transmissão' : 'Notas Am_Divinopolis'}
+                  {activeSection === 'transmissao' ? 'Transmissão' : 'Notas AM: Contrato de Divinopolis'}
                 </h1>
               </div>
             </div>
@@ -697,7 +697,7 @@ export default function App() {
               ) : (
                 <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden mb-10 print-full-table">
                    <div className="p-6 border-b border-gray-50 flex justify-between items-center no-print">
-                     <h2 className="font-black text-gray-900 text-xs uppercase tracking-widest">Base de Dados - {activeSection === 'transmissao' ? 'TRANSMISSÃO' : 'Notas Am_Divinopolis'}</h2>
+                     <h2 className="font-black text-gray-900 text-xs uppercase tracking-widest">Base de Dados - {activeSection === 'transmissao' ? 'TRANSMISSÃO' : 'Notas AM: Contrato de Divinopolis'}</h2>
                      <div className="flex gap-2">
                         <button onClick={exportToPDF} title="Exportar para PDF" className="p-2.5 bg-gray-50 rounded-xl hover:bg-gray-100"><Printer className="w-4 h-4 text-gray-400"/></button>
                         <button onClick={exportToExcel} title="Exportar para Excel" className="p-2.5 bg-emerald-50 rounded-xl hover:bg-emerald-100"><FileSpreadsheet className="w-4 h-4 text-emerald-600"/></button>
@@ -790,14 +790,14 @@ export default function App() {
             <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in duration-700">
                <div className="w-32 h-32 bg-white rounded-[3rem] flex items-center justify-center text-blue-200 mb-10 border border-blue-50 shadow-sm"><HelpCircle className="w-16 h-16"/></div>
                <h3 className="text-2xl font-black text-gray-900 mb-4 uppercase tracking-tighter">
-                {activeSection === 'transmissao' ? 'Transmissão' : 'Notas Am_Divinopolis'} Não Conectada
+                {activeSection === 'transmissao' ? 'Transmissão' : 'Notas AM: Contrato de Divinopolis'} Não Conectada
                </h3>
                <p className="text-gray-400 max-w-md text-base leading-relaxed mb-12">Para carregar o dashboard, clique em sincronizar ou cole o link direto da aba correspondente no campo superior.</p>
                
                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
                   <div className="bg-white p-8 rounded-[2rem] border border-gray-100 text-left shadow-sm">
                      <p className="text-[10px] font-black text-blue-600 uppercase mb-4 flex items-center gap-2"><ExternalLink className="w-4 h-4"/> 1. Acesse a Aba Correta</p>
-                     <p className="text-sm text-gray-600 leading-relaxed">No Google Sheets, clique exatamente no nome da aba inferior <strong>{activeSection === 'transmissao' ? 'Transmissao' : 'Notas Am_Divinopolis'}</strong>.</p>
+                     <p className="text-sm text-gray-600 leading-relaxed">No Google Sheets, clique exatamente no nome da aba inferior <strong>{activeSection === 'transmissao' ? 'Transmissao' : 'Notas AM: Contrato de Divinopolis'}</strong>.</p>
                   </div>
                   <div className="bg-white p-8 rounded-[2rem] border border-gray-100 text-left shadow-sm">
                      <p className="text-[10px] font-black text-emerald-600 uppercase mb-4 flex items-center gap-2"><ExternalLink className="w-4 h-4"/> 2. Copie o Link da Aba</p>
