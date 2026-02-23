@@ -46,6 +46,8 @@ const COLORS = ['#10b981', '#ef4444']; // Emerald-500, Red-500
 
 const DEFAULT_URL_TRANSMISSAO = 'https://docs.google.com/spreadsheets/d/10iINVBkcQQ4LuY7LXq66UQmSIH7nmqU3WfvgOb9TmOE/edit?pli=1&gid=0#gid=0';
 const DEFAULT_URL_NOTAS = 'https://docs.google.com/spreadsheets/d/10iINVBkcQQ4LuY7LXq66UQmSIH7nmqU3WfvgOb9TmOE/edit?pli=1&gid=1027234200#gid=1027234200';
+const DEFAULT_URL_NOTAS_TRIANGULO = 'https://docs.google.com/spreadsheets/d/10iINVBkcQQ4LuY7LXq66UQmSIH7nmqU3WfvgOb9TmOE/edit?pli=1&gid=566285946#gid=566285946';
+const DEFAULT_URL_NOTAS_MANTIQUEIRA = 'https://docs.google.com/spreadsheets/d/10iINVBkcQQ4LuY7LXq66UQmSIH7nmqU3WfvgOb9TmOE/edit?pli=1&gid=548357481#gid=548357481';
 
 const CustomTooltip = ({ active, payload, label, section }: any) => {
   if (active && payload && payload.length) {
@@ -140,13 +142,21 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
   const [isTransmissionOpen, setIsTransmissionOpen] = useState(true);
   const [isNotasOpen, setIsNotasOpen] = useState(false);
+  const [isNotasTrianguloOpen, setIsNotasTrianguloOpen] = useState(false);
+  const [isNotasMantiqueiraOpen, setIsNotasMantiqueiraOpen] = useState(false);
 
   const [transmissaoUrl, setTransmissaoUrl] = useState(DEFAULT_URL_TRANSMISSAO);
   const [notasUrl, setNotasUrl] = useState(DEFAULT_URL_NOTAS);
+  const [notasTrianguloUrl, setNotasTrianguloUrl] = useState(DEFAULT_URL_NOTAS_TRIANGULO);
+  const [notasMantiqueiraUrl, setNotasMantiqueiraUrl] = useState(DEFAULT_URL_NOTAS_MANTIQUEIRA);
   const [transmissaoRawData, setTransmissaoRawData] = useState<ReadingData[]>([]);
   const [notasRawData, setNotasRawData] = useState<NotaData[]>([]);
+  const [notasTrianguloRawData, setNotasTrianguloRawData] = useState<NotaData[]>([]);
+  const [notasMantiqueiraRawData, setNotasMantiqueiraRawData] = useState<NotaData[]>([]);
   const [transmissaoMeta, setTransmissaoMeta] = useState<{ lastUpdate: string | null }>({ lastUpdate: null });
   const [notasMeta, setNotasMeta] = useState<{ lastUpdate: string | null }>({ lastUpdate: null });
+  const [notasTrianguloMeta, setNotasTrianguloMeta] = useState<{ lastUpdate: string | null }>({ lastUpdate: null });
+  const [notasMantiqueiraMeta, setNotasMantiqueiraMeta] = useState<{ lastUpdate: string | null }>({ lastUpdate: null });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -164,13 +174,16 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 15;
 
-  const currentRawData = activeSection === 'transmissao' ? transmissaoRawData : notasRawData;
-  const currentUrl = activeSection === 'transmissao' ? transmissaoUrl : notasUrl;
-  const currentMeta = activeSection === 'transmissao' ? (transmissaoMeta.lastUpdate) : (notasMeta.lastUpdate);
+  const currentRawData = activeSection === 'transmissao' ? transmissaoRawData : (activeSection === 'notas' ? notasRawData : (activeSection === 'notas_triangulo' ? notasTrianguloRawData : notasMantiqueiraRawData));
+  const currentUrl = activeSection === 'transmissao' ? transmissaoUrl : (activeSection === 'notas' ? notasUrl : (activeSection === 'notas_triangulo' ? notasTrianguloUrl : notasMantiqueiraUrl));
+  const currentMeta = activeSection === 'transmissao' ? (transmissaoMeta.lastUpdate) : (activeSection === 'notas' ? notasMeta.lastUpdate : (activeSection === 'notas_triangulo' ? notasTrianguloMeta.lastUpdate : notasMantiqueiraMeta.lastUpdate));
+
+  const isNotas = activeSection === 'notas' || activeSection === 'notas_triangulo' || activeSection === 'notas_mantiqueira';
+  const sectionTitle = activeSection === 'transmissao' ? 'Transmissão' : (activeSection === 'notas' ? 'Notas AM: Contrato de Divinopolis' : (activeSection === 'notas_triangulo' ? 'Notas AM: contrato do Triângulo' : 'Notas AM: Contrato da Mantiqueira'));
 
   const handleLoadData = useCallback(async (sectionOverride?: AppSection) => {
     const targetSection = sectionOverride || activeSection;
-    const url = targetSection === 'transmissao' ? transmissaoUrl : notasUrl;
+    const url = targetSection === 'transmissao' ? transmissaoUrl : (targetSection === 'notas' ? notasUrl : notasTrianguloUrl);
     
     setLoading(true); setError(null);
     try {
@@ -180,9 +193,15 @@ export default function App() {
       if (targetSection === 'transmissao') {
         setTransmissaoRawData(response.data);
         setTransmissaoMeta({ lastUpdate: response.lastUpdate });
-      } else {
+      } else if (targetSection === 'notas') {
         setNotasRawData(response.data);
         setNotasMeta({ lastUpdate: response.lastUpdate });
+      } else if (targetSection === 'notas_triangulo') {
+        setNotasTrianguloRawData(response.data);
+        setNotasTrianguloMeta({ lastUpdate: response.lastUpdate });
+      } else if (targetSection === 'notas_mantiqueira') {
+        setNotasMantiqueiraRawData(response.data);
+        setNotasMantiqueiraMeta({ lastUpdate: response.lastUpdate });
       }
       setCurrentPage(1);
     } catch (err: any) { 
@@ -196,12 +215,14 @@ export default function App() {
   useEffect(() => {
     handleLoadData('transmissao');
     handleLoadData('notas');
+    handleLoadData('notas_triangulo');
+    handleLoadData('notas_mantiqueira');
   }, []);
 
   const exportToExcel = () => {
     if (filteredData.length === 0) return;
     const dataToExport = filteredData.map((row: any) => {
-      if (activeSection === 'notas') {
+      if (isNotas) {
         return {
           "MÊS": row.MES,
           "ANO": row.ANO,
@@ -327,7 +348,7 @@ export default function App() {
   }, [filteredData, activeSection]);
 
   const procedenciaChartData = useMemo(() => {
-    if (activeSection !== 'notas') return [];
+    if (!isNotas) return [];
     const map: Record<string, { name: string, sim: number, nao: number, total: number }> = {};
     filteredData.forEach((d: any) => {
       const leiturista = d.LEITURISTA || 'NÃO INFORMADO';
@@ -420,7 +441,7 @@ export default function App() {
                   <button onClick={() => { setActiveSection('transmissao'); setView('table'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'transmissao' && view === 'table' ? 'bg-blue-600 text-white' : 'text-gray-500 hover:bg-gray-100'}`}>Base de Dados</button>
                 </div>
              </div>
-             <div className="space-y-1">
+              <div className="space-y-1">
                 <button onClick={() => setIsNotasOpen(!isNotasOpen)} className="w-full px-4 py-3 flex items-center justify-between text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
                   <div className="flex items-center gap-2 font-black text-[10px] tracking-widest uppercase"><MessageSquareWarning className="w-4 h-4"/> Notas AM: Contrato de Divinopolis</div>
                   <ChevronDown className={`w-3 h-3 transition-transform ${isNotasOpen ? '' : '-rotate-90'}`} />
@@ -428,6 +449,26 @@ export default function App() {
                 <div className={`space-y-1 pl-4 overflow-hidden transition-all ${isNotasOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
                   <button onClick={() => { setActiveSection('notas'); setView('dashboard'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'notas' && view === 'dashboard' ? 'bg-blue-600 text-white' : 'text-gray-500 hover:bg-gray-100'}`}>Dashboard</button>
                   <button onClick={() => { setActiveSection('notas'); setView('table'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'notas' && view === 'table' ? 'bg-blue-600 text-white' : 'text-gray-500 hover:bg-gray-100'}`}>Base de Dados</button>
+                </div>
+             </div>
+             <div className="space-y-1">
+                <button onClick={() => setIsNotasTrianguloOpen(!isNotasTrianguloOpen)} className="w-full px-4 py-3 flex items-center justify-between text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
+                  <div className="flex items-center gap-2 font-black text-[10px] tracking-widest uppercase"><MessageSquareWarning className="w-4 h-4"/> Notas AM: contrato do Triângulo</div>
+                  <ChevronDown className={`w-3 h-3 transition-transform ${isNotasTrianguloOpen ? '' : '-rotate-90'}`} />
+                </button>
+                <div className={`space-y-1 pl-4 overflow-hidden transition-all ${isNotasTrianguloOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
+                  <button onClick={() => { setActiveSection('notas_triangulo'); setView('dashboard'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'notas_triangulo' && view === 'dashboard' ? 'bg-blue-600 text-white' : 'text-gray-500 hover:bg-gray-100'}`}>Dashboard</button>
+                  <button onClick={() => { setActiveSection('notas_triangulo'); setView('table'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'notas_triangulo' && view === 'table' ? 'bg-blue-600 text-white' : 'text-gray-500 hover:bg-gray-100'}`}>Base de Dados</button>
+                </div>
+             </div>
+             <div className="space-y-1">
+                <button onClick={() => setIsNotasMantiqueiraOpen(!isNotasMantiqueiraOpen)} className="w-full px-4 py-3 flex items-center justify-between text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
+                  <div className="flex items-center gap-2 font-black text-[10px] tracking-widest uppercase"><MessageSquareWarning className="w-4 h-4"/> Notas AM: Contrato da Mantiqueira</div>
+                  <ChevronDown className={`w-3 h-3 transition-transform ${isNotasMantiqueiraOpen ? '' : '-rotate-90'}`} />
+                </button>
+                <div className={`space-y-1 pl-4 overflow-hidden transition-all ${isNotasMantiqueiraOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
+                  <button onClick={() => { setActiveSection('notas_mantiqueira'); setView('dashboard'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'notas_mantiqueira' && view === 'dashboard' ? 'bg-blue-600 text-white' : 'text-gray-500 hover:bg-gray-100'}`}>Dashboard</button>
+                  <button onClick={() => { setActiveSection('notas_mantiqueira'); setView('table'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'notas_mantiqueira' && view === 'table' ? 'bg-blue-600 text-white' : 'text-gray-500 hover:bg-gray-100'}`}>Base de Dados</button>
                 </div>
              </div>
           </nav>
@@ -448,7 +489,7 @@ export default function App() {
                   </span>
                 )}
                 <h1 className="text-xl font-black text-gray-900 uppercase tracking-tighter">
-                  {activeSection === 'transmissao' ? 'Transmissão' : 'Notas AM: Contrato de Divinopolis'}
+                  {sectionTitle}
                 </h1>
               </div>
             </div>
@@ -461,7 +502,13 @@ export default function App() {
                   <input 
                     type="text" 
                     value={currentUrl} 
-                    onChange={(e) => activeSection === 'transmissao' ? setTransmissaoUrl(e.target.value) : setNotasUrl(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (activeSection === 'transmissao') setTransmissaoUrl(val);
+                      else if (activeSection === 'notas') setNotasUrl(val);
+                      else if (activeSection === 'notas_triangulo') setNotasTrianguloUrl(val);
+                      else setNotasMantiqueiraUrl(val);
+                    }}
                     placeholder="Link da aba do Google Sheets (Opcional)..."
                     className="flex-1 px-5 py-2 text-sm bg-transparent text-white placeholder-blue-200 border-none focus:ring-0 outline-none"
                   />
@@ -631,7 +678,7 @@ export default function App() {
                   </div>
 
                   {/* GRÁFICO: Procedência da Reclamação por Leiturista - ATUALIZADO COM CORES VERMELHO CLARO */}
-                  {activeSection === 'notas' && (
+                  {isNotas && (
                     <div className="grid grid-cols-1 gap-8">
                       <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-xl min-h-[550px] relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-64 h-64 bg-red-50 rounded-full -mr-32 -mt-32 opacity-20 pointer-events-none transition-transform group-hover:scale-110"></div>
@@ -697,7 +744,7 @@ export default function App() {
               ) : (
                 <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden mb-10 print-full-table">
                    <div className="p-6 border-b border-gray-50 flex justify-between items-center no-print">
-                     <h2 className="font-black text-gray-900 text-xs uppercase tracking-widest">Base de Dados - {activeSection === 'transmissao' ? 'TRANSMISSÃO' : 'Notas AM: Contrato de Divinopolis'}</h2>
+                     <h2 className="font-black text-gray-900 text-xs uppercase tracking-widest">Base de Dados - {sectionTitle.toUpperCase()}</h2>
                      <div className="flex gap-2">
                         <button onClick={exportToPDF} title="Exportar para PDF" className="p-2.5 bg-gray-50 rounded-xl hover:bg-gray-100"><Printer className="w-4 h-4 text-gray-400"/></button>
                         <button onClick={exportToExcel} title="Exportar para Excel" className="p-2.5 bg-emerald-50 rounded-xl hover:bg-emerald-100"><FileSpreadsheet className="w-4 h-4 text-emerald-600"/></button>
@@ -705,7 +752,7 @@ export default function App() {
                    </div>
                    <div className="overflow-x-auto">
                       <table className="w-full text-left whitespace-nowrap table-auto">
-                        {activeSection === 'notas' ? (
+                        {isNotas ? (
                           <thead className="bg-orange-500 text-white text-[10px] font-black uppercase tracking-widest">
                             <tr>
                               <th className="px-4 py-4">MÊS</th>
@@ -739,7 +786,7 @@ export default function App() {
                         <tbody className="divide-y divide-gray-50 text-[12px] font-bold">
                           {(view === 'table' ? filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize) : filteredData).map((row: any, i) => (
                             <tr key={i} className="hover:bg-blue-50/10 transition-colors">
-                              {activeSection === 'notas' ? (
+                              {isNotas ? (
                                 <>
                                   <td className="px-4 py-4 text-gray-500">{row.MES}</td>
                                   <td className="px-4 py-4 text-gray-500">{row.ANO}</td>
@@ -790,14 +837,14 @@ export default function App() {
             <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in duration-700">
                <div className="w-32 h-32 bg-white rounded-[3rem] flex items-center justify-center text-blue-200 mb-10 border border-blue-50 shadow-sm"><HelpCircle className="w-16 h-16"/></div>
                <h3 className="text-2xl font-black text-gray-900 mb-4 uppercase tracking-tighter">
-                {activeSection === 'transmissao' ? 'Transmissão' : 'Notas AM: Contrato de Divinopolis'} Não Conectada
+                {sectionTitle} Não Conectada
                </h3>
                <p className="text-gray-400 max-w-md text-base leading-relaxed mb-12">Para carregar o dashboard, clique em sincronizar ou cole o link direto da aba correspondente no campo superior.</p>
                
                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
                   <div className="bg-white p-8 rounded-[2rem] border border-gray-100 text-left shadow-sm">
                      <p className="text-[10px] font-black text-blue-600 uppercase mb-4 flex items-center gap-2"><ExternalLink className="w-4 h-4"/> 1. Acesse a Aba Correta</p>
-                     <p className="text-sm text-gray-600 leading-relaxed">No Google Sheets, clique exatamente no nome da aba inferior <strong>{activeSection === 'transmissao' ? 'Transmissao' : 'Notas AM: Contrato de Divinopolis'}</strong>.</p>
+                     <p className="text-sm text-gray-600 leading-relaxed">No Google Sheets, clique exatamente no nome da aba inferior <strong>{activeSection === 'transmissao' ? 'Transmissao' : sectionTitle}</strong>.</p>
                   </div>
                   <div className="bg-white p-8 rounded-[2rem] border border-gray-100 text-left shadow-sm">
                      <p className="text-[10px] font-black text-emerald-600 uppercase mb-4 flex items-center gap-2"><ExternalLink className="w-4 h-4"/> 2. Copie o Link da Aba</p>

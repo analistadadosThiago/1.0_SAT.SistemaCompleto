@@ -21,7 +21,7 @@ const normalizeHeader = (str: string): string => {
     .replace(/\s+/g, '_');
 };
 
-export const fetchSheetData = async (csvUrl: string, section: 'transmissao' | 'notas'): Promise<SheetResponse> => {
+export const fetchSheetData = async (csvUrl: string, section: AppSection): Promise<SheetResponse> => {
   const response = await fetch(csvUrl);
   
   if (!response.ok) {
@@ -94,7 +94,7 @@ export const fetchSheetData = async (csvUrl: string, section: 'transmissao' | 'n
       }
     });
 
-    if (section === 'notas') {
+    if (section === 'notas' || section === 'notas_triangulo' || section === 'notas_mantiqueira') {
       const temInstalacao = row.INSTALACAO && row.INSTALACAO.toString().length > 0;
       row.NOTAS_GERADAS = temInstalacao ? 1 : (row.NOTAS_GERADAS || 0);
 
