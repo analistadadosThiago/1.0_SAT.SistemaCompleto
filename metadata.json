@@ -1,0 +1,5 @@
+{
+  "name": "SAT - Sistema de Acompanhamento de Transmissão",
+  "description": "An operational dashboard for tracking transmission readings integrated with Google Sheets, featuring real-time insights and performance metrics.",
+  "requestFramePermissions": []
+}
