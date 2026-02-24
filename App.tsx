@@ -47,7 +47,7 @@ const COLORS = ['#10b981', '#ef4444']; // Emerald-500, Red-500
 const DEFAULT_URL_TRANSMISSAO = 'https://docs.google.com/spreadsheets/d/10iINVBkcQQ4LuY7LXq66UQmSIH7nmqU3WfvgOb9TmOE/edit?pli=1&gid=0#gid=0';
 const DEFAULT_URL_NOTAS = 'https://docs.google.com/spreadsheets/d/10iINVBkcQQ4LuY7LXq66UQmSIH7nmqU3WfvgOb9TmOE/edit?pli=1&gid=1027234200#gid=1027234200';
 const DEFAULT_URL_NOTAS_TRIANGULO = 'https://docs.google.com/spreadsheets/d/10iINVBkcQQ4LuY7LXq66UQmSIH7nmqU3WfvgOb9TmOE/edit?pli=1&gid=566285946#gid=566285946';
-const DEFAULT_URL_NOTAS_MANTIQUEIRA = 'https://docs.google.com/spreadsheets/d/10iINVBkcQQ4LuY7LXq66UQmSIH7nmqU3WfvgOb9TmOE/edit?pli=1&gid=548357481#gid=548357481';
+const DEFAULT_URL_NOTAS_MANTIQUEIRA = 'https://docs.google.com/spreadsheets/d/10iINVBkcQQ4LuY7LXq66UQmSIH7nmqU3WfvgOb9TmOE/edit?gid=548357481#gid=548357481';
 
 const CustomTooltip = ({ active, payload, label, section }: any) => {
   if (active && payload && payload.length) {
@@ -183,7 +183,9 @@ export default function App() {
 
   const handleLoadData = useCallback(async (sectionOverride?: AppSection) => {
     const targetSection = sectionOverride || activeSection;
-    const url = targetSection === 'transmissao' ? transmissaoUrl : (targetSection === 'notas' ? notasUrl : notasTrianguloUrl);
+    const url = targetSection === 'transmissao' ? transmissaoUrl : 
+                (targetSection === 'notas' ? notasUrl : 
+                (targetSection === 'notas_triangulo' ? notasTrianguloUrl : notasMantiqueiraUrl));
     
     setLoading(true); setError(null);
     try {
@@ -209,7 +211,7 @@ export default function App() {
     } finally { 
       setLoading(false); 
     }
-  }, [activeSection, transmissaoUrl, notasUrl]);
+  }, [activeSection, transmissaoUrl, notasUrl, notasTrianguloUrl, notasMantiqueiraUrl]);
 
   // Carregamento inicial automático
   useEffect(() => {
