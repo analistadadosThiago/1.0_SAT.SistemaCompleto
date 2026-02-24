@@ -165,11 +165,9 @@ export default function App() {
   const [fMes, setFMes] = useState('Tudo');
   const [fAno, setFAno] = useState('Tudo');
   const [fBase, setFBase] = useState('Tudo');
-  const [fTipo, setFTipo] = useState('Tudo');
-  const [fRota, setFRota] = useState('Tudo');
-  const [fLeiturista, setFLeiturista] = useState('Tudo');
   const [fRazao, setFRazao] = useState('Tudo');
   const [fStatus, setFStatus] = useState('Tudo');
+  const [fPrazo, setFPrazo] = useState('Tudo');
 
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 15;
@@ -268,17 +266,10 @@ export default function App() {
 
   useEffect(() => {
     setFContrato('Tudo'); setFMes('Tudo'); setFAno('Tudo');
-    setFBase('Tudo'); setFTipo('Tudo'); setFRota('Tudo'); 
-    setFLeiturista('Tudo'); setFRazao('Tudo'); setFStatus('Tudo');
+    setFBase('Tudo'); setFRazao('Tudo'); setFStatus('Tudo');
+    setFPrazo('Tudo');
     setCurrentPage(1); setError(null);
   }, [activeSection]);
-
-  // Resetar Rota se o Tipo não for CNV
-  useEffect(() => {
-    if (fTipo !== 'CNV') {
-      setFRota('Tudo');
-    }
-  }, [fTipo]);
 
   const contratos = useMemo(() => ['Tudo', ...Array.from(new Set(currentRawData.map((d: any) => d.CONTRATO).filter(Boolean))).sort()], [currentRawData]);
   const dataContrato = useMemo(() => currentRawData.filter(d => fContrato === 'Tudo' || d.CONTRATO === fContrato), [currentRawData, fContrato]);
@@ -292,20 +283,11 @@ export default function App() {
   const bases = useMemo(() => ['Tudo', ...Array.from(new Set(dataAno.map(d => d.BASE).filter(Boolean))).sort()], [dataAno]);
   const dataBase = useMemo(() => dataAno.filter(d => fBase === 'Tudo' || d.BASE === fBase), [dataAno, fBase]);
 
-  const tipos = useMemo(() => ['Tudo', ...Array.from(new Set(dataBase.map((d: any) => d.TIPO).filter(Boolean))).sort()], [dataBase]);
-  const dataTipo = useMemo(() => dataBase.filter((d: any) => fTipo === 'Tudo' || d.TIPO === fTipo), [dataBase, fTipo]);
+  const prazos = useMemo(() => ['Tudo', ...Array.from(new Set(dataBase.map((d: any) => d.PRAZO).filter(Boolean))).sort()], [dataBase]);
+  const dataPrazo = useMemo(() => dataBase.filter((d: any) => fPrazo === 'Tudo' || d.PRAZO === fPrazo), [dataBase, fPrazo]);
   
-  const rotas = useMemo(() => {
-    if (fTipo === 'CNV') return ['Tudo', '96', '97', '98', '99'];
-    return ['Tudo'];
-  }, [fTipo]);
-  const dataRota = useMemo(() => dataTipo.filter((d: any) => fRota === 'Tudo' || String(d.ROTA) === fRota), [dataTipo, fRota]);
-
-  const leituristas = useMemo(() => ['Tudo', ...Array.from(new Set(dataRota.map(d => (d as any).LEITURISTA).filter(Boolean))).sort()], [dataRota]);
-  const dataLeiturista = useMemo(() => dataRota.filter(d => fLeiturista === 'Tudo' || (d as any).LEITURISTA === fLeiturista), [dataRota, fLeiturista]);
-  
-  const razoes = useMemo(() => ['Tudo', ...Array.from(new Set(dataLeiturista.map(d => d.RAZAO).filter(Boolean))).sort()], [dataLeiturista]);
-  const dataRazao = useMemo(() => dataLeiturista.filter(d => fRazao === 'Tudo' || d.RAZAO === fRazao), [dataLeiturista, fRazao]);
+  const razoes = useMemo(() => ['Tudo', ...Array.from(new Set(dataPrazo.map(d => d.RAZAO).filter(Boolean))).sort()], [dataPrazo]);
+  const dataRazao = useMemo(() => dataPrazo.filter(d => fRazao === 'Tudo' || d.RAZAO === fRazao), [dataPrazo, fRazao]);
   
   const statuses = useMemo(() => ['Tudo', ...Array.from(new Set(dataRazao.map((d: any) => d.STATUS).filter(Boolean))).sort()], [dataRazao]);
   const filteredData = useMemo(() => dataRazao.filter((d: any) => fStatus === 'Tudo' || d.STATUS === fStatus), [dataRazao, fStatus]);
@@ -396,13 +378,11 @@ export default function App() {
     if (fMes !== 'Tudo') parts.push(`Mês: ${fMes}`);
     if (fAno !== 'Tudo') parts.push(`Ano: ${fAno}`);
     if (fBase !== 'Tudo') parts.push(`Base: ${fBase}`);
-    if (fTipo !== 'Tudo') parts.push(`Tipo: ${fTipo}`);
-    if (fRota !== 'Tudo') parts.push(`Rota: ${fRota}`);
-    if (fLeiturista !== 'Tudo') parts.push(`Leiturista: ${fLeiturista}`);
+    if (fPrazo !== 'Tudo') parts.push(`Prazo: ${fPrazo}`);
     if (fRazao !== 'Tudo') parts.push(`Razão: ${fRazao}`);
     if (fStatus !== 'Tudo') parts.push(`Status: ${fStatus}`);
     return parts.length > 0 ? parts.join(' | ') : 'Visualizando Todos os Dados';
-  }, [fContrato, fMes, fAno, fBase, fTipo, fRota, fLeiturista, fRazao, fStatus]);
+  }, [fContrato, fMes, fAno, fBase, fPrazo, fRazao, fStatus]);
 
   return (
     <div className="min-h-screen flex bg-[#f8fafc] font-sans relative">
@@ -496,34 +476,6 @@ export default function App() {
                 </h1>
               </div>
             </div>
-            
-            <div className="flex-1 max-w-2xl flex flex-col gap-1">
-               <label className="text-[10px] font-black text-blue-500 uppercase ml-1">
-                  Link: Caso queira tratar outra planilha, cole aqui e depois clique em sincronizar
-               </label>
-               <div className="bg-blue-600 p-1 rounded-2xl flex items-center flex-1 shadow-lg transition-all focus-within:ring-4 focus-within:ring-blue-100">
-                  <input 
-                    type="text" 
-                    value={currentUrl} 
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (activeSection === 'transmissao') setTransmissaoUrl(val);
-                      else if (activeSection === 'notas') setNotasUrl(val);
-                      else if (activeSection === 'notas_triangulo') setNotasTrianguloUrl(val);
-                      else setNotasMantiqueiraUrl(val);
-                    }}
-                    placeholder="Link da aba do Google Sheets (Opcional)..."
-                    className="flex-1 px-5 py-2 text-sm bg-transparent text-white placeholder-blue-200 border-none focus:ring-0 outline-none"
-                  />
-                  <button 
-                    onClick={() => handleLoadData()} 
-                    disabled={loading} 
-                    className="px-6 py-2.5 bg-white text-blue-600 text-[11px] font-black rounded-xl hover:bg-blue-50 disabled:bg-gray-300 uppercase flex items-center gap-2 transition-all active:scale-95 shadow-sm"
-                  >
-                    {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : 'Sincronizar Dados'}
-                  </button>
-               </div>
-            </div>
           </div>
         </header>
 
@@ -554,14 +506,12 @@ export default function App() {
                   </button>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-9 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-7 gap-6">
                   <FilterDropdown label="Contrato" value={fContrato} onChange={setFContrato} options={contratos} icon={<Database className="w-3 h-3"/>}/>
                   <FilterDropdown label="Mês" value={fMes} onChange={setFMes} options={meses} icon={<CalendarDays className="w-3 h-3"/>}/>
                   <FilterDropdown label="Ano" value={fAno} onChange={setFAno} options={anos} icon={<CalendarDays className="w-3 h-3"/>}/>
                   <FilterDropdown label="Base" value={fBase} onChange={setFBase} options={bases} icon={<MapPin className="w-3 h-3"/>}/>
-                  <FilterDropdown label="Tipo" value={fTipo} onChange={setFTipo} options={tipos} icon={<Tag className="w-3 h-3"/>}/>
-                  <FilterDropdown label="Rota" value={fRota} onChange={setFRota} options={rotas} icon={<Navigation className="w-3 h-3"/>}/>
-                  <FilterDropdown label="Leiturista" value={fLeiturista} onChange={setFLeiturista} options={leituristas} icon={<User className="w-3 h-3"/>}/>
+                  <FilterDropdown label="Prazo" value={fPrazo} onChange={setFPrazo} options={prazos} icon={<Clock className="w-3 h-3"/>}/>
                   <FilterDropdown label="Razão" value={fRazao} onChange={setFRazao} options={razoes} icon={<FileText className="w-3 h-3"/>}/>
                   <FilterDropdown label="Status" value={fStatus} onChange={setFStatus} options={statuses} icon={<Activity className="w-3 h-3"/>}/>
                 </div>
