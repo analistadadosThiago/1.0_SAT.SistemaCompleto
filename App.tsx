@@ -236,6 +236,7 @@ export default function App() {
           "UNIDADE DE LEITURA": row.UL,
           "BASE": row.BASE,
           "LEITURISTA": row.LEITURISTA,
+          "PRAZO": row.PRAZO,
           "STATUS": row.STATUS,
           "PROCEDENCIA": row.PROCEDENCIA
         };
@@ -767,6 +768,7 @@ export default function App() {
                               <th className="px-4 py-4">Unidade de leitura</th>
                               <th className="px-4 py-4">Base</th>
                               <th className="px-4 py-4">Leiturista</th>
+                              <th className="px-4 py-4">Prazo</th>
                               <th className="px-4 py-4">Procedência</th>
                               <th className="px-4 py-4 text-center">Status</th>
                             </tr>
@@ -800,6 +802,7 @@ export default function App() {
                                   <td className="px-4 py-4 text-gray-500">{row.UL || '-'}</td>
                                   <td className="px-4 py-4 text-blue-600 font-black">{row.BASE}</td>
                                   <td className="px-4 py-4 text-purple-600 uppercase font-black">{row.LEITURISTA || '-'}</td>
+                                  <td className="px-4 py-4 text-gray-600">{row.PRAZO || '-'}</td>
                                   <td className="px-4 py-4 text-gray-500">{row.PROCEDENCIA || '-'}</td>
                                   <td className="px-4 py-4 text-center">
                                     <span className={`px-2 py-1 text-[9px] font-black rounded-lg uppercase tracking-widest ${row.STATUS === 'OK' ? 'bg-emerald-100 text-emerald-600' : row.STATUS === 'N-OK' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'}`}>

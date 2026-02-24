@@ -38,6 +38,7 @@ export interface NotaData {
   PRAZO_MEDIO?: number;
   STATUS?: string;
   PROCEDENCIA?: string;
+  PRAZO?: string;
 }
 
 export interface DashboardStats {

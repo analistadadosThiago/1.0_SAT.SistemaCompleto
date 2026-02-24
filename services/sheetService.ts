@@ -65,7 +65,7 @@ export const fetchSheetData = async (csvUrl: string, section: AppSection): Promi
     'NOME_LEITURISTA': 'LEITURISTA', 'NOTAS_GERADAS': 'NOTAS_GERADAS', 'NOTAS_CONCLUIDAS': 'NOTAS_CONCLUIDAS',
     'NOTAS_CONCLUIDAS_': 'NOTAS_CONCLUIDAS', 'NOTAS_PENDENTES': 'NOTAS_PENDENTES', 'PRAZO_MEDIO': 'PRAZO_MEDIO',
     'STATUS': 'STATUS', 'INSTALACAO': 'INSTALACAO', 'INSTALACAO_': 'INSTALACAO', 'UL': 'UL', 'UNIDADE_DE_LEITURA': 'UL',
-    'NOTA': 'NOTA', 'N_NOTA': 'NOTA', 'NOTAS': 'NOTA', 'PROCEDENCIA': 'PROCEDENCIA'
+    'NOTA': 'NOTA', 'N_NOTA': 'NOTA', 'NOTAS': 'NOTA', 'PROCEDENCIA': 'PROCEDENCIA', 'PRAZO': 'PRAZO'
   };
 
   const headerMap = section === 'transmissao' ? transmissionMap : notasMap;
