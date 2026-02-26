@@ -757,7 +757,8 @@ export default function App() {
                                   <td className="px-4 py-4 text-center">
                                     <span className={`px-2 py-1 text-[9px] font-black rounded-lg uppercase tracking-widest ${
                                       (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'OK' || 
-                                      (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'CONCLUIDO' 
+                                      (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'CONCLUIDO' ||
+                                      (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'CONCLUIDA'
                                       ? 'bg-emerald-100 text-emerald-600' : 
                                       (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'N-OK' || 
                                       (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'PENDENTE' 

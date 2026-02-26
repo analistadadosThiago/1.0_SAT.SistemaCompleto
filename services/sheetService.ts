@@ -95,12 +95,17 @@ export const fetchSheetData = async (csvUrl: string, section: AppSection): Promi
     });
 
     if (section === 'notas' || section === 'notas_triangulo' || section === 'notas_mantiqueira') {
-      // Geradas: count of all records in the filtered set
-      row.NOTAS_GERADAS = 1;
+      // Geradas: contar a quantidade de registros (1 se a coluna E não estiver vazia)
+      const valE = values.length > 4 ? values[4].trim() : '';
+      row.NOTAS_GERADAS = valE.length > 0 ? 1 : 0;
 
-      const statusNormalizado = (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      // Se a coluna V (índice 21) existir, usamos ela como Status prioritário
+      const statusBruto = values.length > 21 ? values[21] : row.STATUS;
+      row.STATUS = statusBruto; // Atualiza o status para exibição na tabela também
       
-      if (statusNormalizado === 'OK' || statusNormalizado === 'CONCLUIDO') {
+      const statusNormalizado = (statusBruto || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      
+      if (statusNormalizado === 'OK' || statusNormalizado === 'CONCLUIDO' || statusNormalizado === 'CONCLUIDA') {
         row.NOTAS_CONCLUIDAS = 1;
         row.NOTAS_PENDENTES = 0;
       } else if (statusNormalizado === 'N-OK' || statusNormalizado === 'PENDENTE') {
