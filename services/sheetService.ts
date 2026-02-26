@@ -95,19 +95,20 @@ export const fetchSheetData = async (csvUrl: string, section: AppSection): Promi
     });
 
     if (section === 'notas' || section === 'notas_triangulo' || section === 'notas_mantiqueira') {
-      const temInstalacao = row.INSTALACAO && row.INSTALACAO.toString().length > 0;
-      row.NOTAS_GERADAS = temInstalacao ? 1 : (row.NOTAS_GERADAS || 0);
+      // Geradas: count of all records in the filtered set
+      row.NOTAS_GERADAS = 1;
 
-      const statusNormalizado = (row.STATUS || '').toString().trim().toUpperCase();
-      if (statusNormalizado === 'OK') {
+      const statusNormalizado = (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      
+      if (statusNormalizado === 'OK' || statusNormalizado === 'CONCLUIDO') {
         row.NOTAS_CONCLUIDAS = 1;
         row.NOTAS_PENDENTES = 0;
-      } else if (statusNormalizado === 'N-OK') {
+      } else if (statusNormalizado === 'N-OK' || statusNormalizado === 'PENDENTE') {
         row.NOTAS_CONCLUIDAS = 0;
         row.NOTAS_PENDENTES = 1;
-      } else if (!row.NOTAS_CONCLUIDAS && !row.NOTAS_PENDENTES) {
+      } else {
         row.NOTAS_CONCLUIDAS = 0;
-        row.NOTAS_PENDENTES = temInstalacao ? 1 : 0;
+        row.NOTAS_PENDENTES = 0;
       }
     }
 

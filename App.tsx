@@ -80,7 +80,7 @@ const DonutTooltip = ({ active, payload, baseBreakdown }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     const statusType = data.name; 
-    const isOK = statusType === 'OK';
+    const isOK = statusType === 'OK' || statusType === 'Concluído';
     
     return (
       <div className="bg-white p-5 border border-gray-100 shadow-2xl rounded-2xl text-xs min-w-[240px]">
@@ -352,9 +352,9 @@ export default function App() {
   }, [filteredData, activeSection]);
 
   const statusDonutData = useMemo(() => [
-    { name: 'OK', value: stats.totalPerformed },
-    { name: 'N-OK', value: stats.totalPending }
-  ], [stats]);
+    { name: isNotas ? 'Concluído' : 'OK', value: stats.totalPerformed },
+    { name: isNotas ? 'Pendente' : 'N-OK', value: stats.totalPending }
+  ], [stats, isNotas]);
 
   const baseBreakdown = useMemo(() => {
     const map: Record<string, { ok: number, nok: number }> = {};
@@ -617,14 +617,14 @@ export default function App() {
                             <div className="w-4 h-4 rounded-full bg-emerald-500 shadow-md"></div>
                             <span className="text-xl font-black text-gray-800">{stats.totalPerformed.toLocaleString()}</span>
                           </div>
-                          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">OK</span>
+                          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{isNotas ? 'Concluído' : 'OK'}</span>
                         </div>
                         <div className="flex flex-col items-center gap-1">
                           <div className="flex items-center gap-2">
                             <div className="w-4 h-4 rounded-full bg-red-500 shadow-md"></div>
                             <span className="text-xl font-black text-gray-800">{stats.totalPending.toLocaleString()}</span>
                           </div>
-                          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">N-OK</span>
+                          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{isNotas ? 'Pendente' : 'N-OK'}</span>
                         </div>
                       </div>
                     </div>
@@ -755,7 +755,13 @@ export default function App() {
                                   <td className="px-4 py-4 text-gray-600">{row.PRAZO || '-'}</td>
                                   <td className="px-4 py-4 text-gray-500">{row.PROCEDENCIA || '-'}</td>
                                   <td className="px-4 py-4 text-center">
-                                    <span className={`px-2 py-1 text-[9px] font-black rounded-lg uppercase tracking-widest ${row.STATUS === 'OK' ? 'bg-emerald-100 text-emerald-600' : row.STATUS === 'N-OK' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'}`}>
+                                    <span className={`px-2 py-1 text-[9px] font-black rounded-lg uppercase tracking-widest ${
+                                      (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'OK' || 
+                                      (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'CONCLUIDO' 
+                                      ? 'bg-emerald-100 text-emerald-600' : 
+                                      (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'N-OK' || 
+                                      (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'PENDENTE' 
+                                      ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'}`}>
                                       {row.STATUS || '-'}
                                     </span>
                                   </td>
