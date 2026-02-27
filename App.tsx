@@ -168,6 +168,7 @@ export default function App() {
   const [fRazao, setFRazao] = useState('Tudo');
   const [fStatus, setFStatus] = useState('Tudo');
   const [fPrazo, setFPrazo] = useState('Tudo');
+  const [fPrazosPendente, setFPrazosPendente] = useState<string[]>([]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 15;
@@ -267,7 +268,7 @@ export default function App() {
   useEffect(() => {
     setFContrato('Tudo'); setFMes('Tudo'); setFAno('Tudo');
     setFBase('Tudo'); setFRazao('Tudo'); setFStatus('Tudo');
-    setFPrazo('Tudo');
+    setFPrazo('Tudo'); setFPrazosPendente([]);
     setCurrentPage(1); setError(null);
   }, [activeSection]);
 
@@ -290,7 +291,19 @@ export default function App() {
   const dataRazao = useMemo(() => dataPrazo.filter(d => fRazao === 'Tudo' || d.RAZAO === fRazao), [dataPrazo, fRazao]);
   
   const statuses = useMemo(() => ['Tudo', ...Array.from(new Set(dataRazao.map((d: any) => d.STATUS).filter(Boolean))).sort()], [dataRazao]);
-  const filteredData = useMemo(() => dataRazao.filter((d: any) => fStatus === 'Tudo' || d.STATUS === fStatus), [dataRazao, fStatus]);
+  const dataStatus = useMemo(() => dataRazao.filter((d: any) => fStatus === 'Tudo' || d.STATUS === fStatus), [dataRazao, fStatus]);
+
+  const prazosPendenteDisponiveis = useMemo(() => {
+    if (!isNotas || fStatus !== 'Pendente') return [];
+    return Array.from(new Set(dataStatus.map((d: any) => d.PRAZO).filter(Boolean))).sort();
+  }, [dataStatus, fStatus, isNotas]);
+
+  const filteredData = useMemo(() => {
+    if (isNotas && fStatus === 'Pendente' && fPrazosPendente.length > 0) {
+      return dataStatus.filter((d: any) => fPrazosPendente.includes(d.PRAZO));
+    }
+    return dataStatus;
+  }, [dataStatus, fStatus, fPrazosPendente, isNotas]);
 
   const stats = useMemo<DashboardStats>(() => {
     if (!filteredData.length) return { totalToPerform: 0, totalPerformed: 0, totalPending: 0, successRate: 0, pendingRate: 0 };
@@ -381,8 +394,9 @@ export default function App() {
     if (fPrazo !== 'Tudo') parts.push(`Prazo: ${fPrazo}`);
     if (fRazao !== 'Tudo') parts.push(`Razão: ${fRazao}`);
     if (fStatus !== 'Tudo') parts.push(`Status: ${fStatus}`);
+    if (fPrazosPendente.length > 0) parts.push(`Prazos Sel.: ${fPrazosPendente.join(', ')}`);
     return parts.length > 0 ? parts.join(' | ') : 'Visualizando Todos os Dados';
-  }, [fContrato, fMes, fAno, fBase, fPrazo, fRazao, fStatus]);
+  }, [fContrato, fMes, fAno, fBase, fPrazo, fRazao, fStatus, fPrazosPendente]);
 
   return (
     <div className="min-h-screen flex bg-[#f8fafc] font-sans relative">
@@ -515,6 +529,44 @@ export default function App() {
                   <FilterDropdown label="Razão" value={fRazao} onChange={setFRazao} options={razoes} icon={<FileText className="w-3 h-3"/>}/>
                   <FilterDropdown label="Status" value={fStatus} onChange={setFStatus} options={statuses} icon={<Activity className="w-3 h-3"/>}/>
                 </div>
+
+                {isNotas && fStatus === 'Pendente' && prazosPendenteDisponiveis.length > 0 && (
+                  <div className="pt-6 border-t border-gray-50 animate-in slide-in-from-top duration-300">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Clock className="w-4 h-4 text-orange-500" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Filtrar por PRAZO (Pendentes)</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {prazosPendenteDisponiveis.map(prazo => (
+                        <button
+                          key={prazo}
+                          onClick={() => {
+                            if (fPrazosPendente.includes(prazo)) {
+                              setFPrazosPendente(fPrazosPendente.filter(p => p !== prazo));
+                            } else {
+                              setFPrazosPendente([...fPrazosPendente, prazo]);
+                            }
+                          }}
+                          className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+                            fPrazosPendente.includes(prazo) 
+                              ? 'bg-orange-500 text-white border-orange-600 shadow-md' 
+                              : 'bg-white text-gray-500 border-gray-100 hover:bg-gray-50'
+                          }`}
+                        >
+                          {prazo}
+                        </button>
+                      ))}
+                      {fPrazosPendente.length > 0 && (
+                        <button 
+                          onClick={() => setFPrazosPendente([])}
+                          className="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest bg-gray-100 text-gray-400 hover:bg-gray-200 transition-all"
+                        >
+                          Limpar Seleção
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 <div className="pt-6 border-t border-gray-50">
                    <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-2">Resumo da Seleção Atual:</p>
@@ -713,6 +765,7 @@ export default function App() {
                               <th className="px-4 py-4">CONTRATO</th>
                               <th className="px-4 py-4">TIPO</th>
                               <th className="px-4 py-4">Nota</th>
+                              <th className="px-4 py-4">Data Nota</th>
                               <th className="px-4 py-4">Instalação</th>
                               <th className="px-4 py-4">RAZAO</th>
                               <th className="px-4 py-4">Unidade de leitura</th>
@@ -747,6 +800,7 @@ export default function App() {
                                   <td className="px-4 py-4 text-blue-600 font-black">{row.CONTRATO}</td>
                                   <td className="px-4 py-4 text-gray-500 italic">{row.TIPO || '-'}</td>
                                   <td className="px-4 py-4 text-gray-600">{row.NOTA || '-'}</td>
+                                  <td className="px-4 py-4 text-gray-600">{row.DATA_DA_NOTA || '-'}</td>
                                   <td className="px-4 py-4 text-gray-600">{row.INSTALACAO || '-'}</td>
                                   <td className="px-4 py-4 text-gray-700 truncate max-w-[200px]">{row.RAZAO}</td>
                                   <td className="px-4 py-4 text-gray-500">{row.UL || '-'}</td>

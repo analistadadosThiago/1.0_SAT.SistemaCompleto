@@ -39,6 +39,7 @@ export interface NotaData {
   STATUS?: string;
   PROCEDENCIA?: string;
   PRAZO?: string;
+  DATA_DA_NOTA?: string;
 }
 
 export interface DashboardStats {
