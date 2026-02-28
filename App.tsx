@@ -167,7 +167,7 @@ export default function App() {
   const [fBase, setFBase] = useState('Tudo');
   const [fRazao, setFRazao] = useState('Tudo');
   const [fStatus, setFStatus] = useState('Tudo');
-  const [fPrazo, setFPrazo] = useState('Tudo');
+  const [fPrazos, setFPrazos] = useState<string[]>([]);
   const [fPrazosPendente, setFPrazosPendente] = useState<string[]>([]);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -268,7 +268,7 @@ export default function App() {
   useEffect(() => {
     setFContrato('Tudo'); setFMes('Tudo'); setFAno('Tudo');
     setFBase('Tudo'); setFRazao('Tudo'); setFStatus('Tudo');
-    setFPrazo('Tudo'); setFPrazosPendente([]);
+    setFPrazos([]); setFPrazosPendente([]);
     setCurrentPage(1); setError(null);
   }, [activeSection]);
 
@@ -284,8 +284,11 @@ export default function App() {
   const bases = useMemo(() => ['Tudo', ...Array.from(new Set(dataAno.map(d => d.BASE).filter(Boolean))).sort()], [dataAno]);
   const dataBase = useMemo(() => dataAno.filter(d => fBase === 'Tudo' || d.BASE === fBase), [dataAno, fBase]);
 
-  const prazos = useMemo(() => ['Tudo', ...Array.from(new Set(dataBase.map((d: any) => d.PRAZO).filter(Boolean))).sort()], [dataBase]);
-  const dataPrazo = useMemo(() => dataBase.filter((d: any) => fPrazo === 'Tudo' || d.PRAZO === fPrazo), [dataBase, fPrazo]);
+  const prazos = useMemo(() => Array.from(new Set(dataBase.map((d: any) => d.PRAZO).filter(Boolean))).sort(), [dataBase]);
+  const dataPrazo = useMemo(() => {
+    if (fPrazos.length === 0) return dataBase;
+    return dataBase.filter((d: any) => fPrazos.includes(d.PRAZO));
+  }, [dataBase, fPrazos]);
   
   const razoes = useMemo(() => ['Tudo', ...Array.from(new Set(dataPrazo.map(d => d.RAZAO).filter(Boolean))).sort()], [dataPrazo]);
   const dataRazao = useMemo(() => dataPrazo.filter(d => fRazao === 'Tudo' || d.RAZAO === fRazao), [dataPrazo, fRazao]);
@@ -391,12 +394,12 @@ export default function App() {
     if (fMes !== 'Tudo') parts.push(`Mês: ${fMes}`);
     if (fAno !== 'Tudo') parts.push(`Ano: ${fAno}`);
     if (fBase !== 'Tudo') parts.push(`Base: ${fBase}`);
-    if (fPrazo !== 'Tudo') parts.push(`Prazo: ${fPrazo}`);
+    if (fPrazos.length > 0) parts.push(`Prazos: ${fPrazos.join(', ')}`);
     if (fRazao !== 'Tudo') parts.push(`Razão: ${fRazao}`);
     if (fStatus !== 'Tudo') parts.push(`Status: ${fStatus}`);
     if (fPrazosPendente.length > 0) parts.push(`Prazos Sel.: ${fPrazosPendente.join(', ')}`);
     return parts.length > 0 ? parts.join(' | ') : 'Visualizando Todos os Dados';
-  }, [fContrato, fMes, fAno, fBase, fPrazo, fRazao, fStatus, fPrazosPendente]);
+  }, [fContrato, fMes, fAno, fBase, fPrazos, fRazao, fStatus, fPrazosPendente]);
 
   return (
     <div className="min-h-screen flex bg-[#f8fafc] font-sans relative">
@@ -525,7 +528,7 @@ export default function App() {
                   <FilterDropdown label="Mês" value={fMes} onChange={setFMes} options={meses} icon={<CalendarDays className="w-3 h-3"/>}/>
                   <FilterDropdown label="Ano" value={fAno} onChange={setFAno} options={anos} icon={<CalendarDays className="w-3 h-3"/>}/>
                   <FilterDropdown label="Base" value={fBase} onChange={setFBase} options={bases} icon={<MapPin className="w-3 h-3"/>}/>
-                  <FilterDropdown label="Prazo" value={fPrazo} onChange={setFPrazo} options={prazos} icon={<Clock className="w-3 h-3"/>}/>
+                  <MultiSelectFilter label="Prazo" selected={fPrazos} onChange={setFPrazos} options={prazos} icon={<Clock className="w-3 h-3"/>}/>
                   <FilterDropdown label="Razão" value={fRazao} onChange={setFRazao} options={razoes} icon={<FileText className="w-3 h-3"/>}/>
                   <FilterDropdown label="Status" value={fStatus} onChange={setFStatus} options={statuses} icon={<Activity className="w-3 h-3"/>}/>
                 </div>
@@ -595,8 +598,9 @@ export default function App() {
                           <span className="text-base font-black text-red-700">{stats.totalPending.toLocaleString()}</span>
                         </div>
                       </div>
-                      <ResponsiveContainer width="100%" height="80%">
-                        <BarChart data={baseChartData} margin={{ bottom: 100, top: 40 }}>
+                      <div className="h-[400px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={baseChartData} margin={{ bottom: 100, top: 40 }}>
                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                           <XAxis 
                             dataKey="name" 
@@ -621,8 +625,9 @@ export default function App() {
                       </ResponsiveContainer>
                     </div>
                   </div>
+                </div>
 
-                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
                     <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm min-h-[500px] relative">
                       <div className="flex justify-between items-center mb-8">
                         <h3 className="font-black text-gray-900 text-sm uppercase tracking-widest">Pendências por Contrato</h3>
@@ -631,8 +636,9 @@ export default function App() {
                           <span className="text-base font-black text-red-700">{stats.totalPending.toLocaleString()}</span>
                         </div>
                       </div>
-                      <ResponsiveContainer width="100%" height="80%">
-                        <BarChart layout="vertical" data={contratoChartData}>
+                      <div className="h-[400px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart layout="vertical" data={contratoChartData}>
                           <XAxis type="number" hide />
                           <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 700, fill: '#64748b' }} width={140} />
                           <Tooltip content={<CustomTooltip section={activeSection} />} cursor={{fill: '#f8fafc'}} />
@@ -642,27 +648,30 @@ export default function App() {
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
+                  </div>
 
-                    <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm min-h-[500px] flex flex-col items-center">
+                  <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm min-h-[500px] flex flex-col items-center">
                       <h3 className="font-black text-gray-900 text-sm uppercase tracking-widest self-start mb-10">Relação de Status</h3>
-                      <ResponsiveContainer width="100%" height="65%">
-                        <PieChart>
-                          <Pie
-                            data={statusDonutData}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={80}
-                            outerRadius={120}
-                            paddingAngle={10}
-                            dataKey="value"
-                          >
-                            {statusDonutData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <Tooltip content={<DonutTooltip baseBreakdown={baseBreakdown} />} />
-                        </PieChart>
-                      </ResponsiveContainer>
+                      <div className="h-[300px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={statusDonutData}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={80}
+                              outerRadius={120}
+                              paddingAngle={10}
+                              dataKey="value"
+                            >
+                              {statusDonutData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                              ))}
+                            </Pie>
+                            <Tooltip content={<DonutTooltip baseBreakdown={baseBreakdown} />} />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
                       <div className="mt-8 flex gap-8">
                         <div className="flex flex-col items-center gap-1">
                           <div className="flex items-center gap-2">
@@ -708,8 +717,9 @@ export default function App() {
                             </div>
                           </div>
                         </div>
-                        <ResponsiveContainer width="100%" height="80%">
-                          <BarChart data={procedenciaChartData} margin={{ bottom: 120, top: 40 }}>
+                        <div className="h-[400px] w-full">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={procedenciaChartData} margin={{ bottom: 120, top: 40 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                             <XAxis 
                               dataKey="name" 
@@ -738,15 +748,16 @@ export default function App() {
                             </Bar>
                           </BarChart>
                         </ResponsiveContainer>
-                        <div className="absolute bottom-6 right-8 flex items-center gap-2">
-                           <Info className="w-4 h-4 text-red-300" />
-                           <span className="text-[10px] font-black text-gray-400 uppercase italic">Dados extraídos da coluna PROCEDÊNCIA</span>
-                        </div>
+                      </div>
+                      <div className="absolute bottom-6 right-8 flex items-center gap-2">
+                        <Info className="w-4 h-4 text-red-300" />
+                        <span className="text-[10px] font-black text-gray-400 uppercase italic">Dados extraídos da coluna PROCEDÊNCIA</span>
                       </div>
                     </div>
-                  )}
-                </div>
-              ) : (
+                  </div>
+                )}
+              </div>
+            ) : (
                 <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden mb-10 print-full-table">
                    <div className="p-6 border-b border-gray-50 flex justify-between items-center no-print">
                      <h2 className="font-black text-gray-900 text-xs uppercase tracking-widest">Base de Dados - {sectionTitle.toUpperCase()}</h2>
@@ -890,6 +901,60 @@ function FilterDropdown({ label, value, onChange, options, icon }: any) {
         <option value="Tudo">Filtrar {label}</option>
         {options.filter((o: string) => o !== 'Tudo').map((o: string) => <option key={o} value={o}>{o}</option>)}
       </select>
+    </div>
+  );
+}
+
+function MultiSelectFilter({ label, selected, onChange, options, icon }: any) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="flex flex-col gap-2 relative">
+      <label className="text-[10px] font-black text-blue-500 uppercase tracking-tighter flex items-center gap-1.5 ml-1 truncate">
+        {icon} {label}
+      </label>
+      <div 
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full text-xs font-bold border border-gray-100 rounded-2xl px-4 py-3 bg-[#fdfdfd] focus:ring-2 focus:ring-blue-500 outline-none transition-all hover:bg-white shadow-sm cursor-pointer flex justify-between items-center"
+      >
+        <span className="truncate">
+          {selected.length === 0 ? `Filtrar ${label}` : `${selected.length} selecionado(s)`}
+        </span>
+        <ChevronDown className={`w-4 h-4 text-blue-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </div>
+      
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)}></div>
+          <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-100 rounded-2xl shadow-2xl z-20 max-h-60 overflow-y-auto p-2 custom-scrollbar">
+            <div className="flex flex-col gap-1">
+              <button 
+                onClick={() => { onChange([]); setIsOpen(false); }}
+                className="text-left px-3 py-2 text-[10px] font-black text-blue-600 uppercase hover:bg-blue-50 rounded-lg"
+              >
+                Limpar Tudo
+              </button>
+              {options.map((option: string) => (
+                <label key={option} className="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
+                  <input 
+                    type="checkbox" 
+                    checked={selected.includes(option)}
+                    onChange={() => {
+                      if (selected.includes(option)) {
+                        onChange(selected.filter((s: string) => s !== option));
+                      } else {
+                        onChange([...selected, option]);
+                      }
+                    }}
+                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-xs font-bold text-gray-700">{option}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
