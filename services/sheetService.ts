@@ -1,5 +1,5 @@
 
-import { ReadingData, NotaData, SheetResponse } from '../types';
+import { ReadingData, NotaData, SheetResponse, AppSection } from '../types';
 
 export const parseGoogleSheetUrl = (url: string): string | null => {
   const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
