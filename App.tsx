@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  LabelList, PieChart, Pie, Cell, Legend, LineChart, Line
+  LabelList, PieChart, Pie, Cell, Legend, LineChart, Line, ComposedChart
 } from 'recharts';
 import { 
   LayoutDashboard, 
@@ -677,7 +677,7 @@ export default function App() {
                       </div>
                       <div className="h-[400px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={baseChartData} margin={{ bottom: 100, top: 40 }}>
+                          <ComposedChart data={baseChartData} margin={{ bottom: 100, top: 40 }}>
                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === 'blue' ? 'rgba(255,255,255,0.1)' : '#f1f5f9'} />
                           <XAxis 
                             dataKey="name" 
@@ -698,7 +698,8 @@ export default function App() {
                           <Bar dataKey="value" fill="#ef4444" radius={[8, 8, 0, 0]} barSize={45}>
                             <LabelList dataKey="value" position="top" style={{ fontSize: '13px', fontWeight: 900, fill: theme === 'blue' ? '#fca5a5' : '#1e40af' }} />
                           </Bar>
-                        </BarChart>
+                          <Line type="monotone" dataKey="value" stroke={theme === 'blue' ? '#fca5a5' : '#b91c1c'} strokeWidth={3} dot={{ r: 4, fill: theme === 'blue' ? '#fca5a5' : '#b91c1c', strokeWidth: 2, stroke: '#fff' }} />
+                        </ComposedChart>
                       </ResponsiveContainer>
                     </div>
                   </div>
@@ -715,14 +716,15 @@ export default function App() {
                     </div>
                     <div className="h-[400px] w-full">
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart layout="vertical" data={contratoChartData}>
+                        <ComposedChart layout="vertical" data={contratoChartData}>
                           <XAxis type="number" hide />
                           <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 700, fill: theme === 'blue' ? '#93c5fd' : '#64748b' }} width={140} />
                           <Tooltip content={<CustomTooltip section={activeSection} theme={theme} />} cursor={{fill: theme === 'blue' ? 'rgba(255,255,255,0.05)' : '#f8fafc'}} />
                           <Bar dataKey="value" fill="#ef4444" radius={[0, 8, 8, 0]} barSize={18}>
                             <LabelList dataKey="value" position="right" style={{ fontSize: '13px', fontWeight: 900, fill: theme === 'blue' ? '#fca5a5' : '#b91c1c' }} />
                           </Bar>
-                        </BarChart>
+                          <Line type="monotone" dataKey="value" stroke={theme === 'blue' ? '#fca5a5' : '#b91c1c'} strokeWidth={2} dot={{ r: 3, fill: theme === 'blue' ? '#fca5a5' : '#b91c1c', strokeWidth: 1, stroke: '#fff' }} />
+                        </ComposedChart>
                       </ResponsiveContainer>
                     </div>
                   </div>
@@ -796,7 +798,7 @@ export default function App() {
                         </div>
                         <div className="h-[400px] w-full">
                           <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={procedenciaChartData} margin={{ bottom: 120, top: 40 }}>
+                            <ComposedChart data={procedenciaChartData} margin={{ bottom: 120, top: 40 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === 'blue' ? 'rgba(255,255,255,0.1)' : '#f1f5f9'} />
                             <XAxis 
                               dataKey="name" 
@@ -823,7 +825,8 @@ export default function App() {
                                 formatter={(val: any) => val}
                               />
                             </Bar>
-                          </BarChart>
+                            <Line type="monotone" dataKey="total" stroke={theme === 'blue' ? '#fca5a5' : '#450a0a'} strokeWidth={3} dot={{ r: 4, fill: theme === 'blue' ? '#fca5a5' : '#450a0a', strokeWidth: 2, stroke: '#fff' }} />
+                          </ComposedChart>
                         </ResponsiveContainer>
                       </div>
                       <div className="absolute bottom-6 right-8 flex items-center gap-2">
