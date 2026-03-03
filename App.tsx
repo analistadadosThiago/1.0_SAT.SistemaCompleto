@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  LabelList, PieChart, Pie, Cell, Legend
+  LabelList, PieChart, Pie, Cell, Legend, LineChart, Line
 } from 'recharts';
 import { 
   LayoutDashboard, 
@@ -354,6 +354,35 @@ export default function App() {
     return Object.values(map).sort((a: any, b: any) => b.value - a.value);
   }, [filteredData, activeSection]);
 
+  const monthOrder: Record<string, number> = {
+    'JANEIRO': 1, 'FEVEREIRO': 2, 'MARÇO': 3, 'ABRIL': 4, 'MAIO': 5, 'JUNHO': 6,
+    'JULHO': 7, 'AGOSTO': 8, 'SETEMBRO': 9, 'OUTUBRO': 10, 'NOVEMBRO': 11, 'DEZEMBRO': 12,
+    'JAN': 1, 'FEV': 2, 'MAR': 3, 'ABR': 4, 'MAI': 5, 'JUN': 6,
+    'JUL': 7, 'AGO': 8, 'SET': 9, 'OUT': 10, 'NOV': 11, 'DEZ': 12
+  };
+
+  const trendChartData = useMemo(() => {
+    const map: Record<string, any> = {};
+    filteredData.forEach((d: any) => {
+      const key = `${d.ANO}-${d.MES}`;
+      if (!map[key]) map[key] = { name: key, mes: d.MES, ano: d.ANO, realizadas: 0, pendentes: 0 };
+      if (activeSection === 'transmissao') {
+        map[key].realizadas += ((d.LEITURAS_100 || 0) + (d.LEITURAS_30 || 0));
+        map[key].pendentes += (d.LEITURAS_NAO_REALIZADAS || 0);
+      } else {
+        map[key].realizadas += (d.NOTAS_CONCLUIDAS || 0);
+        map[key].pendentes += (d.NOTAS_PENDENTES || 0);
+      }
+    });
+    
+    return Object.values(map).sort((a: any, b: any) => {
+      if (a.ano !== b.ano) return a.ano - b.ano;
+      const m1 = monthOrder[a.mes.toUpperCase()] || 0;
+      const m2 = monthOrder[b.mes.toUpperCase()] || 0;
+      return m1 - m2;
+    });
+  }, [filteredData, activeSection]);
+
   const procedenciaChartData = useMemo(() => {
     if (!isNotas) return [];
     const map: Record<string, { name: string, sim: number, nao: number, total: number }> = {};
@@ -439,7 +468,7 @@ export default function App() {
           <nav className="space-y-4 flex-1">
              <div className="space-y-1">
                 <button onClick={() => setIsTransmissionOpen(!isTransmissionOpen)} className={`w-full px-4 py-3 flex items-center justify-between rounded-xl transition-all ${theme === 'blue' ? 'text-blue-300 hover:bg-blue-800/50' : 'text-blue-600 hover:bg-blue-50'}`}>
-                  <div className="flex items-center gap-2 font-black text-[10px] tracking-widest uppercase"><ClipboardList className="w-4 h-4"/> TRANSMISSÃO</div>
+                  <div className="flex items-center gap-2 font-black text-[10px] tracking-widest uppercase"><ClipboardList className="w-4 h-4"/> Acompanhamento de transmissão</div>
                   <ChevronDown className={`w-3 h-3 transition-transform ${isTransmissionOpen ? '' : '-rotate-90'}`} />
                 </button>
                 <div className={`space-y-1 pl-4 overflow-hidden transition-all ${isTransmissionOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
@@ -609,6 +638,35 @@ export default function App() {
               {view === 'dashboard' ? (
                 <div className="space-y-10 pb-12 no-print">
                   <div className="grid grid-cols-1 gap-8">
+                    <div className={`${theme === 'blue' ? 'bg-blue-900/40 border-blue-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[400px] relative`}>
+                      <h3 className={`font-black text-sm uppercase tracking-widest mb-8 ${theme === 'blue' ? 'text-white' : 'text-gray-900'}`}>Tendência Mensal</h3>
+                      <div className="h-[300px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={trendChartData}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === 'blue' ? 'rgba(255,255,255,0.1)' : '#f1f5f9'} />
+                            <XAxis 
+                              dataKey="mes" 
+                              axisLine={false} 
+                              tickLine={false} 
+                              tick={{ fontSize: 10, fontWeight: 700, fill: theme === 'blue' ? '#93c5fd' : '#64748b' }}
+                            />
+                            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: theme === 'blue' ? '#93c5fd' : '#64748b' }} />
+                            <Tooltip 
+                              contentStyle={{ 
+                                backgroundColor: theme === 'blue' ? '#1e3a8a' : '#fff', 
+                                borderColor: theme === 'blue' ? '#3b82f6' : '#e2e8f0',
+                                color: theme === 'blue' ? '#fff' : '#000',
+                                borderRadius: '12px'
+                              }}
+                            />
+                            <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase' }} />
+                            <Line type="monotone" dataKey="realizadas" name={activeSection === 'transmissao' ? "Realizadas" : "Concluídas"} stroke="#10b981" strokeWidth={4} dot={{ r: 6, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 8 }} />
+                            <Line type="monotone" dataKey="pendentes" name="Pendências" stroke="#ef4444" strokeWidth={4} dot={{ r: 6, fill: '#ef4444', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 8 }} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+
                     <div className={`${theme === 'blue' ? 'bg-blue-900/40 border-blue-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[500px] relative`}>
                       <div className="flex justify-between items-center mb-8">
                         <h3 className={`font-black text-sm uppercase tracking-widest ${theme === 'blue' ? 'text-white' : 'text-gray-900'}`}>Pendências por Base</h3>
