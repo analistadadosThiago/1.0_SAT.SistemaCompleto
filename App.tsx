@@ -905,16 +905,23 @@ export default function App() {
                </h3>
                <p className="text-gray-400 max-w-md text-base leading-relaxed mb-12">Para carregar o dashboard, clique em sincronizar ou cole o link direto da aba correspondente no campo superior.</p>
                
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
-                  <div className="bg-white p-8 rounded-[2rem] border border-gray-100 text-left shadow-sm">
-                     <p className="text-[10px] font-black text-blue-600 uppercase mb-4 flex items-center gap-2"><ExternalLink className="w-4 h-4"/> 1. Acesse a Aba Correta</p>
-                     <p className="text-sm text-gray-600 leading-relaxed">No Google Sheets, clique exatamente no nome da aba inferior <strong>{activeSection === 'transmissao' ? 'Transmissao' : sectionTitle}</strong>.</p>
-                  </div>
-                  <div className="bg-white p-8 rounded-[2rem] border border-gray-100 text-left shadow-sm">
-                     <p className="text-[10px] font-black text-emerald-600 uppercase mb-4 flex items-center gap-2"><ExternalLink className="w-4 h-4"/> 2. Copie o Link da Aba</p>
-                     <p className="text-sm text-gray-600 leading-relaxed">Cada aba tem um link próprio (gid). Copie todo o endereço que aparece no navegador e cole aqui.</p>
-                  </div>
-               </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
+  <div className="bg-white p-8 rounded-[2rem] border border-gray-100 text-left shadow-sm">
+    <p className="text-[10px] font-black text-blue-600 uppercase mb-4 flex items-center gap-2">
+      <ExternalLink className={className} />
+    </p>
+    <p className="text-sm text-gray-600 leading-relaxed">
+      No Google Sheets, clique exatamente no nome da aba inferior
+    </p>
+  </div>
+  <div className="bg-white p-8 rounded-[2rem] border border-gray-100 text-left shadow-sm">
+    <p className="text-[10px] font-black text-emerald-600 uppercase mb-4 flex items-center gap-2">
+      <ExternalLink className={className} />
+    </p>
+    <p className="text-sm text-gray-600 leading-relaxed">
+      Cada aba tem um link próprio (gid). Copie todo o endereço aqui.
+    </p>
+  </div>
             </div>
           )}
         </div>
