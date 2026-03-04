@@ -4,42 +4,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Legend, LineChart, Line
 } from 'recharts';
-import { 
-  LayoutDashboard, 
-  Table as TableIcon, 
-  AlertCircle, 
-  Zap, 
-  CheckCircle2, 
-  Clock,
-  ChevronLeft,
-  ChevronRight,
-  FileSpreadsheet,
-  Printer,
-  Database,
-  Menu,
-  ChevronFirst,
-  RefreshCw,
-  Filter,
-  X,
-  Info,
-  ChevronDown,
-  MessageSquareWarning,
-  ClipboardList,
-  User,
-  ShieldCheck,
-  HelpCircle,
-  ExternalLink,
-  CalendarDays,
-  MapPin,
-  FileText,
-  Activity,
-  RotateCw,
-  Tag,
-  Frown,
-  Navigation,
-  Moon,
-  Sun
-} from 'lucide-react';
+import { LayoutDashboard, Table as TableIcon, CircleAlert as AlertCircle, Zap, CircleCheck as CheckCircle2, Clock, ChevronLeft, ChevronRight, FileSpreadsheet, Printer, Database, Menu, ChevronFirst, RefreshCw, ListFilter as Filter, X, Info, ChevronDown, MessageSquareWarning, ClipboardList, User, ShieldCheck, Circle as HelpCircle, ExternalLink, CalendarDays, MapPin, FileText, Activity, RotateCw, Tag, Frown, Navigation, Moon, Sun } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { ReadingData, NotaData, DashboardStats, AppSection } from './types';
 import { parseGoogleSheetUrl, fetchSheetData } from './services/sheetService';
