@@ -187,7 +187,7 @@ export default function App() {
   const sectionTitle = activeSection === 'transmissao' ? 'Transmissão' : 
                        (activeSection === 'notas' ? 'Notas AM: Contrato de Divinopolis' : 
                        (activeSection === 'notas_triangulo' ? 'Notas AM: contrato do Triângulo' : 
-                       (activeSection === 'notas_mantiqueira' ? 'Notas AM: Contrato da Mantiqueira' : 'Acompanhamento')));
+                       (activeSection === 'notas_mantiqueira' ? 'Notas AM: Contrato da Mantiqueira' : 'Detalhamento de Transmissão')));
 
   const handleLoadData = useCallback(async (sectionOverride?: AppSection) => {
     const targetSection = sectionOverride || activeSection;
@@ -471,7 +471,7 @@ export default function App() {
           <nav className="space-y-4 flex-1">
              <div className="space-y-1">
                 <button onClick={() => setActiveSection('acompanhamento')} className={`w-full px-4 py-3 flex items-center gap-2 rounded-xl transition-all font-black text-[10px] tracking-widest uppercase ${activeSection === 'acompanhamento' ? 'bg-blue-600 text-white shadow-lg' : (theme === 'blue' ? 'text-blue-300 hover:bg-blue-800/50' : 'text-blue-600 hover:bg-blue-50')}`}>
-                  <ExternalLink className="w-4 h-4"/> Acompanhamento
+                  <ExternalLink className="w-4 h-4"/> Detalhamento de Transmissão
                 </button>
              </div>
              <div className="space-y-1">
@@ -554,12 +554,41 @@ export default function App() {
 
         <div className="flex-1 p-8 space-y-8 overflow-y-auto">
           {activeSection === 'acompanhamento' ? (
-            <div className="w-full h-[calc(100vh-180px)] rounded-[2.5rem] overflow-hidden border shadow-xl bg-white no-print" style={{ borderColor: theme === 'blue' ? 'rgba(59, 130, 246, 0.5)' : '#f1f5f9' }}>
-              <iframe 
-                src="https://ais-pre-y57rocsrv4n36yffd4nlz2-43530479359.us-east1.run.app/" 
-                className="w-full h-full border-none"
-                title="Acompanhamento"
-              />
+            <div className="flex flex-col gap-6 h-[calc(100vh-120px)] no-print">
+              <div className="flex justify-center">
+                <a 
+                  href="https://ais-pre-y57rocsrv4n36yffd4nlz2-43530479359.us-east1.run.app/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className={`flex items-center gap-3 px-10 py-5 rounded-3xl text-sm font-black uppercase tracking-widest transition-all shadow-2xl hover:scale-105 active:scale-95 ${
+                    theme === 'blue' 
+                      ? 'bg-emerald-500 text-white hover:bg-emerald-400 shadow-emerald-900/40' 
+                      : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200'
+                  }`}
+                >
+                  <ExternalLink className="w-5 h-5" /> Clique aqui e Veja Resultados em outra aba
+                </a>
+              </div>
+              <div className="flex-1 rounded-[3rem] overflow-hidden border-4 shadow-2xl bg-gray-100 relative group cursor-pointer" 
+                   style={{ borderColor: theme === 'blue' ? 'rgba(59, 130, 246, 0.3)' : '#f1f5f9' }}
+                   onClick={() => window.open('https://ais-pre-y57rocsrv4n36yffd4nlz2-43530479359.us-east1.run.app/', '_blank')}
+              >
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
+                   <div className="bg-white/20 backdrop-blur-md px-8 py-4 rounded-2xl border border-white/30 text-white font-black uppercase tracking-widest text-sm">
+                      Clique para Visualizar
+                   </div>
+                </div>
+                <img 
+                  src="https://picsum.photos/seed/dashboard-analytics/1920/1080?blur=2" 
+                  className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
+                  alt="Preview Detalhamento"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute bottom-10 left-10 right-10 bg-white/90 backdrop-blur-sm p-8 rounded-3xl border border-white shadow-2xl">
+                   <h4 className="text-xl font-black text-gray-900 uppercase tracking-tighter mb-2">Sistema de Detalhamento</h4>
+                   <p className="text-gray-500 text-sm font-bold leading-relaxed">Clique no botão acima ou nesta imagem para abrir o relatório completo de transmissão em uma nova aba do seu navegador.</p>
+                </div>
+              </div>
             </div>
           ) : (
             <>
