@@ -943,12 +943,14 @@ function FilterDropdown({ label, value, onChange, options, icon }: any) {
         style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%233b82f6\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E")', backgroundSize: '1em', backgroundPosition: 'right 0.75rem center' }}
       >
         <option value="Tudo">Filtrar {label}</option>
-        {options.filter((o: string) => o !== 'Tudo').map((o: string) => <option key={o} value={o}>{o}</option>)}
+        {options.filter((o: string) => o !== 'Tudo').map((o: string) => (
+          <option key={o} value={o}>{o}</option>
+        ))}
       </select>
     </div>
   );
 }
-
+              
 function MultiSelectFilter({ label, selected, onChange, options, icon }: any) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -1013,6 +1015,60 @@ function KpiCard({ title, value, icon, label, trend, theme }: any) {
       </div>
       <p className={`text-[11px] font-black uppercase tracking-[0.2em] mb-2 ${theme === 'blue' ? 'text-blue-300' : 'text-gray-400'}`}>{title}</p>
       <h4 className={`text-4xl font-black tracking-tighter ${theme === 'blue' ? 'text-white' : 'text-gray-900'}`}>{value}</h4>
+    </div>
+  );
+}
+
+              function MultiSelectFilter({ label, selected, onChange, options, icon }: any) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="flex flex-col gap-2 relative">
+      <label className="text-[10px] font-black text-blue-500 uppercase tracking-tighter flex items-center gap-1.5 ml-1 truncate">
+        {icon} {label}
+      </label>
+      <div 
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full text-xs font-bold border border-gray-100 rounded-2xl px-4 py-3 bg-[#fdfdfd] focus:ring-2 focus:ring-blue-500 outline-none transition-all hover:bg-white shadow-sm cursor-pointer flex justify-between items-center"
+      >
+        <span className="truncate">
+          {selected.length === 0 ? `Filtrar ${label}` : `${selected.length} selecionado(s)`}
+        </span>
+        <ChevronDown className={`w-4 h-4 text-blue-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </div>
+      
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)}></div>
+          <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-100 rounded-2xl shadow-2xl z-20 max-h-60 overflow-y-auto p-2 custom-scrollbar">
+            <div className="flex flex-col gap-1">
+              <button 
+                onClick={() => { onChange([]); setIsOpen(false); }}
+                className="text-left px-3 py-2 text-[10px] font-black text-blue-600 uppercase hover:bg-blue-50 rounded-lg"
+              >
+                Limpar Tudo
+              </button>
+              {options.map((option: string) => (
+                <label key={option} className="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
+                  <input 
+                    type="checkbox" 
+                    checked={selected.includes(option)}
+                    onChange={() => {
+                      if (selected.includes(option)) {
+                        onChange(selected.filter((s: string) => s !== option));
+                      } else {
+                        onChange([...selected, option]);
+                      }
+                    }}
+                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-xs font-bold text-gray-700">{option}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
