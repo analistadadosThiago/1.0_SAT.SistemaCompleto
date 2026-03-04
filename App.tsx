@@ -901,6 +901,12 @@ export default function App() {
                                 </>
                               ) : (
                                 <>
+
+      <footer className="fixed bottom-0 left-0 right-0 bg-transparent text-center text-[10px] font-black text-gray-400 py-2 pointer-events-none no-print">
+        <p>
+          Copyright SAT: Sistema de Acompanhamento de Transmissão © 2026 | Criado por Thiago Marques Lopes. {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })} às {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+        </p>
+      </footer>
                                   <td className={`px-8 py-5 ${theme === 'blue' ? 'text-blue-400' : 'text-gray-400'}`}>{row.MES}/{row.ANO}</td>
                                   <td className={`px-8 py-5 font-black ${theme === 'blue' ? 'text-blue-300' : 'text-blue-600'}`}>{row.BASE}</td>
                                   <td className={`px-8 py-5 ${theme === 'blue' ? 'text-blue-100' : 'text-gray-600'}`}>{row.CIDADE}</td>
