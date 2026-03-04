@@ -1,10 +1,45 @@
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import {
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  Legend, LineChart, Line
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  LabelList, PieChart, Pie, Cell, Legend, LineChart, Line, ComposedChart
 } from 'recharts';
-import { LayoutDashboard, Table as TableIcon, CircleAlert as AlertCircle, Zap, CircleCheck as CheckCircle2, Clock, ChevronLeft, ChevronRight, FileSpreadsheet, Printer, Database, Menu, ChevronFirst, RefreshCw, ListFilter as Filter, X, Info, ChevronDown, MessageSquareWarning, ClipboardList, User, ShieldCheck, Circle as HelpCircle, ExternalLink, CalendarDays, MapPin, FileText, Activity, RotateCw, Tag, Frown, Navigation, Moon, Sun } from 'lucide-react';
+import { 
+  LayoutDashboard, 
+  Table as TableIcon, 
+  AlertCircle, 
+  Zap, 
+  CheckCircle2, 
+  Clock,
+  ChevronLeft,
+  ChevronRight,
+  FileSpreadsheet,
+  Printer,
+  Database,
+  Menu,
+  ChevronFirst,
+  RefreshCw,
+  Filter,
+  X,
+  Info,
+  ChevronDown,
+  MessageSquareWarning,
+  ClipboardList,
+  User,
+  ShieldCheck,
+  HelpCircle,
+  ExternalLink,
+  CalendarDays,
+  MapPin,
+  FileText,
+  Activity,
+  RotateCw,
+  Tag,
+  Frown,
+  Navigation,
+  Moon,
+  Sun
+} from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { ReadingData, NotaData, DashboardStats, AppSection } from './types';
 import { parseGoogleSheetUrl, fetchSheetData } from './services/sheetService';
@@ -642,32 +677,33 @@ export default function App() {
                       </div>
                       <div className="h-[400px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={baseChartData} margin={{ bottom: 100, top: 40 }}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === 'blue' ? 'rgba(255,255,255,0.1)' : '#f1f5f9'} />
-                            <XAxis
-                              dataKey="name"
-                              axisLine={false}
-                              tickLine={false}
-                              interval={0}
-                              tick={{
-                                fontSize: 9,
-                                fontWeight: 900,
-                                fill: theme === 'blue' ? '#93c5fd' : '#64748b',
-                                angle: -45,
-                                textAnchor: 'end',
-                                dy: 10
-                              }}
-                            />
-                            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: theme === 'blue' ? '#93c5fd' : '#64748b' }} />
-                            <Tooltip content={<CustomTooltip section={activeSection} theme={theme} />} />
-                            <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase' }} />
-                            <Line type="monotone" dataKey="aRealizar" name={activeSection === 'transmissao' ? "A Realizar" : "Geradas"} stroke="#3b82f6" strokeWidth={3} dot={{ r: 5, fill: '#3b82f6', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 7 }} />
-                            <Line type="monotone" dataKey="realizadas" name={activeSection === 'transmissao' ? "Realizadas" : "Concluídas"} stroke="#10b981" strokeWidth={3} dot={{ r: 5, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 7 }} />
-                            <Line type="monotone" dataKey="value" name="Pendências" stroke="#ef4444" strokeWidth={4} dot={{ r: 6, fill: '#ef4444', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 8 }} />
-                          </LineChart>
-                        </ResponsiveContainer>
-                      </div>
+                          <ComposedChart data={baseChartData} margin={{ bottom: 100, top: 40 }}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === 'blue' ? 'rgba(255,255,255,0.1)' : '#f1f5f9'} />
+                          <XAxis 
+                            dataKey="name" 
+                            axisLine={false} 
+                            tickLine={false} 
+                            interval={0}
+                            tick={{ 
+                              fontSize: 9, 
+                              fontWeight: 900, 
+                              fill: theme === 'blue' ? '#93c5fd' : '#64748b', 
+                              angle: -45, 
+                              textAnchor: 'end',
+                              dy: 10
+                            }} 
+                          />
+                          <YAxis axisLine={false} tickLine={false} tick={false} />
+                          <Tooltip content={<CustomTooltip section={activeSection} theme={theme} />} cursor={{fill: theme === 'blue' ? 'rgba(255,255,255,0.05)' : '#f8fafc'}} />
+                          <Bar dataKey="value" fill="#ef4444" radius={[8, 8, 0, 0]} barSize={45}>
+                            <LabelList dataKey="value" position="top" style={{ fontSize: '13px', fontWeight: 900, fill: theme === 'blue' ? '#fca5a5' : '#1e40af' }} />
+                          </Bar>
+                          <Line type="monotone" dataKey="value" stroke={theme === 'blue' ? '#fca5a5' : '#b91c1c'} strokeWidth={3} dot={{ r: 4, fill: theme === 'blue' ? '#fca5a5' : '#b91c1c', strokeWidth: 2, stroke: '#fff' }} />
+                        </ComposedChart>
+                      </ResponsiveContainer>
                     </div>
+                  </div>
+                </div>
 
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
                   <div className={`${theme === 'blue' ? 'bg-blue-900/40 border-blue-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[500px] relative`}>
@@ -680,55 +716,61 @@ export default function App() {
                     </div>
                     <div className="h-[400px] w-full">
                       <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={contratoChartData} margin={{ left: 20, right: 20 }}>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === 'blue' ? 'rgba(255,255,255,0.1)' : '#f1f5f9'} />
-                          <XAxis
-                            dataKey="name"
-                            axisLine={false}
-                            tickLine={false}
-                            tick={{ fontSize: 10, fontWeight: 700, fill: theme === 'blue' ? '#93c5fd' : '#64748b' }}
-                          />
-                          <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: theme === 'blue' ? '#93c5fd' : '#64748b' }} />
-                          <Tooltip content={<CustomTooltip section={activeSection} theme={theme} />} />
-                          <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase' }} />
-                          <Line type="monotone" dataKey="aRealizar" name={activeSection === 'transmissao' ? "A Realizar" : "Geradas"} stroke="#3b82f6" strokeWidth={3} dot={{ r: 5, fill: '#3b82f6', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 7 }} />
-                          <Line type="monotone" dataKey="realizadas" name={activeSection === 'transmissao' ? "Realizadas" : "Concluídas"} stroke="#10b981" strokeWidth={3} dot={{ r: 5, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 7 }} />
-                          <Line type="monotone" dataKey="value" name="Pendências" stroke="#ef4444" strokeWidth={4} dot={{ r: 6, fill: '#ef4444', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 8 }} />
-                        </LineChart>
+                        <ComposedChart layout="vertical" data={contratoChartData}>
+                          <XAxis type="number" hide />
+                          <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 700, fill: theme === 'blue' ? '#93c5fd' : '#64748b' }} width={140} />
+                          <Tooltip content={<CustomTooltip section={activeSection} theme={theme} />} cursor={{fill: theme === 'blue' ? 'rgba(255,255,255,0.05)' : '#f8fafc'}} />
+                          <Bar dataKey="value" fill="#ef4444" radius={[0, 8, 8, 0]} barSize={18}>
+                            <LabelList dataKey="value" position="right" style={{ fontSize: '13px', fontWeight: 900, fill: theme === 'blue' ? '#fca5a5' : '#b91c1c' }} />
+                          </Bar>
+                          <Line type="monotone" dataKey="value" stroke={theme === 'blue' ? '#fca5a5' : '#b91c1c'} strokeWidth={2} dot={{ r: 3, fill: theme === 'blue' ? '#fca5a5' : '#b91c1c', strokeWidth: 1, stroke: '#fff' }} />
+                        </ComposedChart>
                       </ResponsiveContainer>
                     </div>
                   </div>
 
-                  <div className={`${theme === 'blue' ? 'bg-blue-900/40 border-blue-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[500px]`}>
-                    <h3 className={`font-black text-sm uppercase tracking-widest mb-8 ${theme === 'blue' ? 'text-white' : 'text-gray-900'}`}>Relação de Status</h3>
-                    <div className="h-[400px] w-full">
+                  <div className={`${theme === 'blue' ? 'bg-blue-900/40 border-blue-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[500px] flex flex-col items-center`}>
+                    <h3 className={`font-black text-sm uppercase tracking-widest self-start mb-10 ${theme === 'blue' ? 'text-white' : 'text-gray-900'}`}>Relação de Status</h3>
+                    <div className="h-[300px] w-full">
                       <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={statusDonutData}>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === 'blue' ? 'rgba(255,255,255,0.1)' : '#f1f5f9'} />
-                          <XAxis
-                            dataKey="name"
-                            axisLine={false}
-                            tickLine={false}
-                            tick={{ fontSize: 11, fontWeight: 900, fill: theme === 'blue' ? '#93c5fd' : '#64748b' }}
-                          />
-                          <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: theme === 'blue' ? '#93c5fd' : '#64748b' }} />
-                          <Tooltip
-                            contentStyle={{
-                              backgroundColor: theme === 'blue' ? '#1e3a8a' : '#fff',
-                              borderColor: theme === 'blue' ? '#3b82f6' : '#e2e8f0',
-                              color: theme === 'blue' ? '#fff' : '#000',
-                              borderRadius: '12px'
-                            }}
-                          />
-                          <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase' }} />
-                          <Line type="monotone" dataKey="value" name="Quantidade" stroke="#8b5cf6" strokeWidth={4} dot={{ r: 8, fill: '#8b5cf6', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 10 }} />
-                        </LineChart>
+                        <PieChart>
+                          <Pie
+                            data={statusDonutData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={80}
+                            outerRadius={120}
+                            paddingAngle={10}
+                            dataKey="value"
+                          >
+                            {statusDonutData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip content={<DonutTooltip baseBreakdown={baseBreakdown} theme={theme} />} />
+                        </PieChart>
                       </ResponsiveContainer>
+                    </div>
+                    <div className="mt-8 flex gap-8">
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 rounded-full bg-emerald-500 shadow-md"></div>
+                          <span className={`text-xl font-black ${theme === 'blue' ? 'text-white' : 'text-gray-800'}`}>{stats.totalPerformed.toLocaleString()}</span>
+                        </div>
+                        <span className={`text-[10px] font-black uppercase tracking-widest ${theme === 'blue' ? 'text-blue-300' : 'text-gray-400'}`}>{isNotas ? 'Concluído' : 'OK'}</span>
+                      </div>
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 rounded-full bg-red-500 shadow-md"></div>
+                          <span className={`text-xl font-black ${theme === 'blue' ? 'text-white' : 'text-gray-800'}`}>{stats.totalPending.toLocaleString()}</span>
+                        </div>
+                        <span className={`text-[10px] font-black uppercase tracking-widest ${theme === 'blue' ? 'text-blue-300' : 'text-gray-400'}`}>{isNotas ? 'Pendente' : 'N-OK'}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                  {/* GRÁFICO: Procedência da Reclamação por Leiturista */}
+                  {/* GRÁFICO: Procedência da Reclamação por Leiturista - ATUALIZADO COM CORES VERMELHO CLARO */}
                   {isNotas && (
                     <div className="grid grid-cols-1 gap-8">
                       <div className={`${theme === 'blue' ? 'bg-blue-900/40 border-blue-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-xl min-h-[550px] relative overflow-hidden group`}>
@@ -756,30 +798,36 @@ export default function App() {
                         </div>
                         <div className="h-[400px] w-full">
                           <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={procedenciaChartData} margin={{ bottom: 120, top: 40 }}>
-                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === 'blue' ? 'rgba(255,255,255,0.1)' : '#f1f5f9'} />
-                              <XAxis
-                                dataKey="name"
-                                axisLine={false}
-                                tickLine={false}
-                                interval={0}
-                                tick={{
-                                  fontSize: 9,
-                                  fontWeight: 900,
-                                  fill: theme === 'blue' ? '#93c5fd' : '#475569',
-                                  angle: -45,
-                                  textAnchor: 'end',
-                                  dy: 10
-                                }}
+                            <ComposedChart data={procedenciaChartData} margin={{ bottom: 120, top: 40 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === 'blue' ? 'rgba(255,255,255,0.1)' : '#f1f5f9'} />
+                            <XAxis 
+                              dataKey="name" 
+                              axisLine={false} 
+                              tickLine={false} 
+                              interval={0}
+                              tick={{ 
+                                fontSize: 9, 
+                                fontWeight: 900, 
+                                fill: theme === 'blue' ? '#93c5fd' : '#475569', 
+                                angle: -45, 
+                                textAnchor: 'end',
+                                dy: 10
+                              }} 
+                            />
+                            <YAxis axisLine={false} tickLine={false} tick={false} />
+                            <Tooltip content={<ProcedenciaTooltip theme={theme} />} cursor={{fill: theme === 'blue' ? 'rgba(255,255,255,0.05)' : 'rgba(254, 226, 226, 0.4)'}} />
+                            <Bar dataKey="sim" stackId="a" fill="#ef4444" radius={[0, 0, 0, 0]} barSize={40} />
+                            <Bar dataKey="nao" stackId="a" fill="#991b1b" radius={[8, 8, 0, 0]} barSize={40}>
+                              <LabelList 
+                                dataKey="total" 
+                                position="top" 
+                                style={{ fontSize: '12px', fontWeight: 900, fill: theme === 'blue' ? '#fca5a5' : '#991b1b' }} 
+                                formatter={(val: any) => val}
                               />
-                              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: theme === 'blue' ? '#93c5fd' : '#64748b' }} />
-                              <Tooltip content={<ProcedenciaTooltip theme={theme} />} />
-                              <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase' }} />
-                              <Line type="monotone" dataKey="sim" name="Procedente (Sim)" stroke="#ef4444" strokeWidth={3} dot={{ r: 5, fill: '#ef4444', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 7 }} />
-                              <Line type="monotone" dataKey="nao" name="Improcedente (Não)" stroke="#991b1b" strokeWidth={3} dot={{ r: 5, fill: '#991b1b', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 7 }} />
-                              <Line type="monotone" dataKey="total" name="Total Reclamações" stroke={theme === 'blue' ? '#fca5a5' : '#450a0a'} strokeWidth={4} dot={{ r: 6, fill: theme === 'blue' ? '#fca5a5' : '#450a0a', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 8 }} />
-                            </LineChart>
-                          </ResponsiveContainer>
+                            </Bar>
+                            <Line type="monotone" dataKey="total" stroke={theme === 'blue' ? '#fca5a5' : '#450a0a'} strokeWidth={3} dot={{ r: 4, fill: theme === 'blue' ? '#fca5a5' : '#450a0a', strokeWidth: 2, stroke: '#fff' }} />
+                          </ComposedChart>
+                        </ResponsiveContainer>
                       </div>
                       <div className="absolute bottom-6 right-8 flex items-center gap-2">
                         <Info className={`w-4 h-4 ${theme === 'blue' ? 'text-red-300' : 'text-red-300'}`} />
@@ -788,8 +836,8 @@ export default function App() {
                     </div>
                   </div>
                 )}
-                </div>
-              ) : (
+              </div>
+            ) : (
                 <div className={`rounded-[2.5rem] border shadow-sm overflow-hidden mb-10 print-full-table ${theme === 'blue' ? 'bg-blue-900/40 border-blue-700/50' : 'bg-white border-gray-100'}`}>
                    <div className={`p-6 border-b flex justify-between items-center no-print ${theme === 'blue' ? 'border-blue-700/50' : 'border-gray-50'}`}>
                      <h2 className={`font-black text-xs uppercase tracking-widest ${theme === 'blue' ? 'text-white' : 'text-gray-900'}`}>Base de Dados - {sectionTitle.toUpperCase()}</h2>
@@ -866,12 +914,6 @@ export default function App() {
                                 </>
                               ) : (
                                 <>
-
-      <footer className="fixed bottom-0 left-0 right-0 bg-transparent text-center text-[10px] font-black text-gray-400 py-2 pointer-events-none no-print">
-        <p>
-          Copyright SAT: Sistema de Acompanhamento de Transmissão © 2026 | Criado por Thiago Marques Lopes. {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })} às {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-        </p>
-      </footer>
                                   <td className={`px-8 py-5 ${theme === 'blue' ? 'text-blue-400' : 'text-gray-400'}`}>{row.MES}/{row.ANO}</td>
                                   <td className={`px-8 py-5 font-black ${theme === 'blue' ? 'text-blue-300' : 'text-blue-600'}`}>{row.BASE}</td>
                                   <td className={`px-8 py-5 ${theme === 'blue' ? 'text-blue-100' : 'text-gray-600'}`}>{row.CIDADE}</td>
@@ -896,6 +938,7 @@ export default function App() {
                       </div>
                    </div>
                 </div>
+              )}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in duration-700">
@@ -905,23 +948,16 @@ export default function App() {
                </h3>
                <p className="text-gray-400 max-w-md text-base leading-relaxed mb-12">Para carregar o dashboard, clique em sincronizar ou cole o link direto da aba correspondente no campo superior.</p>
                
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
-  <div className="bg-white p-8 rounded-[2rem] border border-gray-100 text-left shadow-sm">
-    <p className="text-[10px] font-black text-blue-600 uppercase mb-4 flex items-center gap-2">
-      <ExternalLink className={className} />
-    </p>
-    <p className="text-sm text-gray-600 leading-relaxed">
-      No Google Sheets, clique exatamente no nome da aba inferior
-    </p>
-  </div>
-  <div className="bg-white p-8 rounded-[2rem] border border-gray-100 text-left shadow-sm">
-    <p className="text-[10px] font-black text-emerald-600 uppercase mb-4 flex items-center gap-2">
-      <ExternalLink className={className} />
-    </p>
-    <p className="text-sm text-gray-600 leading-relaxed">
-      Cada aba tem um link próprio (gid). Copie todo o endereço aqui.
-    </p>
-  </div>
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
+                  <div className="bg-white p-8 rounded-[2rem] border border-gray-100 text-left shadow-sm">
+                     <p className="text-[10px] font-black text-blue-600 uppercase mb-4 flex items-center gap-2"><ExternalLink className="w-4 h-4"/> 1. Acesse a Aba Correta</p>
+                     <p className="text-sm text-gray-600 leading-relaxed">No Google Sheets, clique exatamente no nome da aba inferior <strong>{activeSection === 'transmissao' ? 'Transmissao' : sectionTitle}</strong>.</p>
+                  </div>
+                  <div className="bg-white p-8 rounded-[2rem] border border-gray-100 text-left shadow-sm">
+                     <p className="text-[10px] font-black text-emerald-600 uppercase mb-4 flex items-center gap-2"><ExternalLink className="w-4 h-4"/> 2. Copie o Link da Aba</p>
+                     <p className="text-sm text-gray-600 leading-relaxed">Cada aba tem um link próprio (gid). Copie todo o endereço que aparece no navegador e cole aqui.</p>
+                  </div>
+               </div>
             </div>
           )}
         </div>
@@ -943,14 +979,12 @@ function FilterDropdown({ label, value, onChange, options, icon }: any) {
         style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%233b82f6\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E")', backgroundSize: '1em', backgroundPosition: 'right 0.75rem center' }}
       >
         <option value="Tudo">Filtrar {label}</option>
-        {options.filter((o: string) => o !== 'Tudo').map((o: string) => (
-          <option key={o} value={o}>{o}</option>
-        ))}
+        {options.filter((o: string) => o !== 'Tudo').map((o: string) => <option key={o} value={o}>{o}</option>)}
       </select>
     </div>
   );
 }
-              
+
 function MultiSelectFilter({ label, selected, onChange, options, icon }: any) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -1015,60 +1049,6 @@ function KpiCard({ title, value, icon, label, trend, theme }: any) {
       </div>
       <p className={`text-[11px] font-black uppercase tracking-[0.2em] mb-2 ${theme === 'blue' ? 'text-blue-300' : 'text-gray-400'}`}>{title}</p>
       <h4 className={`text-4xl font-black tracking-tighter ${theme === 'blue' ? 'text-white' : 'text-gray-900'}`}>{value}</h4>
-    </div>
-  );
-}
-
-              function MultiSelectFilter({ label, selected, onChange, options, icon }: any) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div className="flex flex-col gap-2 relative">
-      <label className="text-[10px] font-black text-blue-500 uppercase tracking-tighter flex items-center gap-1.5 ml-1 truncate">
-        {icon} {label}
-      </label>
-      <div 
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full text-xs font-bold border border-gray-100 rounded-2xl px-4 py-3 bg-[#fdfdfd] focus:ring-2 focus:ring-blue-500 outline-none transition-all hover:bg-white shadow-sm cursor-pointer flex justify-between items-center"
-      >
-        <span className="truncate">
-          {selected.length === 0 ? `Filtrar ${label}` : `${selected.length} selecionado(s)`}
-        </span>
-        <ChevronDown className={`w-4 h-4 text-blue-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-      </div>
-      
-      {isOpen && (
-        <>
-          <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)}></div>
-          <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-100 rounded-2xl shadow-2xl z-20 max-h-60 overflow-y-auto p-2 custom-scrollbar">
-            <div className="flex flex-col gap-1">
-              <button 
-                onClick={() => { onChange([]); setIsOpen(false); }}
-                className="text-left px-3 py-2 text-[10px] font-black text-blue-600 uppercase hover:bg-blue-50 rounded-lg"
-              >
-                Limpar Tudo
-              </button>
-              {options.map((option: string) => (
-                <label key={option} className="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
-                  <input 
-                    type="checkbox" 
-                    checked={selected.includes(option)}
-                    onChange={() => {
-                      if (selected.includes(option)) {
-                        onChange(selected.filter((s: string) => s !== option));
-                      } else {
-                        onChange([...selected, option]);
-                      }
-                    }}
-                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-xs font-bold text-gray-700">{option}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
     </div>
   );
 }
