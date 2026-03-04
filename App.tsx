@@ -184,7 +184,10 @@ export default function App() {
   const currentMeta = activeSection === 'transmissao' ? (transmissaoMeta.lastUpdate) : (activeSection === 'notas' ? notasMeta.lastUpdate : (activeSection === 'notas_triangulo' ? notasTrianguloMeta.lastUpdate : notasMantiqueiraMeta.lastUpdate));
 
   const isNotas = activeSection === 'notas' || activeSection === 'notas_triangulo' || activeSection === 'notas_mantiqueira';
-  const sectionTitle = activeSection === 'transmissao' ? 'Transmissão' : (activeSection === 'notas' ? 'Notas AM: Contrato de Divinopolis' : (activeSection === 'notas_triangulo' ? 'Notas AM: contrato do Triângulo' : 'Notas AM: Contrato da Mantiqueira'));
+  const sectionTitle = activeSection === 'transmissao' ? 'Transmissão' : 
+                       (activeSection === 'notas' ? 'Notas AM: Contrato de Divinopolis' : 
+                       (activeSection === 'notas_triangulo' ? 'Notas AM: contrato do Triângulo' : 
+                       (activeSection === 'notas_mantiqueira' ? 'Notas AM: Contrato da Mantiqueira' : 'Acompanhamento')));
 
   const handleLoadData = useCallback(async (sectionOverride?: AppSection) => {
     const targetSection = sectionOverride || activeSection;
@@ -467,6 +470,11 @@ export default function App() {
           </div>
           <nav className="space-y-4 flex-1">
              <div className="space-y-1">
+                <button onClick={() => setActiveSection('acompanhamento')} className={`w-full px-4 py-3 flex items-center gap-2 rounded-xl transition-all font-black text-[10px] tracking-widest uppercase ${activeSection === 'acompanhamento' ? 'bg-blue-600 text-white shadow-lg' : (theme === 'blue' ? 'text-blue-300 hover:bg-blue-800/50' : 'text-blue-600 hover:bg-blue-50')}`}>
+                  <ExternalLink className="w-4 h-4"/> Acompanhamento
+                </button>
+             </div>
+             <div className="space-y-1">
                 <button onClick={() => setIsTransmissionOpen(!isTransmissionOpen)} className={`w-full px-4 py-3 flex items-center justify-between rounded-xl transition-all ${theme === 'blue' ? 'text-blue-300 hover:bg-blue-800/50' : 'text-blue-600 hover:bg-blue-50'}`}>
                   <div className="flex items-center gap-2 font-black text-[10px] tracking-widest uppercase"><ClipboardList className="w-4 h-4"/> Acompanhamento de transmissão</div>
                   <ChevronDown className={`w-3 h-3 transition-transform ${isTransmissionOpen ? '' : '-rotate-90'}`} />
@@ -545,17 +553,27 @@ export default function App() {
         </header>
 
         <div className="flex-1 p-8 space-y-8 overflow-y-auto">
-          {error && (
-            <div className="bg-red-50 border-l-4 border-red-500 p-6 rounded-r-2xl shadow-sm flex items-start gap-4 no-print">
-              <div className="p-2 bg-red-100 rounded-full"><AlertCircle className="w-6 h-6 text-red-600" /></div>
-              <div className="flex-1">
-                <p className="text-red-800 text-sm font-black uppercase mb-1">Erro de Sincronização</p>
-                <p className="text-red-600 text-xs font-bold leading-relaxed">{error}</p>
-              </div>
+          {activeSection === 'acompanhamento' ? (
+            <div className="w-full h-[calc(100vh-180px)] rounded-[2.5rem] overflow-hidden border shadow-xl bg-white no-print" style={{ borderColor: theme === 'blue' ? 'rgba(59, 130, 246, 0.5)' : '#f1f5f9' }}>
+              <iframe 
+                src="https://ais-pre-y57rocsrv4n36yffd4nlz2-43530479359.us-east1.run.app/" 
+                className="w-full h-full border-none"
+                title="Acompanhamento"
+              />
             </div>
-          )}
+          ) : (
+            <>
+              {error && (
+                <div className="bg-red-50 border-l-4 border-red-500 p-6 rounded-r-2xl shadow-sm flex items-start gap-4 no-print">
+                  <div className="p-2 bg-red-100 rounded-full"><AlertCircle className="w-6 h-6 text-red-600" /></div>
+                  <div className="flex-1">
+                    <p className="text-red-800 text-sm font-black uppercase mb-1">Erro de Sincronização</p>
+                    <p className="text-red-600 text-xs font-bold leading-relaxed">{error}</p>
+                  </div>
+                </div>
+              )}
 
-          {currentRawData.length > 0 ? (
+              {currentRawData.length > 0 ? (
             <div className="space-y-8 animate-in fade-in duration-500">
               <div className={`p-8 rounded-[2.5rem] border shadow-sm space-y-8 no-print ${theme === 'blue' ? 'bg-blue-900/40 border-blue-700/50' : 'bg-white border-gray-100'}`}>
                 <div className={`flex items-center justify-between border-b pb-4 ${theme === 'blue' ? 'border-blue-700/50' : 'border-gray-50'}`}>
@@ -960,8 +978,10 @@ export default function App() {
                </div>
             </div>
           )}
-        </div>
-      </main>
+        </>
+      )}
+    </div>
+  </main>
     </div>
   );
 }

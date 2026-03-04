@@ -57,4 +57,4 @@ export interface SheetResponse {
   cellT1: string | null;
 }
 
-export type AppSection = 'transmissao' | 'notas' | 'notas_triangulo' | 'notas_mantiqueira';
+export type AppSection = 'transmissao' | 'notas' | 'notas_triangulo' | 'notas_mantiqueira' | 'acompanhamento';
