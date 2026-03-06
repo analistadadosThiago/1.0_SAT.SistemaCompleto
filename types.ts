@@ -46,6 +46,7 @@ export interface DashboardStats {
   totalToPerform: number;
   totalPerformed: number;
   totalPending: number;
+  totalNotSent: number;
   successRate: number;
   pendingRate: number;
 }

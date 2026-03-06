@@ -319,14 +319,31 @@ export default function App() {
   }, [dataStatus, fStatus, fPrazosPendente, isNotas]);
 
   const stats = useMemo<DashboardStats>(() => {
-    if (!filteredData.length) return { totalToPerform: 0, totalPerformed: 0, totalPending: 0, successRate: 0, pendingRate: 0 };
-    let tP = 0, tR = 0, tPend = 0;
+    if (!filteredData.length) return { totalToPerform: 0, totalPerformed: 0, totalPending: 0, totalNotSent: 0, successRate: 0, pendingRate: 0 };
+    let tP = 0, tR = 0, tPend = 0, tNotSent = 0;
     if (activeSection === 'transmissao') {
-      filteredData.forEach((d: any) => { tP += d.LEITURAS_A_REALIZAR; tR += (d.LEITURAS_100 + d.LEITURAS_30); tPend += d.LEITURAS_NAO_REALIZADAS; });
+      filteredData.forEach((d: any) => { 
+        tP += d.LEITURAS_A_REALIZAR; 
+        tR += (d.LEITURAS_100 + d.LEITURAS_30); 
+        tPend += d.LEITURAS_NAO_REALIZADAS;
+        if (d.STATUS?.toString().toUpperCase() === 'NÃO ENVIADA') tNotSent++;
+      });
     } else {
-      filteredData.forEach((d: any) => { tP += d.NOTAS_GERADAS; tR += d.NOTAS_CONCLUIDAS; tPend += d.NOTAS_PENDENTES; });
+      filteredData.forEach((d: any) => { 
+        tP += d.NOTAS_GERADAS; 
+        tR += d.NOTAS_CONCLUIDAS; 
+        tPend += d.NOTAS_PENDENTES;
+        if (d.STATUS?.toString().toUpperCase() === 'NÃO ENVIADA') tNotSent++;
+      });
     }
-    return { totalToPerform: tP, totalPerformed: tR, totalPending: tPend, successRate: tP > 0 ? (tR / tP) * 100 : 0, pendingRate: tP > 0 ? (tPend / tP) * 100 : 0 };
+    return { 
+      totalToPerform: tP, 
+      totalPerformed: tR, 
+      totalPending: tPend, 
+      totalNotSent: tNotSent,
+      successRate: tP > 0 ? (tR / tP) * 100 : 0, 
+      pendingRate: tP > 0 ? (tPend / tP) * 100 : 0 
+    };
   }, [filteredData, activeSection]);
 
   const baseChartData = useMemo(() => {
@@ -679,10 +696,11 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 no-print">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-8 no-print">
                 <KpiCard title={activeSection === 'transmissao' ? "A Realizar" : "Geradas"} value={stats.totalToPerform.toLocaleString()} icon={<Clock className={theme !== 'white' ? "text-blue-300" : "text-blue-600"}/>} trend="+2.4%" theme={theme}/>
                 <KpiCard title={activeSection === 'transmissao' ? "Realizadas" : "Concluídas"} value={stats.totalPerformed.toLocaleString()} icon={<CheckCircle2 className={theme !== 'white' ? "text-emerald-400" : "text-emerald-600"}/>} label={`${stats.successRate.toFixed(1)}% Efic.`} theme={theme}/>
                 <KpiCard title={activeSection === 'transmissao' ? "Pendências" : "Pendentes"} value={stats.totalPending.toLocaleString()} icon={<AlertCircle className={theme !== 'white' ? "text-red-400" : "text-red-600"}/>} label={`${stats.pendingRate.toFixed(1)}% Pend.`} theme={theme}/>
+                <KpiCard title="Não Enviada" value={stats.totalNotSent.toLocaleString()} icon={<MessageSquareWarning className={theme !== 'white' ? "text-orange-400" : "text-orange-600"}/>} theme={theme}/>
               </div>
 
               {view === 'dashboard' ? (
