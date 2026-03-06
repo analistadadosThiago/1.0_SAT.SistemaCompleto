@@ -38,7 +38,8 @@ import {
   Frown,
   Navigation,
   Moon,
-  Sun
+  Sun,
+  Cloud
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { ReadingData, NotaData, DashboardStats, AppSection } from './types';
@@ -55,20 +56,20 @@ const CustomTooltip = ({ active, payload, label, section, theme }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     const isTransmissao = section === 'transmissao';
-    const isBlue = theme === 'blue';
+    const isDark = theme !== 'white';
     return (
-      <div className={`${isBlue ? 'bg-blue-900 border-blue-700 text-white' : 'bg-white border-gray-200 text-gray-800'} p-4 border shadow-2xl rounded-xl text-sm min-w-[180px]`}>
-        <p className={`font-black mb-3 text-base border-b pb-2 ${isBlue ? 'border-blue-700' : 'border-gray-100'}`}>{label || data.name}</p>
+      <div className={`${isDark ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border-gray-200 text-gray-800'} p-4 border shadow-2xl rounded-xl text-sm min-w-[180px]`}>
+        <p className={`font-black mb-3 text-base border-b pb-2 ${isDark ? 'border-gray-700' : 'border-gray-100'}`}>{label || data.name}</p>
         <div className="space-y-2">
-          <p className={`flex justify-between gap-6 font-bold ${isBlue ? 'text-blue-300' : 'text-blue-700'}`}>
+          <p className={`flex justify-between gap-6 font-bold ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
             <span>{isTransmissao ? 'A Realizar:' : 'Geradas:'}</span> 
             <span>{data.aRealizar?.toLocaleString()}</span>
           </p>
-          <p className={`flex justify-between gap-6 font-bold ${isBlue ? 'text-emerald-400' : 'text-emerald-700'}`}>
+          <p className={`flex justify-between gap-6 font-bold ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
             <span>{isTransmissao ? 'Realizadas:' : 'Concluídas:'}</span> 
             <span>{data.realizadas?.toLocaleString()}</span>
           </p>
-          <p className={`flex justify-between gap-6 font-black border-t pt-2 mt-2 ${isBlue ? 'text-red-400 border-blue-700' : 'text-red-700 border-gray-100'}`}>
+          <p className={`flex justify-between gap-6 font-black border-t pt-2 mt-2 ${isDark ? 'text-red-400 border-gray-700' : 'text-red-700 border-gray-100'}`}>
             <span>Pendências:</span> 
             <span>{data.value?.toLocaleString()}</span>
           </p>
@@ -84,15 +85,15 @@ const DonutTooltip = ({ active, payload, baseBreakdown, theme }: any) => {
     const data = payload[0].payload;
     const statusType = data.name; 
     const isOK = statusType === 'OK' || statusType === 'Concluído';
-    const isBlue = theme === 'blue';
+    const isDark = theme !== 'white';
     
     return (
-      <div className={`${isBlue ? 'bg-blue-900 border-blue-700 text-white' : 'bg-white border-gray-100 text-gray-800'} p-5 border shadow-2xl rounded-2xl text-xs min-w-[240px]`}>
-        <div className={`flex items-center justify-between mb-4 pb-2 border-b ${isBlue ? 'border-blue-700' : 'border-gray-50'}`}>
+      <div className={`${isDark ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border-gray-100 text-gray-800'} p-5 border shadow-2xl rounded-2xl text-xs min-w-[240px]`}>
+        <div className={`flex items-center justify-between mb-4 pb-2 border-b ${isDark ? 'border-gray-700' : 'border-gray-50'}`}>
           <span className={`font-black uppercase tracking-widest text-sm ${isOK ? 'text-emerald-500' : 'text-red-500'}`}>
             Status: {statusType}
           </span>
-          <span className={`font-bold ${isBlue ? 'text-blue-300' : 'text-gray-500'}`}>Total: {data.value.toLocaleString()}</span>
+          <span className={`font-bold ${isDark ? 'text-blue-300' : 'text-gray-500'}`}>Total: {data.value.toLocaleString()}</span>
         </div>
         <div className="space-y-2.5 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
           {Object.entries(baseBreakdown).map(([base, stats]: [string, any]) => {
@@ -100,7 +101,7 @@ const DonutTooltip = ({ active, payload, baseBreakdown, theme }: any) => {
             if (count === 0) return null;
             return (
               <div key={base} className="flex justify-between items-center gap-4">
-                <span className={`${isBlue ? 'text-blue-200' : 'text-gray-600'} font-bold truncate max-w-[140px]`}>{base}</span>
+                <span className={`${isDark ? 'text-blue-200' : 'text-gray-600'} font-bold truncate max-w-[140px]`}>{base}</span>
                 <span className={`font-black text-sm ${isOK ? 'text-emerald-500' : 'text-red-500'}`}>{count.toLocaleString()}</span>
               </div>
             );
@@ -115,16 +116,16 @@ const DonutTooltip = ({ active, payload, baseBreakdown, theme }: any) => {
 const ProcedenciaTooltip = ({ active, payload, label, theme }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
-    const isBlue = theme === 'blue';
+    const isDark = theme !== 'white';
     return (
-      <div className={`${isBlue ? 'bg-blue-900 border-blue-700 text-white' : 'bg-white border-gray-200 text-gray-800'} p-4 border shadow-2xl rounded-xl text-sm min-w-[200px]`}>
-        <p className={`font-black mb-2 border-b pb-1 uppercase text-xs tracking-wider ${isBlue ? 'border-blue-700' : 'border-gray-100'}`}>{label}</p>
+      <div className={`${isDark ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border-gray-200 text-gray-800'} p-4 border shadow-2xl rounded-xl text-sm min-w-[200px]`}>
+        <p className={`font-black mb-2 border-b pb-1 uppercase text-xs tracking-wider ${isDark ? 'border-gray-700' : 'border-gray-100'}`}>{label}</p>
         <div className="space-y-1">
-          <p className={`flex justify-between font-bold ${isBlue ? 'text-blue-300' : 'text-blue-600'}`}>
+          <p className={`flex justify-between font-bold ${isDark ? 'text-blue-300' : 'text-blue-600'}`}>
             <span>Total Reclamações:</span> 
             <span>{data.total}</span>
           </p>
-          <div className={`pt-2 mt-2 border-t space-y-1 ${isBlue ? 'border-blue-700' : 'border-gray-50'}`}>
+          <div className={`pt-2 mt-2 border-t space-y-1 ${isDark ? 'border-gray-700' : 'border-gray-50'}`}>
             <p className="flex justify-between text-rose-500 font-bold">
               <span>Procedente (Sim):</span> 
               <span className="font-black">{data.sim}</span>
@@ -149,7 +150,7 @@ export default function App() {
   const [isNotasOpen, setIsNotasOpen] = useState(false);
   const [isNotasTrianguloOpen, setIsNotasTrianguloOpen] = useState(false);
   const [isNotasMantiqueiraOpen, setIsNotasMantiqueiraOpen] = useState(false);
-  const [theme, setTheme] = useState<'white' | 'blue'>('white');
+  const [theme, setTheme] = useState<'white' | 'blue' | 'dark'>('white');
 
   const [transmissaoUrl, setTransmissaoUrl] = useState(DEFAULT_URL_TRANSMISSAO);
   const [notasUrl, setNotasUrl] = useState(DEFAULT_URL_NOTAS);
@@ -302,7 +303,7 @@ export default function App() {
   const razoes = useMemo(() => ['Tudo', ...Array.from(new Set(dataPrazo.map(d => d.RAZAO).filter(Boolean))).sort()], [dataPrazo]);
   const dataRazao = useMemo(() => dataPrazo.filter(d => fRazao === 'Tudo' || d.RAZAO === fRazao), [dataPrazo, fRazao]);
   
-  const statuses = useMemo(() => ['Tudo', ...Array.from(new Set(dataRazao.map((d: any) => d.STATUS).filter(Boolean))).sort()], [dataRazao]);
+  const statuses = useMemo(() => ['Tudo', ...Array.from(new Set(currentRawData.map((d: any) => d.STATUS).filter(Boolean))).sort()], [currentRawData]);
   const dataStatus = useMemo(() => dataRazao.filter((d: any) => fStatus === 'Tudo' || d.STATUS === fStatus), [dataRazao, fStatus]);
 
   const prazosPendenteDisponiveis = useMemo(() => {
@@ -440,7 +441,7 @@ export default function App() {
   }, [fContrato, fMes, fAno, fBase, fPrazos, fRazao, fStatus, fPrazosPendente]);
 
   return (
-    <div className={`min-h-screen flex font-sans relative transition-colors duration-500 ${theme === 'blue' ? 'bg-[#1e3a8a]' : 'bg-[#f8fafc]'}`}>
+    <div className={`min-h-screen flex font-sans relative transition-colors duration-500 ${theme === 'blue' ? 'bg-blue-400' : theme === 'dark' ? 'bg-black' : 'bg-[#f8fafc]'}`}>
       <style>{`
         @media print {
           aside, header, .no-print { display: none !important; }
@@ -456,62 +457,62 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
       `}</style>
 
-      <aside className={`fixed md:relative z-50 h-full border-r transition-all duration-300 flex flex-col shadow-xl md:shadow-none ${isSidebarOpen ? 'w-80' : 'w-0 md:w-0'} overflow-hidden no-print ${theme === 'blue' ? 'bg-blue-900 border-blue-800' : 'bg-white border-gray-100'}`}>
+      <aside className={`fixed md:relative z-50 h-full border-r transition-all duration-300 flex flex-col shadow-xl md:shadow-none ${isSidebarOpen ? 'w-80' : 'w-0 md:w-0'} overflow-hidden no-print ${theme !== 'white' ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-100'}`}>
         <div className="p-6 w-80 h-full flex flex-col">
           <div className="flex items-center justify-between mb-10">
-            <div className={`flex items-center gap-3 ${theme === 'blue' ? 'text-blue-300' : 'text-blue-600'}`}>
+            <div className={`flex items-center gap-3 ${theme !== 'white' ? 'text-blue-300' : 'text-blue-600'}`}>
               <Zap className="w-8 h-8 fill-current" />
               <div className="flex flex-col">
-                <span className={`text-sm font-black uppercase leading-none ${theme === 'blue' ? 'text-white' : 'text-gray-800'}`}>SAT: Sistema de</span>
-                <span className={`text-sm font-black uppercase leading-none mt-1 ${theme === 'blue' ? 'text-white' : 'text-gray-800'}`}>Acompanhamento de Transmissão</span>
+                <span className={`text-sm font-black uppercase leading-none ${theme !== 'white' ? 'text-white' : 'text-gray-800'}`}>SAT: Sistema de</span>
+                <span className={`text-sm font-black uppercase leading-none mt-1 ${theme !== 'white' ? 'text-white' : 'text-gray-800'}`}>Acompanhamento de Transmissão</span>
               </div>
             </div>
-            <button onClick={() => setIsSidebarOpen(false)} className={`md:hidden ${theme === 'blue' ? 'text-blue-300' : 'text-gray-400'}`}><X /></button>
+            <button onClick={() => setIsSidebarOpen(false)} className={`md:hidden ${theme !== 'white' ? 'text-blue-300' : 'text-gray-400'}`}><X /></button>
           </div>
           <nav className="space-y-4 flex-1">
              <div className="space-y-1">
-                <button onClick={() => setActiveSection('acompanhamento')} className={`w-full px-4 py-3 flex items-center gap-2 rounded-xl transition-all font-black text-[10px] tracking-widest uppercase ${activeSection === 'acompanhamento' ? 'bg-blue-600 text-white shadow-lg' : (theme === 'blue' ? 'text-blue-300 hover:bg-blue-800/50' : 'text-blue-600 hover:bg-blue-50')}`}>
+                <button onClick={() => setActiveSection('acompanhamento')} className={`w-full px-4 py-3 flex items-center gap-2 rounded-xl transition-all font-black text-[10px] tracking-widest uppercase ${activeSection === 'acompanhamento' ? 'bg-blue-600 text-white shadow-lg' : (theme !== 'white' ? 'text-blue-300 hover:bg-blue-800/50' : 'text-blue-600 hover:bg-blue-50')}`}>
                   <ExternalLink className="w-4 h-4"/> Detalhamento de Transmissão
                 </button>
              </div>
              <div className="space-y-1">
-                <button onClick={() => setIsTransmissionOpen(!isTransmissionOpen)} className={`w-full px-4 py-3 flex items-center justify-between rounded-xl transition-all ${theme === 'blue' ? 'text-blue-300 hover:bg-blue-800/50' : 'text-blue-600 hover:bg-blue-50'}`}>
+                <button onClick={() => setIsTransmissionOpen(!isTransmissionOpen)} className={`w-full px-4 py-3 flex items-center justify-between rounded-xl transition-all ${theme !== 'white' ? 'text-blue-300 hover:bg-blue-800/50' : 'text-blue-600 hover:bg-blue-50'}`}>
                   <div className="flex items-center gap-2 font-black text-[10px] tracking-widest uppercase"><ClipboardList className="w-4 h-4"/> Acompanhamento de transmissão</div>
                   <ChevronDown className={`w-3 h-3 transition-transform ${isTransmissionOpen ? '' : '-rotate-90'}`} />
                 </button>
                 <div className={`space-y-1 pl-4 overflow-hidden transition-all ${isTransmissionOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
-                  <button onClick={() => { setActiveSection('transmissao'); setView('dashboard'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'transmissao' && view === 'dashboard' ? 'bg-blue-600 text-white' : (theme === 'blue' ? 'text-blue-400 hover:bg-blue-800/30' : 'text-gray-500 hover:bg-gray-100')}`}>Dashboard</button>
-                  <button onClick={() => { setActiveSection('transmissao'); setView('table'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'transmissao' && view === 'table' ? 'bg-blue-600 text-white' : (theme === 'blue' ? 'text-blue-400 hover:bg-blue-800/30' : 'text-gray-500 hover:bg-gray-100')}`}>Base de Dados</button>
+                  <button onClick={() => { setActiveSection('transmissao'); setView('dashboard'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'transmissao' && view === 'dashboard' ? 'bg-blue-600 text-white' : (theme !== 'white' ? 'text-blue-400 hover:bg-blue-800/30' : 'text-gray-500 hover:bg-gray-100')}`}>Dashboard</button>
+                  <button onClick={() => { setActiveSection('transmissao'); setView('table'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'transmissao' && view === 'table' ? 'bg-blue-600 text-white' : (theme !== 'white' ? 'text-blue-400 hover:bg-blue-800/30' : 'text-gray-500 hover:bg-gray-100')}`}>Base de Dados</button>
                 </div>
              </div>
               <div className="space-y-1">
-                <button onClick={() => setIsNotasOpen(!isNotasOpen)} className={`w-full px-4 py-3 flex items-center justify-between rounded-xl transition-all ${theme === 'blue' ? 'text-blue-300 hover:bg-blue-800/50' : 'text-blue-600 hover:bg-blue-50'}`}>
+                <button onClick={() => setIsNotasOpen(!isNotasOpen)} className={`w-full px-4 py-3 flex items-center justify-between rounded-xl transition-all ${theme !== 'white' ? 'text-blue-300 hover:bg-blue-800/50' : 'text-blue-600 hover:bg-blue-50'}`}>
                   <div className="flex items-center gap-2 font-black text-[10px] tracking-widest uppercase"><MessageSquareWarning className="w-4 h-4"/> Notas AM: Contrato de Divinopolis</div>
                   <ChevronDown className={`w-3 h-3 transition-transform ${isNotasOpen ? '' : '-rotate-90'}`} />
                 </button>
                 <div className={`space-y-1 pl-4 overflow-hidden transition-all ${isNotasOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
-                  <button onClick={() => { setActiveSection('notas'); setView('dashboard'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'notas' && view === 'dashboard' ? 'bg-blue-600 text-white' : (theme === 'blue' ? 'text-blue-400 hover:bg-blue-800/30' : 'text-gray-500 hover:bg-gray-100')}`}>Dashboard</button>
-                  <button onClick={() => { setActiveSection('notas'); setView('table'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'notas' && view === 'table' ? 'bg-blue-600 text-white' : (theme === 'blue' ? 'text-blue-400 hover:bg-blue-800/30' : 'text-gray-500 hover:bg-gray-100')}`}>Base de Dados</button>
+                  <button onClick={() => { setActiveSection('notas'); setView('dashboard'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'notas' && view === 'dashboard' ? 'bg-blue-600 text-white' : (theme !== 'white' ? 'text-blue-400 hover:bg-blue-800/30' : 'text-gray-500 hover:bg-gray-100')}`}>Dashboard</button>
+                  <button onClick={() => { setActiveSection('notas'); setView('table'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'notas' && view === 'table' ? 'bg-blue-600 text-white' : (theme !== 'white' ? 'text-blue-400 hover:bg-blue-800/30' : 'text-gray-500 hover:bg-gray-100')}`}>Base de Dados</button>
                 </div>
              </div>
              <div className="space-y-1">
-                <button onClick={() => setIsNotasTrianguloOpen(!isNotasTrianguloOpen)} className={`w-full px-4 py-3 flex items-center justify-between rounded-xl transition-all ${theme === 'blue' ? 'text-blue-300 hover:bg-blue-800/50' : 'text-blue-600 hover:bg-blue-50'}`}>
+                <button onClick={() => setIsNotasTrianguloOpen(!isNotasTrianguloOpen)} className={`w-full px-4 py-3 flex items-center justify-between rounded-xl transition-all ${theme !== 'white' ? 'text-blue-300 hover:bg-blue-800/50' : 'text-blue-600 hover:bg-blue-50'}`}>
                   <div className="flex items-center gap-2 font-black text-[10px] tracking-widest uppercase"><MessageSquareWarning className="w-4 h-4"/> Notas AM: contrato do Triângulo</div>
                   <ChevronDown className={`w-3 h-3 transition-transform ${isNotasTrianguloOpen ? '' : '-rotate-90'}`} />
                 </button>
                 <div className={`space-y-1 pl-4 overflow-hidden transition-all ${isNotasTrianguloOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
-                  <button onClick={() => { setActiveSection('notas_triangulo'); setView('dashboard'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'notas_triangulo' && view === 'dashboard' ? 'bg-blue-600 text-white' : (theme === 'blue' ? 'text-blue-400 hover:bg-blue-800/30' : 'text-gray-500 hover:bg-gray-100')}`}>Dashboard</button>
-                  <button onClick={() => { setActiveSection('notas_triangulo'); setView('table'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'notas_triangulo' && view === 'table' ? 'bg-blue-600 text-white' : (theme === 'blue' ? 'text-blue-400 hover:bg-blue-800/30' : 'text-gray-500 hover:bg-gray-100')}`}>Base de Dados</button>
+                  <button onClick={() => { setActiveSection('notas_triangulo'); setView('dashboard'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'notas_triangulo' && view === 'dashboard' ? 'bg-blue-600 text-white' : (theme !== 'white' ? 'text-blue-400 hover:bg-blue-800/30' : 'text-gray-500 hover:bg-gray-100')}`}>Dashboard</button>
+                  <button onClick={() => { setActiveSection('notas_triangulo'); setView('table'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'notas_triangulo' && view === 'table' ? 'bg-blue-600 text-white' : (theme !== 'white' ? 'text-blue-400 hover:bg-blue-800/30' : 'text-gray-500 hover:bg-gray-100')}`}>Base de Dados</button>
                 </div>
              </div>
              <div className="space-y-1">
-                <button onClick={() => setIsNotasMantiqueiraOpen(!isNotasMantiqueiraOpen)} className={`w-full px-4 py-3 flex items-center justify-between rounded-xl transition-all ${theme === 'blue' ? 'text-blue-300 hover:bg-blue-800/50' : 'text-blue-600 hover:bg-blue-50'}`}>
+                <button onClick={() => setIsNotasMantiqueiraOpen(!isNotasMantiqueiraOpen)} className={`w-full px-4 py-3 flex items-center justify-between rounded-xl transition-all ${theme !== 'white' ? 'text-blue-300 hover:bg-blue-800/50' : 'text-blue-600 hover:bg-blue-50'}`}>
                   <div className="flex items-center gap-2 font-black text-[10px] tracking-widest uppercase"><MessageSquareWarning className="w-4 h-4"/> Notas AM: Contrato da Mantiqueira</div>
                   <ChevronDown className={`w-3 h-3 transition-transform ${isNotasMantiqueiraOpen ? '' : '-rotate-90'}`} />
                 </button>
                 <div className={`space-y-1 pl-4 overflow-hidden transition-all ${isNotasMantiqueiraOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
-                  <button onClick={() => { setActiveSection('notas_mantiqueira'); setView('dashboard'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'notas_mantiqueira' && view === 'dashboard' ? 'bg-blue-600 text-white' : (theme === 'blue' ? 'text-blue-400 hover:bg-blue-800/30' : 'text-gray-500 hover:bg-gray-100')}`}>Dashboard</button>
-                  <button onClick={() => { setActiveSection('notas_mantiqueira'); setView('table'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'notas_mantiqueira' && view === 'table' ? 'bg-blue-600 text-white' : (theme === 'blue' ? 'text-blue-400 hover:bg-blue-800/30' : 'text-gray-500 hover:bg-gray-100')}`}>Base de Dados</button>
+                  <button onClick={() => { setActiveSection('notas_mantiqueira'); setView('dashboard'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'notas_mantiqueira' && view === 'dashboard' ? 'bg-blue-600 text-white' : (theme !== 'white' ? 'text-blue-400 hover:bg-blue-800/30' : 'text-gray-500 hover:bg-gray-100')}`}>Dashboard</button>
+                  <button onClick={() => { setActiveSection('notas_mantiqueira'); setView('table'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'notas_mantiqueira' && view === 'table' ? 'bg-blue-600 text-white' : (theme !== 'white' ? 'text-blue-400 hover:bg-blue-800/30' : 'text-gray-500 hover:bg-gray-100')}`}>Base de Dados</button>
                 </div>
              </div>
           </nav>
@@ -519,34 +520,36 @@ export default function App() {
       </aside>
 
       <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        <header className={`${theme === 'blue' ? 'bg-blue-900 border-blue-800' : 'bg-white border-gray-100'} px-8 py-4 flex flex-col gap-4 z-40 shadow-sm no-print`}>
+        <header className={`${theme !== 'white' ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-100'} px-8 py-4 flex flex-col gap-4 z-40 shadow-sm no-print`}>
           <div className="flex items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`p-2.5 rounded-xl border transition-all ${theme === 'blue' ? 'bg-blue-900/50 border-blue-700 text-blue-200' : 'bg-gray-50 border-gray-200 text-gray-500'}`}>
+              <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`p-2.5 rounded-xl border transition-all ${theme !== 'white' ? 'bg-gray-800 border-gray-700 text-blue-200' : 'bg-gray-50 border-gray-200 text-gray-500'}`}>
                 {isSidebarOpen ? <ChevronFirst /> : <Menu />}
               </button>
               <div className="flex flex-col">
                 {currentMeta && (
-                  <span className={`text-[10px] font-black uppercase mb-1 ${theme === 'blue' ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                  <span className={`text-[10px] font-black uppercase mb-1 ${theme !== 'white' ? 'text-emerald-400' : 'text-emerald-600'}`}>
                     Última atualização: {currentMeta}
                   </span>
                 )}
-                <h1 className={`text-xl font-black uppercase tracking-tighter ${theme === 'blue' ? 'text-white' : 'text-gray-900'}`}>
+                <h1 className={`text-xl font-black uppercase tracking-tighter ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>
                   {sectionTitle}
                 </h1>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <button 
-                onClick={() => setTheme(theme === 'white' ? 'blue' : 'white')}
+                onClick={() => setTheme(theme === 'white' ? 'blue' : theme === 'blue' ? 'dark' : 'white')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border shadow-sm ${
-                  theme === 'blue' 
-                    ? 'bg-white text-blue-900 border-white hover:bg-gray-100' 
-                    : 'bg-blue-900 text-white border-blue-900 hover:bg-blue-800'
+                  theme === 'white' 
+                    ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700' 
+                    : theme === 'blue'
+                    ? 'bg-blue-500 text-white border-blue-400 hover:bg-blue-600'
+                    : 'bg-gray-800 text-white border-gray-700 hover:bg-gray-900'
                 }`}
               >
-                {theme === 'white' ? <Moon className="w-3 h-3" /> : <Sun className="w-3 h-3" />}
-                Fundo {theme === 'white' ? 'Azul' : 'Branco'}
+                {theme === 'white' ? <Sun className="w-3 h-3" /> : theme === 'blue' ? <Cloud className="w-3 h-3" /> : <Moon className="w-3 h-3" />}
+                Tema: {theme === 'white' ? 'Claro' : theme === 'blue' ? 'Azul' : 'Escuro'}
               </button>
             </div>
           </div>
@@ -561,7 +564,7 @@ export default function App() {
                   target="_blank" 
                   rel="noopener noreferrer"
                   className={`flex items-center gap-3 px-10 py-5 rounded-3xl text-sm font-black uppercase tracking-widest transition-all shadow-2xl hover:scale-105 active:scale-95 ${
-                    theme === 'blue' 
+                    theme !== 'white' 
                       ? 'bg-emerald-500 text-white hover:bg-emerald-400 shadow-emerald-900/40' 
                       : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200'
                   }`}
@@ -570,7 +573,7 @@ export default function App() {
                 </a>
               </div>
               <div className="flex-1 rounded-[3rem] overflow-hidden border-4 shadow-2xl bg-gray-100 relative group cursor-pointer" 
-                   style={{ borderColor: theme === 'blue' ? 'rgba(59, 130, 246, 0.3)' : '#f1f5f9' }}
+                   style={{ borderColor: theme !== 'white' ? 'rgba(59, 130, 246, 0.3)' : '#f1f5f9' }}
                    onClick={() => window.open('https://ais-pre-y57rocsrv4n36yffd4nlz2-43530479359.us-east1.run.app/', '_blank')}
               >
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
@@ -604,28 +607,28 @@ export default function App() {
 
               {currentRawData.length > 0 ? (
             <div className="space-y-8 animate-in fade-in duration-500">
-              <div className={`p-8 rounded-[2.5rem] border shadow-sm space-y-8 no-print ${theme === 'blue' ? 'bg-blue-900/40 border-blue-700/50' : 'bg-white border-gray-100'}`}>
-                <div className={`flex items-center justify-between border-b pb-4 ${theme === 'blue' ? 'border-blue-700/50' : 'border-gray-50'}`}>
+              <div className={`p-8 rounded-[2.5rem] border shadow-sm space-y-8 no-print ${theme !== 'white' ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100'}`}>
+                <div className={`flex items-center justify-between border-b pb-4 ${theme !== 'white' ? 'border-gray-700/50' : 'border-gray-50'}`}>
                   <div className="flex items-center gap-2">
-                    <Filter className={`w-5 h-5 ${theme === 'blue' ? 'text-blue-300' : 'text-blue-600'}`} />
-                    <span className={`text-xs font-black uppercase tracking-widest ${theme === 'blue' ? 'text-blue-400' : 'text-gray-400'}`}>Menus de Seleção de Dados</span>
+                    <Filter className={`w-5 h-5 ${theme !== 'white' ? 'text-blue-300' : 'text-blue-600'}`} />
+                    <span className={`text-xs font-black uppercase tracking-widest ${theme !== 'white' ? 'text-blue-400' : 'text-gray-400'}`}>Menus de Seleção de Dados</span>
                   </div>
                   <button 
                     onClick={() => handleLoadData()} 
-                    className={`flex items-center gap-2 text-[10px] font-black uppercase px-4 py-2 rounded-xl transition-all ${theme === 'blue' ? 'text-blue-300 hover:bg-blue-800/50' : 'text-blue-600 hover:bg-blue-50'}`}
+                    className={`flex items-center gap-2 text-[10px] font-black uppercase px-4 py-2 rounded-xl transition-all ${theme !== 'white' ? 'text-blue-300 hover:bg-blue-800/50' : 'text-blue-600 hover:bg-blue-50'}`}
                   >
                     <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} /> Atualizar Planilha
                   </button>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-7 gap-6">
-                  <FilterDropdown label="Contrato" value={fContrato} onChange={setFContrato} options={contratos} icon={<Database className="w-3 h-3"/>}/>
-                  <FilterDropdown label="Mês" value={fMes} onChange={setFMes} options={meses} icon={<CalendarDays className="w-3 h-3"/>}/>
-                  <FilterDropdown label="Ano" value={fAno} onChange={setFAno} options={anos} icon={<CalendarDays className="w-3 h-3"/>}/>
-                  <FilterDropdown label="Base" value={fBase} onChange={setFBase} options={bases} icon={<MapPin className="w-3 h-3"/>}/>
-                  <MultiSelectFilter label="Prazo" selected={fPrazos} onChange={setFPrazos} options={prazos} icon={<Clock className="w-3 h-3"/>}/>
-                  <FilterDropdown label="Razão" value={fRazao} onChange={setFRazao} options={razoes} icon={<FileText className="w-3 h-3"/>}/>
-                  <FilterDropdown label="Status" value={fStatus} onChange={setFStatus} options={statuses} icon={<Activity className="w-3 h-3"/>}/>
+                  <FilterDropdown label="Contrato" value={fContrato} onChange={setFContrato} options={contratos} icon={<Database className="w-3 h-3"/>} theme={theme}/>
+                  <FilterDropdown label="Mês" value={fMes} onChange={setFMes} options={meses} icon={<CalendarDays className="w-3 h-3"/>} theme={theme}/>
+                  <FilterDropdown label="Ano" value={fAno} onChange={setFAno} options={anos} icon={<CalendarDays className="w-3 h-3"/>} theme={theme}/>
+                  <FilterDropdown label="Base" value={fBase} onChange={setFBase} options={bases} icon={<MapPin className="w-3 h-3"/>} theme={theme}/>
+                  <MultiSelectFilter label="Prazo" selected={fPrazos} onChange={setFPrazos} options={prazos} icon={<Clock className="w-3 h-3"/>} theme={theme}/>
+                  <FilterDropdown label="Razão" value={fRazao} onChange={setFRazao} options={razoes} icon={<FileText className="w-3 h-3"/>} theme={theme}/>
+                  <FilterDropdown label="Status" value={fStatus} onChange={setFStatus} options={statuses} icon={<Activity className="w-3 h-3"/>} theme={theme}/>
                 </div>
 
                 {isNotas && fStatus === 'Pendente' && prazosPendenteDisponiveis.length > 0 && (
@@ -677,32 +680,32 @@ export default function App() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 no-print">
-                <KpiCard title={activeSection === 'transmissao' ? "A Realizar" : "Geradas"} value={stats.totalToPerform.toLocaleString()} icon={<Clock className={theme === 'blue' ? "text-blue-300" : "text-blue-600"}/>} trend="+2.4%" theme={theme}/>
-                <KpiCard title={activeSection === 'transmissao' ? "Realizadas" : "Concluídas"} value={stats.totalPerformed.toLocaleString()} icon={<CheckCircle2 className={theme === 'blue' ? "text-emerald-400" : "text-emerald-600"}/>} label={`${stats.successRate.toFixed(1)}% Efic.`} theme={theme}/>
-                <KpiCard title={activeSection === 'transmissao' ? "Pendências" : "Pendentes"} value={stats.totalPending.toLocaleString()} icon={<AlertCircle className={theme === 'blue' ? "text-red-400" : "text-red-600"}/>} label={`${stats.pendingRate.toFixed(1)}% Pend.`} theme={theme}/>
+                <KpiCard title={activeSection === 'transmissao' ? "A Realizar" : "Geradas"} value={stats.totalToPerform.toLocaleString()} icon={<Clock className={theme !== 'white' ? "text-blue-300" : "text-blue-600"}/>} trend="+2.4%" theme={theme}/>
+                <KpiCard title={activeSection === 'transmissao' ? "Realizadas" : "Concluídas"} value={stats.totalPerformed.toLocaleString()} icon={<CheckCircle2 className={theme !== 'white' ? "text-emerald-400" : "text-emerald-600"}/>} label={`${stats.successRate.toFixed(1)}% Efic.`} theme={theme}/>
+                <KpiCard title={activeSection === 'transmissao' ? "Pendências" : "Pendentes"} value={stats.totalPending.toLocaleString()} icon={<AlertCircle className={theme !== 'white' ? "text-red-400" : "text-red-600"}/>} label={`${stats.pendingRate.toFixed(1)}% Pend.`} theme={theme}/>
               </div>
 
               {view === 'dashboard' ? (
                 <div className="space-y-10 pb-12 no-print">
                   <div className="grid grid-cols-1 gap-8">
-                    <div className={`${theme === 'blue' ? 'bg-blue-900/40 border-blue-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[400px] relative`}>
-                      <h3 className={`font-black text-sm uppercase tracking-widest mb-8 ${theme === 'blue' ? 'text-white' : 'text-gray-900'}`}>Tendência Mensal</h3>
+                    <div className={`${theme !== 'white' ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[400px] relative`}>
+                      <h3 className={`font-black text-sm uppercase tracking-widest mb-8 ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>Tendência Mensal</h3>
                       <div className="h-[300px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
                           <LineChart data={trendChartData}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === 'blue' ? 'rgba(255,255,255,0.1)' : '#f1f5f9'} />
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme !== 'white' ? 'rgba(255,255,255,0.1)' : '#f1f5f9'} />
                             <XAxis 
                               dataKey="mes" 
                               axisLine={false} 
                               tickLine={false} 
-                              tick={{ fontSize: 10, fontWeight: 700, fill: theme === 'blue' ? '#93c5fd' : '#64748b' }}
+                              tick={{ fontSize: 10, fontWeight: 700, fill: theme !== 'white' ? '#93c5fd' : '#64748b' }}
                             />
-                            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: theme === 'blue' ? '#93c5fd' : '#64748b' }} />
+                            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: theme !== 'white' ? '#93c5fd' : '#64748b' }} />
                             <Tooltip 
                               contentStyle={{ 
-                                backgroundColor: theme === 'blue' ? '#1e3a8a' : '#fff', 
-                                borderColor: theme === 'blue' ? '#3b82f6' : '#e2e8f0',
-                                color: theme === 'blue' ? '#fff' : '#000',
+                                backgroundColor: theme !== 'white' ? '#111827' : '#fff', 
+                                borderColor: theme !== 'white' ? '#374151' : '#e2e8f0',
+                                color: theme !== 'white' ? '#fff' : '#000',
                                 borderRadius: '12px'
                               }}
                             />
@@ -714,18 +717,18 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div className={`${theme === 'blue' ? 'bg-blue-900/40 border-blue-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[500px] relative`}>
+                    <div className={`${theme !== 'white' ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[500px] relative`}>
                       <div className="flex justify-between items-center mb-8">
-                        <h3 className={`font-black text-sm uppercase tracking-widest ${theme === 'blue' ? 'text-white' : 'text-gray-900'}`}>Pendências por Base</h3>
-                        <div className={`${theme === 'blue' ? 'bg-red-900/30 border-red-800/50' : 'bg-red-50 border-red-100'} px-4 py-2 rounded-xl border flex items-center gap-3`}>
-                          <span className={`text-xs font-black uppercase ${theme === 'blue' ? 'text-red-300' : 'text-red-600'}`}>Pendências em Geral:</span>
-                          <span className={`text-base font-black ${theme === 'blue' ? 'text-red-400' : 'text-red-700'}`}>{stats.totalPending.toLocaleString()}</span>
+                        <h3 className={`font-black text-sm uppercase tracking-widest ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>Pendências por Base</h3>
+                        <div className={`${theme !== 'white' ? 'bg-red-900/30 border-red-800/50' : 'bg-red-50 border-red-100'} px-4 py-2 rounded-xl border flex items-center gap-3`}>
+                          <span className={`text-xs font-black uppercase ${theme !== 'white' ? 'text-red-300' : 'text-red-600'}`}>Pendências em Geral:</span>
+                          <span className={`text-base font-black ${theme !== 'white' ? 'text-red-400' : 'text-red-700'}`}>{stats.totalPending.toLocaleString()}</span>
                         </div>
                       </div>
                       <div className="h-[400px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
                           <ComposedChart data={baseChartData} margin={{ bottom: 100, top: 40 }}>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === 'blue' ? 'rgba(255,255,255,0.1)' : '#f1f5f9'} />
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme !== 'white' ? 'rgba(255,255,255,0.1)' : '#f1f5f9'} />
                           <XAxis 
                             dataKey="name" 
                             axisLine={false} 
@@ -734,18 +737,17 @@ export default function App() {
                             tick={{ 
                               fontSize: 9, 
                               fontWeight: 900, 
-                              fill: theme === 'blue' ? '#93c5fd' : '#64748b', 
+                              fill: theme !== 'white' ? '#93c5fd' : '#64748b', 
                               angle: -45, 
                               textAnchor: 'end',
                               dy: 10
                             }} 
                           />
                           <YAxis axisLine={false} tickLine={false} tick={false} />
-                          <Tooltip content={<CustomTooltip section={activeSection} theme={theme} />} cursor={{fill: theme === 'blue' ? 'rgba(255,255,255,0.05)' : '#f8fafc'}} />
+                          <Tooltip content={<CustomTooltip section={activeSection} theme={theme} />} cursor={{fill: theme !== 'white' ? 'rgba(255,255,255,0.05)' : '#f8fafc'}} />
                           <Bar dataKey="value" fill="#ef4444" radius={[8, 8, 0, 0]} barSize={45}>
-                            <LabelList dataKey="value" position="top" style={{ fontSize: '13px', fontWeight: 900, fill: theme === 'blue' ? '#fca5a5' : '#1e40af' }} />
+                            <LabelList dataKey="value" position="top" style={{ fontSize: '16px', fontWeight: 900, fill: theme !== 'white' ? '#fca5a5' : '#1e40af' }} />
                           </Bar>
-                          <Line type="monotone" dataKey="value" stroke={theme === 'blue' ? '#fca5a5' : '#b91c1c'} strokeWidth={3} dot={{ r: 4, fill: theme === 'blue' ? '#fca5a5' : '#b91c1c', strokeWidth: 2, stroke: '#fff' }} />
                         </ComposedChart>
                       </ResponsiveContainer>
                     </div>
@@ -753,31 +755,30 @@ export default function App() {
                 </div>
 
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                  <div className={`${theme === 'blue' ? 'bg-blue-900/40 border-blue-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[500px] relative`}>
+                  <div className={`${theme !== 'white' ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[500px] relative`}>
                     <div className="flex justify-between items-center mb-8">
-                      <h3 className={`font-black text-sm uppercase tracking-widest ${theme === 'blue' ? 'text-white' : 'text-gray-900'}`}>Pendências por Contrato</h3>
-                      <div className={`${theme === 'blue' ? 'bg-red-900/30 border-red-800/50' : 'bg-red-50 border-red-100'} px-4 py-2 rounded-xl border flex items-center gap-3`}>
-                        <span className={`text-xs font-black uppercase ${theme === 'blue' ? 'text-red-300' : 'text-red-600'}`}>Pendências em Geral:</span>
-                        <span className={`text-base font-black ${theme === 'blue' ? 'text-red-400' : 'text-red-700'}`}>{stats.totalPending.toLocaleString()}</span>
+                      <h3 className={`font-black text-sm uppercase tracking-widest ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>Pendências por Contrato</h3>
+                      <div className={`${theme !== 'white' ? 'bg-red-900/30 border-red-800/50' : 'bg-red-50 border-red-100'} px-4 py-2 rounded-xl border flex items-center gap-3`}>
+                        <span className={`text-xs font-black uppercase ${theme !== 'white' ? 'text-red-300' : 'text-red-600'}`}>Pendências em Geral:</span>
+                        <span className={`text-base font-black ${theme !== 'white' ? 'text-red-400' : 'text-red-700'}`}>{stats.totalPending.toLocaleString()}</span>
                       </div>
                     </div>
                     <div className="h-[400px] w-full">
                       <ResponsiveContainer width="100%" height="100%">
                         <ComposedChart layout="vertical" data={contratoChartData}>
                           <XAxis type="number" hide />
-                          <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 700, fill: theme === 'blue' ? '#93c5fd' : '#64748b' }} width={140} />
-                          <Tooltip content={<CustomTooltip section={activeSection} theme={theme} />} cursor={{fill: theme === 'blue' ? 'rgba(255,255,255,0.05)' : '#f8fafc'}} />
+                          <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 700, fill: theme !== 'white' ? '#93c5fd' : '#64748b' }} width={140} />
+                          <Tooltip content={<CustomTooltip section={activeSection} theme={theme} />} cursor={{fill: theme !== 'white' ? 'rgba(255,255,255,0.05)' : '#f8fafc'}} />
                           <Bar dataKey="value" fill="#ef4444" radius={[0, 8, 8, 0]} barSize={18}>
-                            <LabelList dataKey="value" position="right" style={{ fontSize: '13px', fontWeight: 900, fill: theme === 'blue' ? '#fca5a5' : '#b91c1c' }} />
+                            <LabelList dataKey="value" position="right" style={{ fontSize: '16px', fontWeight: 900, fill: theme !== 'white' ? '#fca5a5' : '#b91c1c' }} />
                           </Bar>
-                          <Line type="monotone" dataKey="value" stroke={theme === 'blue' ? '#fca5a5' : '#b91c1c'} strokeWidth={2} dot={{ r: 3, fill: theme === 'blue' ? '#fca5a5' : '#b91c1c', strokeWidth: 1, stroke: '#fff' }} />
                         </ComposedChart>
                       </ResponsiveContainer>
                     </div>
                   </div>
 
-                  <div className={`${theme === 'blue' ? 'bg-blue-900/40 border-blue-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[500px] flex flex-col items-center`}>
-                    <h3 className={`font-black text-sm uppercase tracking-widest self-start mb-10 ${theme === 'blue' ? 'text-white' : 'text-gray-900'}`}>Relação de Status</h3>
+                  <div className={`${theme !== 'white' ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[500px] flex flex-col items-center`}>
+                    <h3 className={`font-black text-sm uppercase tracking-widest self-start mb-10 ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>Relação de Status</h3>
                     <div className="h-[300px] w-full">
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
@@ -802,16 +803,16 @@ export default function App() {
                       <div className="flex flex-col items-center gap-1">
                         <div className="flex items-center gap-2">
                           <div className="w-4 h-4 rounded-full bg-emerald-500 shadow-md"></div>
-                          <span className={`text-xl font-black ${theme === 'blue' ? 'text-white' : 'text-gray-800'}`}>{stats.totalPerformed.toLocaleString()}</span>
+                          <span className={`text-xl font-black ${theme !== 'white' ? 'text-white' : 'text-gray-800'}`}>{stats.totalPerformed.toLocaleString()}</span>
                         </div>
-                        <span className={`text-[10px] font-black uppercase tracking-widest ${theme === 'blue' ? 'text-blue-300' : 'text-gray-400'}`}>{isNotas ? 'Concluído' : 'OK'}</span>
+                        <span className={`text-[10px] font-black uppercase tracking-widest ${theme !== 'white' ? 'text-blue-300' : 'text-gray-400'}`}>{isNotas ? 'Concluído' : 'OK'}</span>
                       </div>
                       <div className="flex flex-col items-center gap-1">
                         <div className="flex items-center gap-2">
                           <div className="w-4 h-4 rounded-full bg-red-500 shadow-md"></div>
-                          <span className={`text-xl font-black ${theme === 'blue' ? 'text-white' : 'text-gray-800'}`}>{stats.totalPending.toLocaleString()}</span>
+                          <span className={`text-xl font-black ${theme !== 'white' ? 'text-white' : 'text-gray-800'}`}>{stats.totalPending.toLocaleString()}</span>
                         </div>
-                        <span className={`text-[10px] font-black uppercase tracking-widest ${theme === 'blue' ? 'text-blue-300' : 'text-gray-400'}`}>{isNotas ? 'Pendente' : 'N-OK'}</span>
+                        <span className={`text-[10px] font-black uppercase tracking-widest ${theme !== 'white' ? 'text-blue-300' : 'text-gray-400'}`}>{isNotas ? 'Pendente' : 'N-OK'}</span>
                       </div>
                     </div>
                   </div>
@@ -820,33 +821,33 @@ export default function App() {
                   {/* GRÁFICO: Procedência da Reclamação por Leiturista - ATUALIZADO COM CORES VERMELHO CLARO */}
                   {isNotas && (
                     <div className="grid grid-cols-1 gap-8">
-                      <div className={`${theme === 'blue' ? 'bg-blue-900/40 border-blue-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-xl min-h-[550px] relative overflow-hidden group`}>
-                        <div className={`absolute top-0 right-0 w-64 h-64 rounded-full -mr-32 -mt-32 opacity-20 pointer-events-none transition-transform group-hover:scale-110 ${theme === 'blue' ? 'bg-blue-400' : 'bg-red-50'}`}></div>
+                      <div className={`${theme !== 'white' ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-xl min-h-[550px] relative overflow-hidden group`}>
+                        <div className={`absolute top-0 right-0 w-64 h-64 rounded-full -mr-32 -mt-32 opacity-20 pointer-events-none transition-transform group-hover:scale-110 ${theme !== 'white' ? 'bg-blue-400' : 'bg-red-50'}`}></div>
                         <div className="flex justify-between items-start mb-10">
                           <div className="space-y-1">
-                            <h3 className={`font-black text-sm uppercase tracking-widest flex items-center gap-3 ${theme === 'blue' ? 'text-white' : 'text-gray-900'}`}>
-                              <Frown className={`w-5 h-5 ${theme === 'blue' ? 'text-red-300' : 'text-red-400'}`} />
+                            <h3 className={`font-black text-sm uppercase tracking-widest flex items-center gap-3 ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>
+                              <Frown className={`w-5 h-5 ${theme !== 'white' ? 'text-red-300' : 'text-red-400'}`} />
                               Procedência da Reclamação por Leiturista
                             </h3>
-                            <p className={`text-[10px] uppercase tracking-tighter ${theme === 'blue' ? 'text-blue-300' : 'text-gray-500'}`}>
+                            <p className={`text-[10px] uppercase tracking-tighter ${theme !== 'white' ? 'text-blue-300' : 'text-gray-500'}`}>
                                <b className="italic font-bold">Passar cursor e ver análise</b>
                             </p>
                           </div>
                           <div className="flex gap-4">
-                            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl ${theme === 'blue' ? 'bg-red-900/30' : 'bg-red-50'}`}>
+                            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl ${theme !== 'white' ? 'bg-red-900/30' : 'bg-red-50'}`}>
                               <div className="w-2.5 h-2.5 rounded-full bg-[#ef4444]"></div>
-                              <span className={`text-[10px] font-black uppercase ${theme === 'blue' ? 'text-red-300' : 'text-rose-700'}`}>Sim</span>
+                              <span className={`text-[10px] font-black uppercase ${theme !== 'white' ? 'text-red-300' : 'text-rose-700'}`}>Sim</span>
                             </div>
-                            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl ${theme === 'blue' ? 'bg-red-950/50' : 'bg-red-100'}`}>
+                            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl ${theme !== 'white' ? 'bg-red-950/50' : 'bg-red-100'}`}>
                               <div className="w-2.5 h-2.5 rounded-full bg-[#991b1b]"></div>
-                              <span className={`text-[10px] font-black uppercase ${theme === 'blue' ? 'text-red-400' : 'text-red-800'}`}>Não</span>
+                              <span className={`text-[10px] font-black uppercase ${theme !== 'white' ? 'text-red-400' : 'text-red-800'}`}>Não</span>
                             </div>
                           </div>
                         </div>
                         <div className="h-[400px] w-full">
                           <ResponsiveContainer width="100%" height="100%">
                             <ComposedChart data={procedenciaChartData} margin={{ bottom: 120, top: 40 }}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === 'blue' ? 'rgba(255,255,255,0.1)' : '#f1f5f9'} />
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme !== 'white' ? 'rgba(255,255,255,0.1)' : '#f1f5f9'} />
                             <XAxis 
                               dataKey="name" 
                               axisLine={false} 
@@ -855,48 +856,47 @@ export default function App() {
                               tick={{ 
                                 fontSize: 9, 
                                 fontWeight: 900, 
-                                fill: theme === 'blue' ? '#93c5fd' : '#475569', 
+                                fill: theme !== 'white' ? '#93c5fd' : '#475569', 
                                 angle: -45, 
                                 textAnchor: 'end',
                                 dy: 10
                               }} 
                             />
                             <YAxis axisLine={false} tickLine={false} tick={false} />
-                            <Tooltip content={<ProcedenciaTooltip theme={theme} />} cursor={{fill: theme === 'blue' ? 'rgba(255,255,255,0.05)' : 'rgba(254, 226, 226, 0.4)'}} />
+                            <Tooltip content={<ProcedenciaTooltip theme={theme} />} cursor={{fill: theme !== 'white' ? 'rgba(255,255,255,0.05)' : 'rgba(254, 226, 226, 0.4)'}} />
                             <Bar dataKey="sim" stackId="a" fill="#ef4444" radius={[0, 0, 0, 0]} barSize={40} />
                             <Bar dataKey="nao" stackId="a" fill="#991b1b" radius={[8, 8, 0, 0]} barSize={40}>
                               <LabelList 
                                 dataKey="total" 
                                 position="top" 
-                                style={{ fontSize: '12px', fontWeight: 900, fill: theme === 'blue' ? '#fca5a5' : '#991b1b' }} 
+                                style={{ fontSize: '16px', fontWeight: 900, fill: theme !== 'white' ? '#fca5a5' : '#991b1b' }} 
                                 formatter={(val: any) => val}
                               />
                             </Bar>
-                            <Line type="monotone" dataKey="total" stroke={theme === 'blue' ? '#fca5a5' : '#450a0a'} strokeWidth={3} dot={{ r: 4, fill: theme === 'blue' ? '#fca5a5' : '#450a0a', strokeWidth: 2, stroke: '#fff' }} />
                           </ComposedChart>
                         </ResponsiveContainer>
                       </div>
                       <div className="absolute bottom-6 right-8 flex items-center gap-2">
-                        <Info className={`w-4 h-4 ${theme === 'blue' ? 'text-red-300' : 'text-red-300'}`} />
-                        <span className={`text-[10px] font-black uppercase italic ${theme === 'blue' ? 'text-blue-300' : 'text-gray-400'}`}>Dados extraídos da coluna PROCEDÊNCIA</span>
+                        <Info className={`w-4 h-4 ${theme !== 'white' ? 'text-red-300' : 'text-red-300'}`} />
+                        <span className={`text-[10px] font-black uppercase italic ${theme !== 'white' ? 'text-blue-300' : 'text-gray-400'}`}>Dados extraídos da coluna PROCEDÊNCIA</span>
                       </div>
                     </div>
                   </div>
                 )}
               </div>
             ) : (
-                <div className={`rounded-[2.5rem] border shadow-sm overflow-hidden mb-10 print-full-table ${theme === 'blue' ? 'bg-blue-900/40 border-blue-700/50' : 'bg-white border-gray-100'}`}>
-                   <div className={`p-6 border-b flex justify-between items-center no-print ${theme === 'blue' ? 'border-blue-700/50' : 'border-gray-50'}`}>
-                     <h2 className={`font-black text-xs uppercase tracking-widest ${theme === 'blue' ? 'text-white' : 'text-gray-900'}`}>Base de Dados - {sectionTitle.toUpperCase()}</h2>
+                <div className={`rounded-[2.5rem] border shadow-sm overflow-hidden mb-10 print-full-table ${theme !== 'white' ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100'}`}>
+                   <div className={`p-6 border-b flex justify-between items-center no-print ${theme !== 'white' ? 'border-gray-700/50' : 'border-gray-50'}`}>
+                     <h2 className={`font-black text-xs uppercase tracking-widest ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>Base de Dados - {sectionTitle.toUpperCase()}</h2>
                      <div className="flex gap-2">
-                        <button onClick={exportToPDF} title="Exportar para PDF" className={`p-2.5 rounded-xl transition-all ${theme === 'blue' ? 'bg-blue-800/50 hover:bg-blue-700/50 text-blue-300' : 'bg-gray-50 hover:bg-gray-100 text-gray-400'}`}><Printer className="w-4 h-4"/></button>
-                        <button onClick={exportToExcel} title="Exportar para Excel" className={`p-2.5 rounded-xl transition-all ${theme === 'blue' ? 'bg-emerald-900/30 hover:bg-emerald-800/30 text-emerald-400' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600'}`}><FileSpreadsheet className="w-4 h-4"/></button>
+                        <button onClick={exportToPDF} title="Exportar para PDF" className={`p-2.5 rounded-xl transition-all ${theme !== 'white' ? 'bg-gray-800 hover:bg-gray-700 text-blue-300' : 'bg-gray-50 hover:bg-gray-100 text-gray-400'}`}><Printer className="w-4 h-4"/></button>
+                        <button onClick={exportToExcel} title="Exportar para Excel" className={`p-2.5 rounded-xl transition-all ${theme !== 'white' ? 'bg-emerald-900/30 hover:bg-emerald-800/30 text-emerald-400' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600'}`}><FileSpreadsheet className="w-4 h-4"/></button>
                      </div>
                    </div>
                    <div className="overflow-x-auto">
                       <table className="w-full text-left whitespace-nowrap table-auto">
                         {isNotas ? (
-                          <thead className={`${theme === 'blue' ? 'bg-blue-900/60 text-blue-300' : 'bg-orange-500 text-white'} text-[10px] font-black uppercase tracking-widest`}>
+                          <thead className={`${theme !== 'white' ? 'bg-gray-800 text-blue-300' : 'bg-orange-500 text-white'} text-[10px] font-black uppercase tracking-widest`}>
                             <tr>
                               <th className="px-4 py-4">MÊS</th>
                               <th className="px-4 py-4">ANO</th>
@@ -915,7 +915,7 @@ export default function App() {
                             </tr>
                           </thead>
                         ) : (
-                          <thead className={`${theme === 'blue' ? 'bg-blue-900/60 text-blue-300' : 'bg-gray-50/50 text-gray-400'} text-[10px] font-black uppercase tracking-widest`}>
+                          <thead className={`${theme !== 'white' ? 'bg-gray-800 text-blue-300' : 'bg-gray-50/50 text-gray-400'} text-[10px] font-black uppercase tracking-widest`}>
                             <tr>
                               <th className="px-8 py-5">Período</th>
                               <th className="px-8 py-5">Base</th>
@@ -928,47 +928,47 @@ export default function App() {
                             </tr>
                           </thead>
                         )}
-                        <tbody className={`divide-y text-[12px] font-bold ${theme === 'blue' ? 'divide-blue-800/50' : 'divide-gray-50'}`}>
+                        <tbody className={`divide-y text-[12px] font-bold ${theme !== 'white' ? 'divide-blue-800/50' : 'divide-gray-50'}`}>
                           {(view === 'table' ? filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize) : filteredData).map((row: any, i) => (
-                            <tr key={i} className={`transition-colors ${theme === 'blue' ? 'hover:bg-blue-800/20' : 'hover:bg-blue-50/10'}`}>
+                            <tr key={i} className={`transition-colors ${theme !== 'white' ? 'hover:bg-blue-800/20' : 'hover:bg-blue-50/10'}`}>
                               {isNotas ? (
                                 <>
-                                  <td className={`px-4 py-4 ${theme === 'blue' ? 'text-blue-200' : 'text-gray-500'}`}>{row.MES}</td>
-                                  <td className={`px-4 py-4 ${theme === 'blue' ? 'text-blue-200' : 'text-gray-500'}`}>{row.ANO}</td>
-                                  <td className={`px-4 py-4 font-black ${theme === 'blue' ? 'text-blue-300' : 'text-blue-600'}`}>{row.CONTRATO}</td>
-                                  <td className={`px-4 py-4 italic ${theme === 'blue' ? 'text-blue-400' : 'text-gray-500'}`}>{row.TIPO || '-'}</td>
-                                  <td className={`px-4 py-4 ${theme === 'blue' ? 'text-blue-100' : 'text-gray-600'}`}>{row.NOTA || '-'}</td>
-                                  <td className={`px-4 py-4 ${theme === 'blue' ? 'text-blue-100' : 'text-gray-600'}`}>{row.DATA_DA_NOTA || '-'}</td>
-                                  <td className={`px-4 py-4 ${theme === 'blue' ? 'text-blue-100' : 'text-gray-600'}`}>{row.INSTALACAO || '-'}</td>
-                                  <td className={`px-4 py-4 truncate max-w-[200px] ${theme === 'blue' ? 'text-white' : 'text-gray-700'}`}>{row.RAZAO}</td>
-                                  <td className={`px-4 py-4 ${theme === 'blue' ? 'text-blue-200' : 'text-gray-500'}`}>{row.UL || '-'}</td>
-                                  <td className={`px-4 py-4 font-black ${theme === 'blue' ? 'text-blue-300' : 'text-blue-600'}`}>{row.BASE}</td>
-                                  <td className={`px-4 py-4 uppercase font-black ${theme === 'blue' ? 'text-purple-300' : 'text-purple-600'}`}>{row.LEITURISTA || '-'}</td>
-                                  <td className={`px-4 py-4 ${theme === 'blue' ? 'text-blue-100' : 'text-gray-600'}`}>{row.PRAZO || '-'}</td>
-                                  <td className={`px-4 py-4 ${theme === 'blue' ? 'text-blue-200' : 'text-gray-500'}`}>{row.PROCEDENCIA || '-'}</td>
+                                  <td className={`px-4 py-4 ${theme !== 'white' ? 'text-blue-200' : 'text-gray-500'}`}>{row.MES}</td>
+                                  <td className={`px-4 py-4 ${theme !== 'white' ? 'text-blue-200' : 'text-gray-500'}`}>{row.ANO}</td>
+                                  <td className={`px-4 py-4 font-black ${theme !== 'white' ? 'text-blue-300' : 'text-blue-600'}`}>{row.CONTRATO}</td>
+                                  <td className={`px-4 py-4 italic ${theme !== 'white' ? 'text-blue-400' : 'text-gray-500'}`}>{row.TIPO || '-'}</td>
+                                  <td className={`px-4 py-4 ${theme !== 'white' ? 'text-blue-100' : 'text-gray-600'}`}>{row.NOTA || '-'}</td>
+                                  <td className={`px-4 py-4 ${theme !== 'white' ? 'text-blue-100' : 'text-gray-600'}`}>{row.DATA_DA_NOTA || '-'}</td>
+                                  <td className={`px-4 py-4 ${theme !== 'white' ? 'text-blue-100' : 'text-gray-600'}`}>{row.INSTALACAO || '-'}</td>
+                                  <td className={`px-4 py-4 truncate max-w-[200px] ${theme !== 'white' ? 'text-white' : 'text-gray-700'}`}>{row.RAZAO}</td>
+                                  <td className={`px-4 py-4 ${theme !== 'white' ? 'text-blue-200' : 'text-gray-500'}`}>{row.UL || '-'}</td>
+                                  <td className={`px-4 py-4 font-black ${theme !== 'white' ? 'text-blue-300' : 'text-blue-600'}`}>{row.BASE}</td>
+                                  <td className={`px-4 py-4 uppercase font-black ${theme !== 'white' ? 'text-purple-300' : 'text-purple-600'}`}>{row.LEITURISTA || '-'}</td>
+                                  <td className={`px-4 py-4 ${theme !== 'white' ? 'text-blue-100' : 'text-gray-600'}`}>{row.PRAZO || '-'}</td>
+                                  <td className={`px-4 py-4 ${theme !== 'white' ? 'text-blue-200' : 'text-gray-500'}`}>{row.PROCEDENCIA || '-'}</td>
                                   <td className="px-4 py-4 text-center">
                                     <span className={`px-2 py-1 text-[9px] font-black rounded-lg uppercase tracking-widest ${
                                       (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'OK' || 
                                       (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'CONCLUIDO' ||
                                       (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'CONCLUIDA'
-                                      ? (theme === 'blue' ? 'bg-emerald-900/50 text-emerald-400' : 'bg-emerald-100 text-emerald-600') : 
+                                      ? (theme !== 'white' ? 'bg-emerald-900/50 text-emerald-400' : 'bg-emerald-100 text-emerald-600') : 
                                       (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'N-OK' || 
                                       (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'PENDENTE' 
-                                      ? (theme === 'blue' ? 'bg-red-900/50 text-red-400' : 'bg-red-100 text-red-600') : (theme === 'blue' ? 'bg-blue-800/50 text-blue-300' : 'bg-gray-100 text-gray-500')}`}>
+                                      ? (theme !== 'white' ? 'bg-red-900/50 text-red-400' : 'bg-red-100 text-red-600') : (theme !== 'white' ? 'bg-blue-800/50 text-blue-300' : 'bg-gray-100 text-gray-500')}`}>
                                       {row.STATUS || '-'}
                                     </span>
                                   </td>
                                 </>
                               ) : (
                                 <>
-                                  <td className={`px-8 py-5 ${theme === 'blue' ? 'text-blue-400' : 'text-gray-400'}`}>{row.MES}/{row.ANO}</td>
-                                  <td className={`px-8 py-5 font-black ${theme === 'blue' ? 'text-blue-300' : 'text-blue-600'}`}>{row.BASE}</td>
-                                  <td className={`px-8 py-5 ${theme === 'blue' ? 'text-blue-100' : 'text-gray-600'}`}>{row.CIDADE}</td>
-                                  <td className={`px-8 py-5 truncate max-w-[250px] ${theme === 'blue' ? 'text-blue-200' : 'text-gray-500'}`}>{row.RAZAO}</td>
-                                  <td className={`px-8 py-5 font-black ${theme === 'blue' ? 'text-blue-300' : 'text-blue-600'}`}>{row.UL || '-'}</td>
-                                  <td className={`px-8 py-5 text-center ${theme === 'blue' ? 'text-white' : 'text-gray-900'}`}>{row.LEITURAS_A_REALIZAR}</td>
-                                  <td className={`px-8 py-5 text-center font-black ${theme === 'blue' ? 'text-emerald-400' : 'text-emerald-600'}`}>{(row.LEITURAS_100 + row.LEITURAS_30)}</td>
-                                  <td className={`px-8 py-5 text-center font-black ${theme === 'blue' ? 'text-red-400' : 'text-red-600'}`}>{row.LEITURAS_NAO_REALIZADAS}</td>
+                                  <td className={`px-8 py-5 ${theme !== 'white' ? 'text-blue-400' : 'text-gray-400'}`}>{row.MES}/{row.ANO}</td>
+                                  <td className={`px-8 py-5 font-black ${theme !== 'white' ? 'text-blue-300' : 'text-blue-600'}`}>{row.BASE}</td>
+                                  <td className={`px-8 py-5 ${theme !== 'white' ? 'text-blue-100' : 'text-gray-600'}`}>{row.CIDADE}</td>
+                                  <td className={`px-8 py-5 truncate max-w-[250px] ${theme !== 'white' ? 'text-blue-200' : 'text-gray-500'}`}>{row.RAZAO}</td>
+                                  <td className={`px-8 py-5 font-black ${theme !== 'white' ? 'text-blue-300' : 'text-blue-600'}`}>{row.UL || '-'}</td>
+                                  <td className={`px-8 py-5 text-center ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>{row.LEITURAS_A_REALIZAR}</td>
+                                  <td className={`px-8 py-5 text-center font-black ${theme !== 'white' ? 'text-emerald-400' : 'text-emerald-600'}`}>{(row.LEITURAS_100 + row.LEITURAS_30)}</td>
+                                  <td className={`px-8 py-5 text-center font-black ${theme !== 'white' ? 'text-red-400' : 'text-red-600'}`}>{row.LEITURAS_NAO_REALIZADAS}</td>
                                 </>
                               )}
                             </tr>
@@ -976,12 +976,12 @@ export default function App() {
                         </tbody>
                       </table>
                    </div>
-                   <div className={`p-6 border-t flex items-center justify-between no-print ${theme === 'blue' ? 'bg-blue-900/20 border-blue-800/50' : 'bg-gray-50/20 border-gray-50'}`}>
-                      <span className={`text-[10px] font-black uppercase tracking-widest ${theme === 'blue' ? 'text-blue-400' : 'text-gray-400'}`}>Registros: {filteredData.length}</span>
+                   <div className={`p-6 border-t flex items-center justify-between no-print ${theme !== 'white' ? 'bg-gray-800/20 border-gray-700/50' : 'bg-gray-50/20 border-gray-50'}`}>
+                      <span className={`text-[10px] font-black uppercase tracking-widest ${theme !== 'white' ? 'text-blue-400' : 'text-gray-400'}`}>Registros: {filteredData.length}</span>
                       <div className="flex gap-2">
-                         <button onClick={() => setCurrentPage(p => Math.max(1, p-1))} className={`p-3 border rounded-xl shadow-sm transition-all ${theme === 'blue' ? 'bg-blue-900 border-blue-700 hover:bg-blue-800 text-blue-300' : 'bg-white border-gray-100 hover:bg-gray-50'}`}><ChevronLeft className="w-4 h-4"/></button>
-                         <div className={`px-6 py-3 border rounded-xl text-xs font-black shadow-sm ${theme === 'blue' ? 'bg-blue-900 border-blue-700 text-white' : 'bg-white border-gray-100'}`}>PÁG {currentPage} / {Math.ceil(filteredData.length / pageSize) || 1}</div>
-                         <button onClick={() => setCurrentPage(p => Math.min(Math.ceil(filteredData.length / pageSize), p+1))} className={`p-3 border rounded-xl shadow-sm transition-all ${theme === 'blue' ? 'bg-blue-900 border-blue-700 hover:bg-blue-800 text-blue-300' : 'bg-white border-gray-100 hover:bg-gray-50'}`}><ChevronRight className="w-4 h-4"/></button>
+                         <button onClick={() => setCurrentPage(p => Math.max(1, p-1))} className={`p-3 border rounded-xl shadow-sm transition-all ${theme !== 'white' ? 'bg-gray-800 border-gray-700 hover:bg-gray-700 text-blue-300' : 'bg-white border-gray-100 hover:bg-gray-50'}`}><ChevronLeft className="w-4 h-4"/></button>
+                         <div className={`px-6 py-3 border rounded-xl text-xs font-black shadow-sm ${theme !== 'white' ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-100'}`}>PÁG {currentPage} / {Math.ceil(filteredData.length / pageSize) || 1}</div>
+                         <button onClick={() => setCurrentPage(p => Math.min(Math.ceil(filteredData.length / pageSize), p+1))} className={`p-3 border rounded-xl shadow-sm transition-all ${theme !== 'white' ? 'bg-gray-800 border-gray-700 hover:bg-gray-700 text-blue-300' : 'bg-white border-gray-100 hover:bg-gray-50'}`}><ChevronRight className="w-4 h-4"/></button>
                       </div>
                    </div>
                 </div>
@@ -1015,17 +1015,20 @@ export default function App() {
   );
 }
 
-function FilterDropdown({ label, value, onChange, options, icon }: any) {
+function FilterDropdown({ label, value, onChange, options, icon, theme }: any) {
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-[10px] font-black text-blue-500 uppercase tracking-tighter flex items-center gap-1.5 ml-1 truncate">
+      <label className={`text-[10px] font-black uppercase tracking-tighter flex items-center gap-1.5 ml-1 truncate ${theme !== 'white' ? 'text-blue-300' : 'text-blue-500'}`}>
         {icon} {label}
       </label>
       <select 
         value={value} 
         onChange={(e) => onChange(e.target.value)} 
-        className="w-full text-xs font-bold border border-gray-100 rounded-2xl px-4 py-3 bg-[#fdfdfd] focus:ring-2 focus:ring-blue-500 outline-none transition-all hover:bg-white shadow-sm appearance-none bg-no-repeat bg-right"
-        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%233b82f6\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E")', backgroundSize: '1em', backgroundPosition: 'right 0.75rem center' }}
+        className={`w-full text-xs font-bold border rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all shadow-sm appearance-none bg-no-repeat bg-right ${
+          theme !== 'white' ? 'bg-gray-800 border-gray-700 text-white' : 
+          'bg-[#fdfdfd] border-gray-100 text-gray-800 hover:bg-white'
+        }`}
+        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23${theme !== 'white' ? 'ffffff' : '3b82f6'}'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`, backgroundSize: '1em', backgroundPosition: 'right 0.75rem center' }}
       >
         <option value="Tudo">Filtrar {label}</option>
         {options.filter((o: string) => o !== 'Tudo').map((o: string) => <option key={o} value={o}>{o}</option>)}
@@ -1034,37 +1037,43 @@ function FilterDropdown({ label, value, onChange, options, icon }: any) {
   );
 }
 
-function MultiSelectFilter({ label, selected, onChange, options, icon }: any) {
+function MultiSelectFilter({ label, selected, onChange, options, icon, theme }: any) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="flex flex-col gap-2 relative">
-      <label className="text-[10px] font-black text-blue-500 uppercase tracking-tighter flex items-center gap-1.5 ml-1 truncate">
+      <label className={`text-[10px] font-black uppercase tracking-tighter flex items-center gap-1.5 ml-1 truncate ${theme !== 'white' ? 'text-blue-300' : 'text-blue-500'}`}>
         {icon} {label}
       </label>
       <div 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full text-xs font-bold border border-gray-100 rounded-2xl px-4 py-3 bg-[#fdfdfd] focus:ring-2 focus:ring-blue-500 outline-none transition-all hover:bg-white shadow-sm cursor-pointer flex justify-between items-center"
+        className={`w-full text-xs font-bold border rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all shadow-sm cursor-pointer flex justify-between items-center ${
+          theme !== 'white' ? 'bg-gray-800 border-gray-700 text-white' : 
+          'bg-[#fdfdfd] border-gray-100 text-gray-800 hover:bg-white'
+        }`}
       >
         <span className="truncate">
           {selected.length === 0 ? `Filtrar ${label}` : `${selected.length} selecionado(s)`}
         </span>
-        <ChevronDown className={`w-4 h-4 text-blue-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''} ${theme !== 'white' ? 'text-white' : 'text-blue-500'}`} />
       </div>
       
       {isOpen && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)}></div>
-          <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-100 rounded-2xl shadow-2xl z-20 max-h-60 overflow-y-auto p-2 custom-scrollbar">
+          <div className={`absolute top-full left-0 right-0 mt-2 border rounded-2xl shadow-2xl z-20 max-h-60 overflow-y-auto p-2 custom-scrollbar ${
+            theme !== 'white' ? 'bg-gray-800 border-gray-700' : 
+            'bg-white border-gray-100'
+          }`}>
             <div className="flex flex-col gap-1">
               <button 
                 onClick={() => { onChange([]); setIsOpen(false); }}
-                className="text-left px-3 py-2 text-[10px] font-black text-blue-600 uppercase hover:bg-blue-50 rounded-lg"
+                className={`text-left px-3 py-2 text-[10px] font-black uppercase rounded-lg ${theme !== 'white' ? 'text-blue-200 hover:bg-blue-800' : 'text-blue-600 hover:bg-blue-50'}`}
               >
                 Limpar Tudo
               </button>
               {options.map((option: string) => (
-                <label key={option} className="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
+                <label key={option} className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors ${theme !== 'white' ? 'hover:bg-blue-800' : 'hover:bg-gray-50'}`}>
                   <input 
                     type="checkbox" 
                     checked={selected.includes(option)}
@@ -1077,7 +1086,7 @@ function MultiSelectFilter({ label, selected, onChange, options, icon }: any) {
                     }}
                     className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <span className="text-xs font-bold text-gray-700">{option}</span>
+                  <span className={`text-xs font-bold ${theme !== 'white' ? 'text-blue-100' : 'text-gray-700'}`}>{option}</span>
                 </label>
               ))}
             </div>
@@ -1090,14 +1099,14 @@ function MultiSelectFilter({ label, selected, onChange, options, icon }: any) {
 
 function KpiCard({ title, value, icon, label, trend, theme }: any) {
   return (
-    <div className={`${theme === 'blue' ? 'bg-blue-900/40 border-blue-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm hover:shadow-xl transition-all duration-300`}>
+    <div className={`${theme !== 'white' ? 'bg-gray-900/60 border-gray-800' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm hover:shadow-xl transition-all duration-300`}>
       <div className="flex justify-between items-start mb-6">
-        <div className={`p-3 rounded-2xl ${theme === 'blue' ? 'bg-blue-800/50' : 'bg-gray-50'}`}>{icon}</div>
-        {trend && <span className={`text-[10px] font-black px-3 py-1.5 rounded-xl uppercase ${theme === 'blue' ? 'text-emerald-400 bg-emerald-900/30' : 'text-emerald-500 bg-emerald-50'}`}>{trend}</span>}
-        {label && !trend && <span className={`text-[10px] font-black border px-3 py-1.5 rounded-xl uppercase tracking-widest ${theme === 'blue' ? 'text-blue-300 border-blue-700 bg-blue-800/30' : 'text-gray-400 border-gray-100'}`}>{label}</span>}
+        <div className={`p-3 rounded-2xl ${theme !== 'white' ? 'bg-gray-800' : 'bg-gray-50'}`}>{icon}</div>
+        {trend && <span className={`text-[10px] font-black px-3 py-1.5 rounded-xl uppercase ${theme !== 'white' ? 'text-emerald-400 bg-emerald-900/30' : 'text-emerald-500 bg-emerald-50'}`}>{trend}</span>}
+        {label && !trend && <span className={`text-[10px] font-black border px-3 py-1.5 rounded-xl uppercase tracking-widest ${theme !== 'white' ? 'text-blue-300 border-gray-700 bg-gray-800/30' : 'text-gray-400 border-gray-100'}`}>{label}</span>}
       </div>
-      <p className={`text-[11px] font-black uppercase tracking-[0.2em] mb-2 ${theme === 'blue' ? 'text-blue-300' : 'text-gray-400'}`}>{title}</p>
-      <h4 className={`text-4xl font-black tracking-tighter ${theme === 'blue' ? 'text-white' : 'text-gray-900'}`}>{value}</h4>
+      <p className={`text-[11px] font-black uppercase tracking-[0.2em] mb-2 ${theme !== 'white' ? 'text-blue-300' : 'text-gray-400'}`}>{title}</p>
+      <h4 className={`text-4xl font-black tracking-tighter ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>{value}</h4>
     </div>
   );
 }
