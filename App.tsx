@@ -706,35 +706,6 @@ export default function App() {
               {view === 'dashboard' ? (
                 <div className="space-y-10 pb-12 no-print">
                   <div className="grid grid-cols-1 gap-8">
-                    <div className={`${theme !== 'white' ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[400px] relative`}>
-                      <h3 className={`font-black text-sm uppercase tracking-widest mb-8 ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>Tendência Mensal</h3>
-                      <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={trendChartData}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme !== 'white' ? 'rgba(255,255,255,0.1)' : '#f1f5f9'} />
-                            <XAxis 
-                              dataKey="mes" 
-                              axisLine={false} 
-                              tickLine={false} 
-                              tick={{ fontSize: 10, fontWeight: 700, fill: theme !== 'white' ? '#93c5fd' : '#64748b' }}
-                            />
-                            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: theme !== 'white' ? '#93c5fd' : '#64748b' }} />
-                            <Tooltip 
-                              contentStyle={{ 
-                                backgroundColor: theme !== 'white' ? '#111827' : '#fff', 
-                                borderColor: theme !== 'white' ? '#374151' : '#e2e8f0',
-                                color: theme !== 'white' ? '#fff' : '#000',
-                                borderRadius: '12px'
-                              }}
-                            />
-                            <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase' }} />
-                            <Line type="monotone" dataKey="realizadas" name={activeSection === 'transmissao' ? "Realizadas" : "Concluídas"} stroke="#10b981" strokeWidth={4} dot={{ r: 6, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 8 }} />
-                            <Line type="monotone" dataKey="pendentes" name="Pendências" stroke="#ef4444" strokeWidth={4} dot={{ r: 6, fill: '#ef4444', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 8 }} />
-                          </LineChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </div>
-
                     <div className={`${theme !== 'white' ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[500px] relative`}>
                       <div className="flex justify-between items-center mb-8">
                         <h3 className={`font-black text-sm uppercase tracking-widest ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>Pendências por Base</h3>
@@ -770,7 +741,36 @@ export default function App() {
                       </ResponsiveContainer>
                     </div>
                   </div>
-                </div>
+
+                    <div className={`${theme !== 'white' ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[400px] relative`}>
+                      <h3 className={`font-black text-sm uppercase tracking-widest mb-8 ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>Tendência Mensal</h3>
+                      <div className="h-[300px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={trendChartData}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme !== 'white' ? 'rgba(255,255,255,0.1)' : '#f1f5f9'} />
+                            <XAxis 
+                              dataKey="mes" 
+                              axisLine={false} 
+                              tickLine={false} 
+                              tick={{ fontSize: 10, fontWeight: 700, fill: theme !== 'white' ? '#93c5fd' : '#64748b' }}
+                            />
+                            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: theme !== 'white' ? '#93c5fd' : '#64748b' }} />
+                            <Tooltip 
+                              contentStyle={{ 
+                                backgroundColor: theme !== 'white' ? '#111827' : '#fff', 
+                                borderColor: theme !== 'white' ? '#374151' : '#e2e8f0',
+                                color: theme !== 'white' ? '#fff' : '#000',
+                                borderRadius: '12px'
+                              }}
+                            />
+                            <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase' }} />
+                            <Line type="monotone" dataKey="realizadas" name={activeSection === 'transmissao' ? "Realizadas" : "Concluídas"} stroke="#10b981" strokeWidth={4} dot={{ r: 6, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 8 }} />
+                            <Line type="monotone" dataKey="pendentes" name="Pendências" stroke="#ef4444" strokeWidth={4} dot={{ r: 6, fill: '#ef4444', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 8 }} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                  </div>
 
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
                   <div className={`${theme !== 'white' ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[500px] relative`}>
