@@ -616,9 +616,9 @@ export default function App() {
                 {isSidebarOpen ? <ChevronFirst /> : <Menu />}
               </button>
               <div className="flex flex-col">
-                {isConsistencia && consistenciaMeta.tipo && (
+                {isConsistencia && (
                   <span className={`text-[10px] font-black uppercase mb-1 ${theme !== 'white' ? 'text-emerald-400' : 'text-emerald-600'}`}>
-                    Tipo: {consistenciaMeta.tipo} | Última atualização: {consistenciaMeta.lastUpdate}
+                    Acompanhamento de Consistência | Última Atualização: {consistenciaMeta.lastUpdate}
                   </span>
                 )}
                 {!isConsistencia && currentMeta && (
@@ -773,7 +773,7 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-8 no-print">
+              <div className={`grid grid-cols-1 ${isConsistencia ? 'md:grid-cols-3' : 'md:grid-cols-4'} gap-8 no-print`}>
                 <KpiCard 
                   title={isConsistencia ? "A Realizar" : (activeSection === 'transmissao' ? "A Realizar" : "Geradas")} 
                   value={stats.totalToPerform.toLocaleString()} 
@@ -795,7 +795,7 @@ export default function App() {
                   label={`${stats.pendingRate.toFixed(1)}% Pend.`} 
                   theme={theme}
                 />
-                <KpiCard title="Não Enviada" value={stats.totalNotSent.toLocaleString()} icon={<MessageSquareWarning className={theme !== 'white' ? "text-orange-400" : "text-orange-600"}/>} theme={theme}/>
+                {!isConsistencia && <KpiCard title="Não Enviada" value={stats.totalNotSent.toLocaleString()} icon={<MessageSquareWarning className={theme !== 'white' ? "text-orange-400" : "text-orange-600"}/>} theme={theme}/>}
               </div>
 
               {view === 'dashboard' ? (
@@ -837,34 +837,36 @@ export default function App() {
                     </div>
                   </div>
 
-                    <div className={`${theme !== 'white' ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[400px] relative`}>
-                      <h3 className={`font-black text-sm uppercase tracking-widest mb-8 ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>Tendência Mensal</h3>
-                      <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={trendChartData}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme !== 'white' ? 'rgba(255,255,255,0.1)' : '#f1f5f9'} />
-                            <XAxis 
-                              dataKey="mes" 
-                              axisLine={false} 
-                              tickLine={false} 
-                              tick={{ fontSize: 10, fontWeight: 700, fill: theme !== 'white' ? '#93c5fd' : '#64748b' }}
-                            />
-                            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: theme !== 'white' ? '#93c5fd' : '#64748b' }} />
-                            <Tooltip 
-                              contentStyle={{ 
-                                backgroundColor: theme !== 'white' ? '#111827' : '#fff', 
-                                borderColor: theme !== 'white' ? '#374151' : '#e2e8f0',
-                                color: theme !== 'white' ? '#fff' : '#000',
-                                borderRadius: '12px'
-                              }}
-                            />
-                            <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase' }} />
-                            <Line type="monotone" dataKey="realizadas" name={activeSection === 'transmissao' ? "Realizadas" : "Concluídas"} stroke="#10b981" strokeWidth={4} dot={{ r: 6, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 8 }} />
-                            <Line type="monotone" dataKey="pendentes" name="Pendências" stroke="#ef4444" strokeWidth={4} dot={{ r: 6, fill: '#ef4444', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 8 }} />
-                          </LineChart>
-                        </ResponsiveContainer>
+                    {!isConsistencia && (
+                      <div className={`${theme !== 'white' ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[400px] relative`}>
+                        <h3 className={`font-black text-sm uppercase tracking-widest mb-8 ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>Tendência Mensal</h3>
+                        <div className="h-[300px] w-full">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={trendChartData}>
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme !== 'white' ? 'rgba(255,255,255,0.1)' : '#f1f5f9'} />
+                              <XAxis 
+                                dataKey="mes" 
+                                axisLine={false} 
+                                tickLine={false} 
+                                tick={{ fontSize: 10, fontWeight: 700, fill: theme !== 'white' ? '#93c5fd' : '#64748b' }}
+                              />
+                              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: theme !== 'white' ? '#93c5fd' : '#64748b' }} />
+                              <Tooltip 
+                                contentStyle={{ 
+                                  backgroundColor: theme !== 'white' ? '#111827' : '#fff', 
+                                  borderColor: theme !== 'white' ? '#374151' : '#e2e8f0',
+                                  color: theme !== 'white' ? '#fff' : '#000',
+                                  borderRadius: '12px'
+                                }}
+                              />
+                              <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase' }} />
+                              <Line type="monotone" dataKey="realizadas" name={activeSection === 'transmissao' ? "Realizadas" : "Concluídas"} stroke="#10b981" strokeWidth={4} dot={{ r: 6, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 8 }} />
+                              <Line type="monotone" dataKey="pendentes" name="Pendências" stroke="#ef4444" strokeWidth={4} dot={{ r: 6, fill: '#ef4444', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 8 }} />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
 
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
@@ -912,21 +914,35 @@ export default function App() {
                         </PieChart>
                       </ResponsiveContainer>
                     </div>
-                    <div className="mt-8 flex gap-8">
-                      <div className="flex flex-col items-center gap-1">
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 rounded-full bg-emerald-500 shadow-md"></div>
-                          <span className={`text-xl font-black ${theme !== 'white' ? 'text-white' : 'text-gray-800'}`}>{stats.totalPerformed.toLocaleString()}</span>
-                        </div>
-                        <span className={`text-[10px] font-black uppercase tracking-widest ${theme !== 'white' ? 'text-blue-300' : 'text-gray-400'}`}>{isNotas ? 'Concluído' : 'OK'}</span>
-                      </div>
-                      <div className="flex flex-col items-center gap-1">
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 rounded-full bg-red-500 shadow-md"></div>
-                          <span className={`text-xl font-black ${theme !== 'white' ? 'text-white' : 'text-gray-800'}`}>{stats.totalPending.toLocaleString()}</span>
-                        </div>
-                        <span className={`text-[10px] font-black uppercase tracking-widest ${theme !== 'white' ? 'text-blue-300' : 'text-gray-400'}`}>{isNotas ? 'Pendente' : 'N-OK'}</span>
-                      </div>
+                    <div className="mt-8 flex flex-wrap gap-6">
+                      {isConsistencia ? (
+                        statusDonutData.map((entry, index) => (
+                          <div key={index} className="flex flex-col items-center gap-1">
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
+                              <span className={`text-lg font-black ${theme !== 'white' ? 'text-white' : 'text-gray-800'}`}>{entry.value.toLocaleString()}</span>
+                            </div>
+                            <span className={`text-[9px] font-black uppercase tracking-widest ${theme !== 'white' ? 'text-blue-300' : 'text-gray-400'}`}>{entry.name}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <>
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="flex items-center gap-2">
+                              <div className="w-4 h-4 rounded-full bg-emerald-500 shadow-md"></div>
+                              <span className={`text-xl font-black ${theme !== 'white' ? 'text-white' : 'text-gray-800'}`}>{stats.totalPerformed.toLocaleString()}</span>
+                            </div>
+                            <span className={`text-[10px] font-black uppercase tracking-widest ${theme !== 'white' ? 'text-blue-300' : 'text-gray-400'}`}>{isNotas ? 'Concluído' : 'OK'}</span>
+                          </div>
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="flex items-center gap-2">
+                              <div className="w-4 h-4 rounded-full bg-red-500 shadow-md"></div>
+                              <span className={`text-xl font-black ${theme !== 'white' ? 'text-white' : 'text-gray-800'}`}>{stats.totalPending.toLocaleString()}</span>
+                            </div>
+                            <span className={`text-[10px] font-black uppercase tracking-widest ${theme !== 'white' ? 'text-blue-300' : 'text-gray-400'}`}>{isNotas ? 'Pendente' : 'N-OK'}</span>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>

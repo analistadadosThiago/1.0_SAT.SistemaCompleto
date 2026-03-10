@@ -49,11 +49,10 @@ export const fetchSheetData = async (csvUrl: string, section: AppSection): Promi
   const rawHeaders = lines[0].split(delimiter).map(h => h.trim());
   const normalizedHeaders = rawHeaders.map(normalizeHeader);
   
-  // Extrair M2 da segunda linha (índice 12) se for consistência
-  let cellM2 = null;
-  if (section === 'consistencia' && lines.length > 1) {
-    const secondLineCells = lines[1].split(delimiter);
-    cellM2 = secondLineCells.length > 12 ? secondLineCells[12].trim() : null;
+  // Extrair M1 da primeira linha (índice 12) se for consistência
+  let cellM1 = null;
+  if (section === 'consistencia') {
+    cellM1 = firstLineCells.length > 12 ? firstLineCells[12].trim() : null;
   }
 
   const transmissionMap: Record<string, string> = {
@@ -140,5 +139,5 @@ export const fetchSheetData = async (csvUrl: string, section: AppSection): Promi
     data.push(row);
   }
 
-  return { data, lastUpdate: cellW1, cellC2: cellM2, cellT1: null };
+  return { data, lastUpdate: cellW1, cellC2: cellM1, cellT1: null };
 };
