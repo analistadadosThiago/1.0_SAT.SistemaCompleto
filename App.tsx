@@ -51,26 +51,37 @@ const DEFAULT_URL_TRANSMISSAO = 'https://docs.google.com/spreadsheets/d/10iINVBk
 const DEFAULT_URL_NOTAS = 'https://docs.google.com/spreadsheets/d/10iINVBkcQQ4LuY7LXq66UQmSIH7nmqU3WfvgOb9TmOE/edit?pli=1&gid=1027234200#gid=1027234200';
 const DEFAULT_URL_NOTAS_TRIANGULO = 'https://docs.google.com/spreadsheets/d/10iINVBkcQQ4LuY7LXq66UQmSIH7nmqU3WfvgOb9TmOE/edit?pli=1&gid=566285946#gid=566285946';
 const DEFAULT_URL_NOTAS_MANTIQUEIRA = 'https://docs.google.com/spreadsheets/d/10iINVBkcQQ4LuY7LXq66UQmSIH7nmqU3WfvgOb9TmOE/edit?gid=548357481#gid=548357481';
+const DEFAULT_URL_CONSISTENCIA = 'https://docs.google.com/spreadsheets/d/1NxhRlMdWQj5C-MLfIRD4KWbQiQ5RDAjNMTTykNGU_DE/edit?gid=437512748#gid=437512748';
 
 const CustomTooltip = ({ active, payload, label, section, theme }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     const isTransmissao = section === 'transmissao';
+    const isConsistencia = section === 'consistencia';
     const isDark = theme !== 'white';
+    
+    let labelRealizar = 'Geradas:';
+    if (isTransmissao) labelRealizar = 'A Realizar:';
+    if (isConsistencia) labelRealizar = 'Qtd Consistência:';
+
+    let labelRealizadas = 'Concluídas:';
+    if (isTransmissao) labelRealizadas = 'Realizadas:';
+    if (isConsistencia) labelRealizadas = 'Realizadas:';
+
     return (
       <div className={`${isDark ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border-gray-200 text-gray-800'} p-4 border shadow-2xl rounded-xl text-sm min-w-[180px]`}>
         <p className={`font-black mb-3 text-base border-b pb-2 ${isDark ? 'border-gray-700' : 'border-gray-100'}`}>{label || data.name}</p>
         <div className="space-y-2">
           <p className={`flex justify-between gap-6 font-bold ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
-            <span>{isTransmissao ? 'A Realizar:' : 'Geradas:'}</span> 
+            <span>{labelRealizar}</span> 
             <span>{data.aRealizar?.toLocaleString()}</span>
           </p>
           <p className={`flex justify-between gap-6 font-bold ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
-            <span>{isTransmissao ? 'Realizadas:' : 'Concluídas:'}</span> 
+            <span>{labelRealizadas}</span> 
             <span>{data.realizadas?.toLocaleString()}</span>
           </p>
           <p className={`flex justify-between gap-6 font-black border-t pt-2 mt-2 ${isDark ? 'text-red-400 border-gray-700' : 'text-red-700 border-gray-100'}`}>
-            <span>Pendências:</span> 
+            <span>{isConsistencia ? 'Pendência:' : 'Pendências:'}</span> 
             <span>{data.value?.toLocaleString()}</span>
           </p>
         </div>
@@ -150,20 +161,24 @@ export default function App() {
   const [isNotasOpen, setIsNotasOpen] = useState(false);
   const [isNotasTrianguloOpen, setIsNotasTrianguloOpen] = useState(false);
   const [isNotasMantiqueiraOpen, setIsNotasMantiqueiraOpen] = useState(false);
+  const [isConsistenciaOpen, setIsConsistenciaOpen] = useState(false);
   const [theme, setTheme] = useState<'white' | 'blue' | 'dark'>('white');
 
   const [transmissaoUrl, setTransmissaoUrl] = useState(DEFAULT_URL_TRANSMISSAO);
   const [notasUrl, setNotasUrl] = useState(DEFAULT_URL_NOTAS);
   const [notasTrianguloUrl, setNotasTrianguloUrl] = useState(DEFAULT_URL_NOTAS_TRIANGULO);
   const [notasMantiqueiraUrl, setNotasMantiqueiraUrl] = useState(DEFAULT_URL_NOTAS_MANTIQUEIRA);
+  const [consistenciaUrl, setConsistenciaUrl] = useState(DEFAULT_URL_CONSISTENCIA);
   const [transmissaoRawData, setTransmissaoRawData] = useState<ReadingData[]>([]);
   const [notasRawData, setNotasRawData] = useState<NotaData[]>([]);
   const [notasTrianguloRawData, setNotasTrianguloRawData] = useState<NotaData[]>([]);
   const [notasMantiqueiraRawData, setNotasMantiqueiraRawData] = useState<NotaData[]>([]);
+  const [consistenciaRawData, setConsistenciaRawData] = useState<any[]>([]);
   const [transmissaoMeta, setTransmissaoMeta] = useState<{ lastUpdate: string | null }>({ lastUpdate: null });
   const [notasMeta, setNotasMeta] = useState<{ lastUpdate: string | null }>({ lastUpdate: null });
   const [notasTrianguloMeta, setNotasTrianguloMeta] = useState<{ lastUpdate: string | null }>({ lastUpdate: null });
   const [notasMantiqueiraMeta, setNotasMantiqueiraMeta] = useState<{ lastUpdate: string | null }>({ lastUpdate: null });
+  const [consistenciaMeta, setConsistenciaMeta] = useState<{ lastUpdate: string | null, tipo: string | null }>({ lastUpdate: null, tipo: null });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -180,21 +195,36 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 15;
 
-  const currentRawData = activeSection === 'transmissao' ? transmissaoRawData : (activeSection === 'notas' ? notasRawData : (activeSection === 'notas_triangulo' ? notasTrianguloRawData : notasMantiqueiraRawData));
-  const currentUrl = activeSection === 'transmissao' ? transmissaoUrl : (activeSection === 'notas' ? notasUrl : (activeSection === 'notas_triangulo' ? notasTrianguloUrl : notasMantiqueiraUrl));
-  const currentMeta = activeSection === 'transmissao' ? (transmissaoMeta.lastUpdate) : (activeSection === 'notas' ? notasMeta.lastUpdate : (activeSection === 'notas_triangulo' ? notasTrianguloMeta.lastUpdate : notasMantiqueiraMeta.lastUpdate));
+  const currentRawData = activeSection === 'transmissao' ? transmissaoRawData : 
+                     (activeSection === 'notas' ? notasRawData : 
+                     (activeSection === 'notas_triangulo' ? notasTrianguloRawData : 
+                     (activeSection === 'notas_mantiqueira' ? notasMantiqueiraRawData : consistenciaRawData)));
+  
+  const currentUrl = activeSection === 'transmissao' ? transmissaoUrl : 
+                    (activeSection === 'notas' ? notasUrl : 
+                    (activeSection === 'notas_triangulo' ? notasTrianguloUrl : 
+                    (activeSection === 'notas_mantiqueira' ? notasMantiqueiraUrl : consistenciaUrl)));
+  
+  const currentMeta = activeSection === 'transmissao' ? (transmissaoMeta.lastUpdate) : 
+                     (activeSection === 'notas' ? notasMeta.lastUpdate : 
+                     (activeSection === 'notas_triangulo' ? notasTrianguloMeta.lastUpdate : 
+                     (activeSection === 'notas_mantiqueira' ? notasMantiqueiraMeta.lastUpdate : consistenciaMeta.lastUpdate)));
 
   const isNotas = activeSection === 'notas' || activeSection === 'notas_triangulo' || activeSection === 'notas_mantiqueira';
+  const isConsistencia = activeSection === 'consistencia';
+
   const sectionTitle = activeSection === 'transmissao' ? 'Transmissão' : 
                        (activeSection === 'notas' ? 'Notas AM: Contrato de Divinopolis' : 
                        (activeSection === 'notas_triangulo' ? 'Notas AM: contrato do Triângulo' : 
-                       (activeSection === 'notas_mantiqueira' ? 'Notas AM: Contrato da Mantiqueira' : 'Detalhamento de Transmissão')));
+                       (activeSection === 'notas_mantiqueira' ? 'Notas AM: Contrato da Mantiqueira' : 
+                       (activeSection === 'consistencia' ? 'Acompanhamento de Consistência' : 'Detalhamento de Transmissão'))));
 
   const handleLoadData = useCallback(async (sectionOverride?: AppSection) => {
     const targetSection = sectionOverride || activeSection;
     const url = targetSection === 'transmissao' ? transmissaoUrl : 
                 (targetSection === 'notas' ? notasUrl : 
-                (targetSection === 'notas_triangulo' ? notasTrianguloUrl : notasMantiqueiraUrl));
+                (targetSection === 'notas_triangulo' ? notasTrianguloUrl : 
+                (targetSection === 'notas_mantiqueira' ? notasMantiqueiraUrl : consistenciaUrl)));
     
     setLoading(true); setError(null);
     try {
@@ -213,6 +243,9 @@ export default function App() {
       } else if (targetSection === 'notas_mantiqueira') {
         setNotasMantiqueiraRawData(response.data);
         setNotasMantiqueiraMeta({ lastUpdate: response.lastUpdate });
+      } else if (targetSection === 'consistencia') {
+        setConsistenciaRawData(response.data);
+        setConsistenciaMeta({ lastUpdate: response.cellC2, tipo: response.cellC2 }); // Usando cellC2 para ambos como solicitado (M2 mapeado para cellC2)
       }
       setCurrentPage(1);
     } catch (err: any) { 
@@ -228,6 +261,7 @@ export default function App() {
     handleLoadData('notas');
     handleLoadData('notas_triangulo');
     handleLoadData('notas_mantiqueira');
+    handleLoadData('consistencia');
   }, []);
 
   const exportToExcel = () => {
@@ -248,6 +282,18 @@ export default function App() {
           "PRAZO": row.PRAZO,
           "STATUS": row.STATUS,
           "PROCEDENCIA": row.PROCEDENCIA
+        };
+      } else if (isConsistencia) {
+        return {
+          "MÊS": row.MES,
+          "ANO": row.ANO,
+          "BASE": row.BASE,
+          "CONTRATO": row.CONTRATO,
+          "QUANTIDADE DE CONSISTENCIA": row.LEITURAS_A_REALIZAR,
+          "QUANTIDADE DE REALIZADAS": row.LEITURAS_100,
+          "QUANTIDADE DE PENDENCIA": row.LEITURAS_NAO_REALIZADAS,
+          "STATUS": row.STATUS,
+          "PRAZO": row.PRAZO
         };
       } else {
         return {
@@ -321,11 +367,11 @@ export default function App() {
   const stats = useMemo<DashboardStats>(() => {
     if (!filteredData.length) return { totalToPerform: 0, totalPerformed: 0, totalPending: 0, totalNotSent: 0, successRate: 0, pendingRate: 0 };
     let tP = 0, tR = 0, tPend = 0, tNotSent = 0;
-    if (activeSection === 'transmissao') {
+    if (activeSection === 'transmissao' || activeSection === 'consistencia') {
       filteredData.forEach((d: any) => { 
-        tP += d.LEITURAS_A_REALIZAR; 
-        tR += (d.LEITURAS_100 + d.LEITURAS_30); 
-        tPend += d.LEITURAS_NAO_REALIZADAS;
+        tP += (d.LEITURAS_A_REALIZAR || 0); 
+        tR += (d.LEITURAS_100 || 0) + (d.LEITURAS_30 || 0); 
+        tPend += (d.LEITURAS_NAO_REALIZADAS || 0);
         if (d.STATUS?.toString().toUpperCase() === 'NÃO ENVIADA') tNotSent++;
       });
     } else {
@@ -350,7 +396,11 @@ export default function App() {
     const map: Record<string, any> = {};
     filteredData.forEach((d: any) => {
       if (!map[d.BASE]) map[d.BASE] = { name: d.BASE, value: 0, aRealizar: 0, realizadas: 0 };
-      if (activeSection === 'transmissao') { map[d.BASE].value += d.LEITURAS_NAO_REALIZADAS; map[d.BASE].aRealizar += d.LEITURAS_A_REALIZAR; map[d.BASE].realizadas += (d.LEITURAS_100 + d.LEITURAS_30); }
+      if (activeSection === 'transmissao' || activeSection === 'consistencia') { 
+        map[d.BASE].value += (d.LEITURAS_NAO_REALIZADAS || 0); 
+        map[d.BASE].aRealizar += (d.LEITURAS_A_REALIZAR || 0); 
+        map[d.BASE].realizadas += (d.LEITURAS_100 || 0) + (d.LEITURAS_30 || 0); 
+      }
       else { map[d.BASE].value += d.NOTAS_PENDENTES; map[d.BASE].aRealizar += d.NOTAS_GERADAS; map[d.BASE].realizadas += d.NOTAS_CONCLUIDAS; }
     });
     return Object.values(map).sort((a: any, b: any) => b.value - a.value);
@@ -361,7 +411,7 @@ export default function App() {
     filteredData.forEach((d: any) => {
       const name = d.CONTRATO || 'Não Informado';
       if (!map[name]) map[name] = { name, value: 0, aRealizar: 0, realizadas: 0 };
-      if (activeSection === 'transmissao') { 
+      if (activeSection === 'transmissao' || activeSection === 'consistencia') { 
         map[name].value += (d.LEITURAS_NAO_REALIZADAS || 0); 
         map[name].aRealizar += (d.LEITURAS_A_REALIZAR || 0); 
         map[name].realizadas += ((d.LEITURAS_100 || 0) + (d.LEITURAS_30 || 0)); 
@@ -423,10 +473,20 @@ export default function App() {
       .sort((a, b) => b.total - a.total);
   }, [filteredData, activeSection]);
 
-  const statusDonutData = useMemo(() => [
-    { name: isNotas ? 'Concluído' : 'OK', value: stats.totalPerformed },
-    { name: isNotas ? 'Pendente' : 'N-OK', value: stats.totalPending }
-  ], [stats, isNotas]);
+  const statusDonutData = useMemo(() => {
+    if (isConsistencia) {
+      const map: Record<string, number> = {};
+      filteredData.forEach((d: any) => {
+        const s = d.STATUS || 'NÃO INFORMADO';
+        map[s] = (map[s] || 0) + 1;
+      });
+      return Object.entries(map).map(([name, value]) => ({ name, value }));
+    }
+    return [
+      { name: isNotas ? 'Concluído' : 'OK', value: stats.totalPerformed },
+      { name: isNotas ? 'Pendente' : 'N-OK', value: stats.totalPending }
+    ];
+  }, [filteredData, stats, isNotas, isConsistencia]);
 
   const baseBreakdown = useMemo(() => {
     const map: Record<string, { ok: number, nok: number }> = {};
@@ -454,7 +514,9 @@ export default function App() {
     if (fRazao !== 'Tudo') parts.push(`Razão: ${fRazao}`);
     if (fStatus !== 'Tudo') parts.push(`Status: ${fStatus}`);
     if (fPrazosPendente.length > 0) parts.push(`Prazos Sel.: ${fPrazosPendente.join(', ')}`);
-    return parts.length > 0 ? parts.join(' | ') : 'Visualizando Todos os Dados';
+    
+    if (parts.length === 0) return 'Visualizando Todos os Dados';
+    return `Selecionado: ${parts.join(' | ')}`;
   }, [fContrato, fMes, fAno, fBase, fPrazos, fRazao, fStatus, fPrazosPendente]);
 
   return (
@@ -532,6 +594,16 @@ export default function App() {
                   <button onClick={() => { setActiveSection('notas_mantiqueira'); setView('table'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'notas_mantiqueira' && view === 'table' ? 'bg-blue-600 text-white' : (theme !== 'white' ? 'text-blue-400 hover:bg-blue-800/30' : 'text-gray-500 hover:bg-gray-100')}`}>Base de Dados</button>
                 </div>
              </div>
+             <div className="space-y-1">
+                <button onClick={() => setIsConsistenciaOpen(!isConsistenciaOpen)} className={`w-full px-4 py-3 flex items-center justify-between rounded-xl transition-all ${theme !== 'white' ? 'text-blue-300 hover:bg-blue-800/50' : 'text-blue-600 hover:bg-blue-50'}`}>
+                  <div className="flex items-center gap-2 font-black text-[10px] tracking-widest uppercase"><ClipboardList className="w-4 h-4"/> Acompanhamento de Consistência</div>
+                  <ChevronDown className={`w-3 h-3 transition-transform ${isConsistenciaOpen ? '' : '-rotate-90'}`} />
+                </button>
+                <div className={`space-y-1 pl-4 overflow-hidden transition-all ${isConsistenciaOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
+                  <button onClick={() => { setActiveSection('consistencia'); setView('dashboard'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'consistencia' && view === 'dashboard' ? 'bg-blue-600 text-white' : (theme !== 'white' ? 'text-blue-400 hover:bg-blue-800/30' : 'text-gray-500 hover:bg-gray-100')}`}>Dashboard</button>
+                  <button onClick={() => { setActiveSection('consistencia'); setView('table'); }} className={`w-full text-left px-4 py-2 text-sm font-bold rounded-lg ${activeSection === 'consistencia' && view === 'table' ? 'bg-blue-600 text-white' : (theme !== 'white' ? 'text-blue-400 hover:bg-blue-800/30' : 'text-gray-500 hover:bg-gray-100')}`}>Base de Dados</button>
+                </div>
+             </div>
           </nav>
         </div>
       </aside>
@@ -544,7 +616,12 @@ export default function App() {
                 {isSidebarOpen ? <ChevronFirst /> : <Menu />}
               </button>
               <div className="flex flex-col">
-                {currentMeta && (
+                {isConsistencia && consistenciaMeta.tipo && (
+                  <span className={`text-[10px] font-black uppercase mb-1 ${theme !== 'white' ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                    Tipo: {consistenciaMeta.tipo} | Última atualização: {consistenciaMeta.lastUpdate}
+                  </span>
+                )}
+                {!isConsistencia && currentMeta && (
                   <span className={`text-[10px] font-black uppercase mb-1 ${theme !== 'white' ? 'text-emerald-400' : 'text-emerald-600'}`}>
                     Última atualização: {currentMeta}
                   </span>
@@ -697,9 +774,27 @@ export default function App() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-8 no-print">
-                <KpiCard title={activeSection === 'transmissao' ? "A Realizar" : "Geradas"} value={stats.totalToPerform.toLocaleString()} icon={<Clock className={theme !== 'white' ? "text-blue-300" : "text-blue-600"}/>} trend="+2.4%" theme={theme}/>
-                <KpiCard title={activeSection === 'transmissao' ? "Realizadas" : "Concluídas"} value={stats.totalPerformed.toLocaleString()} icon={<CheckCircle2 className={theme !== 'white' ? "text-emerald-400" : "text-emerald-600"}/>} label={`${stats.successRate.toFixed(1)}% Efic.`} theme={theme}/>
-                <KpiCard title={activeSection === 'transmissao' ? "Pendências" : "Pendentes"} value={stats.totalPending.toLocaleString()} icon={<AlertCircle className={theme !== 'white' ? "text-red-400" : "text-red-600"}/>} label={`${stats.pendingRate.toFixed(1)}% Pend.`} theme={theme}/>
+                <KpiCard 
+                  title={isConsistencia ? "A Realizar" : (activeSection === 'transmissao' ? "A Realizar" : "Geradas")} 
+                  value={stats.totalToPerform.toLocaleString()} 
+                  icon={<Clock className={theme !== 'white' ? "text-blue-300" : "text-blue-600"}/>} 
+                  trend="+2.4%" 
+                  theme={theme}
+                />
+                <KpiCard 
+                  title={isConsistencia ? "Realizadas" : (activeSection === 'transmissao' ? "Realizadas" : "Concluídas")} 
+                  value={stats.totalPerformed.toLocaleString()} 
+                  icon={<CheckCircle2 className={theme !== 'white' ? "text-emerald-400" : "text-emerald-600"}/>} 
+                  label={`${stats.successRate.toFixed(1)}% Efic.`} 
+                  theme={theme}
+                />
+                <KpiCard 
+                  title={isConsistencia ? "Não-Realizadas" : (activeSection === 'transmissao' ? "Pendências" : "Pendentes")} 
+                  value={stats.totalPending.toLocaleString()} 
+                  icon={<AlertCircle className={theme !== 'white' ? "text-red-400" : "text-red-600"}/>} 
+                  label={`${stats.pendingRate.toFixed(1)}% Pend.`} 
+                  theme={theme}
+                />
                 <KpiCard title="Não Enviada" value={stats.totalNotSent.toLocaleString()} icon={<MessageSquareWarning className={theme !== 'white' ? "text-orange-400" : "text-orange-600"}/>} theme={theme}/>
               </div>
 
@@ -906,9 +1001,13 @@ export default function App() {
                 <div className={`rounded-[2.5rem] border shadow-sm overflow-hidden mb-10 print-full-table ${theme !== 'white' ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100'}`}>
                    <div className={`p-6 border-b flex justify-between items-center no-print ${theme !== 'white' ? 'border-gray-700/50' : 'border-gray-50'}`}>
                      <h2 className={`font-black text-xs uppercase tracking-widest ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>Base de Dados - {sectionTitle.toUpperCase()}</h2>
-                     <div className="flex gap-2">
-                        <button onClick={exportToPDF} title="Exportar para PDF" className={`p-2.5 rounded-xl transition-all ${theme !== 'white' ? 'bg-gray-800 hover:bg-gray-700 text-blue-300' : 'bg-gray-50 hover:bg-gray-100 text-gray-400'}`}><Printer className="w-4 h-4"/></button>
-                        <button onClick={exportToExcel} title="Exportar para Excel" className={`p-2.5 rounded-xl transition-all ${theme !== 'white' ? 'bg-emerald-900/30 hover:bg-emerald-800/30 text-emerald-400' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600'}`}><FileSpreadsheet className="w-4 h-4"/></button>
+                     <div className="flex gap-3">
+                        <button onClick={exportToExcel} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all ${theme !== 'white' ? 'bg-emerald-900/30 text-emerald-400 hover:bg-emerald-800/30' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'}`}>
+                          <FileSpreadsheet className="w-4 h-4"/> Exportar em Excel
+                        </button>
+                        <button onClick={exportToPDF} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all ${theme !== 'white' ? 'bg-blue-900/30 text-blue-300 hover:bg-blue-800/30' : 'bg-blue-50 text-blue-600 hover:bg-blue-100'}`}>
+                          <Printer className="w-4 h-4"/> Exportar em PDF
+                        </button>
                      </div>
                    </div>
                    <div className="overflow-x-auto">
@@ -930,6 +1029,20 @@ export default function App() {
                               <th className="px-4 py-4">Prazo</th>
                               <th className="px-4 py-4">Procedência</th>
                               <th className="px-4 py-4 text-center">Status</th>
+                            </tr>
+                          </thead>
+                        ) : isConsistencia ? (
+                          <thead className={`${theme !== 'white' ? 'bg-gray-800 text-blue-300' : 'bg-gray-50/50 text-gray-400'} text-[10px] font-black uppercase tracking-widest`}>
+                            <tr>
+                              <th className="px-8 py-5">Mês</th>
+                              <th className="px-8 py-5">Ano</th>
+                              <th className="px-8 py-5">Base</th>
+                              <th className="px-8 py-5">Contrato</th>
+                              <th className="px-8 py-5 text-center">Quantidade de Consistência</th>
+                              <th className="px-8 py-5 text-center">Quantidade de Realizadas</th>
+                              <th className="px-8 py-5 text-center">Quantidade de Pendência</th>
+                              <th className="px-8 py-5 text-center">Status</th>
+                              <th className="px-8 py-5">Prazo</th>
                             </tr>
                           </thead>
                         ) : (
@@ -976,6 +1089,29 @@ export default function App() {
                                       {row.STATUS || '-'}
                                     </span>
                                   </td>
+                                </>
+                              ) : isConsistencia ? (
+                                <>
+                                  <td className={`px-8 py-5 ${theme !== 'white' ? 'text-blue-400' : 'text-gray-400'}`}>{row.MES}</td>
+                                  <td className={`px-8 py-5 ${theme !== 'white' ? 'text-blue-400' : 'text-gray-400'}`}>{row.ANO}</td>
+                                  <td className={`px-8 py-5 font-black ${theme !== 'white' ? 'text-blue-300' : 'text-blue-600'}`}>{row.BASE}</td>
+                                  <td className={`px-8 py-5 ${theme !== 'white' ? 'text-blue-100' : 'text-gray-600'}`}>{row.CONTRATO}</td>
+                                  <td className={`px-8 py-5 text-center ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>{row.LEITURAS_A_REALIZAR}</td>
+                                  <td className={`px-8 py-5 text-center font-black ${theme !== 'white' ? 'text-emerald-400' : 'text-emerald-600'}`}>{row.LEITURAS_100}</td>
+                                  <td className={`px-8 py-5 text-center font-black ${theme !== 'white' ? 'text-red-400' : 'text-red-600'}`}>{row.LEITURAS_NAO_REALIZADAS}</td>
+                                  <td className="px-8 py-5 text-center">
+                                    <span className={`px-2 py-1 text-[9px] font-black rounded-lg uppercase tracking-widest ${
+                                      (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'OK' || 
+                                      (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'CONCLUIDO' ||
+                                      (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'CONCLUIDA'
+                                      ? (theme !== 'white' ? 'bg-emerald-900/50 text-emerald-400' : 'bg-emerald-100 text-emerald-600') : 
+                                      (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'N-OK' || 
+                                      (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'PENDENTE' 
+                                      ? (theme !== 'white' ? 'bg-red-900/50 text-red-400' : 'bg-red-100 text-red-600') : (theme !== 'white' ? 'bg-blue-800/50 text-blue-300' : 'bg-gray-100 text-gray-500')}`}>
+                                      {row.STATUS || '-'}
+                                    </span>
+                                  </td>
+                                  <td className={`px-8 py-5 ${theme !== 'white' ? 'text-blue-200' : 'text-gray-500'}`}>{row.PRAZO || '-'}</td>
                                 </>
                               ) : (
                                 <>

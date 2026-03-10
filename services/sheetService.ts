@@ -49,6 +49,13 @@ export const fetchSheetData = async (csvUrl: string, section: AppSection): Promi
   const rawHeaders = lines[0].split(delimiter).map(h => h.trim());
   const normalizedHeaders = rawHeaders.map(normalizeHeader);
   
+  // Extrair M2 da segunda linha (índice 12) se for consistência
+  let cellM2 = null;
+  if (section === 'consistencia' && lines.length > 1) {
+    const secondLineCells = lines[1].split(delimiter);
+    cellM2 = secondLineCells.length > 12 ? secondLineCells[12].trim() : null;
+  }
+
   const transmissionMap: Record<string, string> = {
     'MES': 'MES', 'ANO': 'ANO', 'CONTRATO': 'CONTRATO', 'BASE': 'BASE', 'CIDADE': 'CIDADE',
     'UL': 'UL', 'RAZAO': 'RAZAO', 'RAZAO_SOCIAL': 'RAZAO', 'LOCAL': 'LOCAL', 'ROTA': 'ROTA', 'TIPO': 'TIPO',
@@ -69,7 +76,15 @@ export const fetchSheetData = async (csvUrl: string, section: AppSection): Promi
     'DATA_DA_NOTA': 'DATA_DA_NOTA', 'DATA_NOTA': 'DATA_DA_NOTA', 'DATA_DA_EMISSAO': 'DATA_DA_NOTA'
   };
 
-  const headerMap = section === 'transmissao' ? transmissionMap : notasMap;
+  const consistenciaMap: Record<string, string> = {
+    'MES': 'MES', 'ANO': 'ANO', 'CONTRATO': 'CONTRATO', 'BASE': 'BASE',
+    'QUANTIDADE_DE_CONSISTENCIA': 'LEITURAS_A_REALIZAR',
+    'QUANTIDADE_DE_REALIZADAS': 'LEITURAS_100',
+    'QUANTIDADE_DE_PENDENCIA': 'LEITURAS_NAO_REALIZADAS',
+    'STATUS': 'STATUS', 'PRAZO': 'PRAZO', 'RAZAO': 'RAZAO'
+  };
+
+  let headerMap = section === 'transmissao' ? transmissionMap : (section === 'consistencia' ? consistenciaMap : notasMap);
 
   const data: any[] = [];
   
@@ -94,6 +109,10 @@ export const fetchSheetData = async (csvUrl: string, section: AppSection): Promi
         row[targetKey] = val || '';
       }
     });
+
+    if (section === 'consistencia') {
+      row.LEITURAS_30 = 0; // Garantir que não quebre a lógica de soma
+    }
 
     if (section === 'notas' || section === 'notas_triangulo' || section === 'notas_mantiqueira') {
       // Geradas: contar a quantidade de registros (1 se a coluna E não estiver vazia)
@@ -121,5 +140,5 @@ export const fetchSheetData = async (csvUrl: string, section: AppSection): Promi
     data.push(row);
   }
 
-  return { data, lastUpdate: cellW1, cellC2: null, cellT1: null };
+  return { data, lastUpdate: cellW1, cellC2: cellM2, cellT1: null };
 };
