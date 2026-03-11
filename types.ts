@@ -54,6 +54,7 @@ export interface DashboardStats {
 export interface SheetResponse {
   data: any[];
   lastUpdate: string | null;
+  cellO1: string | null;
   cellC2: string | null;
   cellT1: string | null;
 }

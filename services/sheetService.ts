@@ -49,10 +49,10 @@ export const fetchSheetData = async (csvUrl: string, section: AppSection): Promi
   const rawHeaders = lines[0].split(delimiter).map(h => h.trim());
   const normalizedHeaders = rawHeaders.map(normalizeHeader);
   
-  // Extrair M1 da primeira linha (índice 12) se for consistência
-  let cellM1 = null;
+  // Extrair O1 da primeira linha (índice 14) se for consistência
+  let cellO1 = null;
   if (section === 'consistencia') {
-    cellM1 = firstLineCells.length > 12 ? firstLineCells[12].trim() : null;
+    cellO1 = firstLineCells.length > 14 ? firstLineCells[14].trim() : null;
   }
 
   const transmissionMap: Record<string, string> = {
@@ -80,7 +80,7 @@ export const fetchSheetData = async (csvUrl: string, section: AppSection): Promi
     'QUANTIDADE_DE_CONSISTENCIA': 'LEITURAS_A_REALIZAR',
     'QUANTIDADE_DE_REALIZADAS': 'LEITURAS_100',
     'QUANTIDADE_DE_PENDENCIA': 'LEITURAS_NAO_REALIZADAS',
-    'STATUS': 'STATUS', 'PRAZO': 'PRAZO', 'RAZAO': 'RAZAO'
+    'STATUS': 'STATUS', 'PRAZO': 'PRAZO', 'RAZAO': 'RAZAO', 'RZ': 'RAZAO'
   };
 
   let headerMap = section === 'transmissao' ? transmissionMap : (section === 'consistencia' ? consistenciaMap : notasMap);
@@ -110,7 +110,15 @@ export const fetchSheetData = async (csvUrl: string, section: AppSection): Promi
     });
 
     if (section === 'consistencia') {
-      row.LEITURAS_30 = 0; // Garantir que não quebre a lógica de soma
+      const valC = values.length > 2 ? values[2].trim() : '';
+      const valF = values.length > 5 ? values[5].trim() : ''; // Base
+      const valK = values.length > 10 ? values[10].trim() : ''; // Status
+      
+      row.UL = valC;
+      row.CARD_A_REALIZAR = valF ? 1 : 0;
+      row.CARD_REALIZADAS = (valF && valK.toUpperCase() === 'FINALIZADO') ? 1 : 0;
+      row.CARD_NAO_REALIZADAS = (valF && valK.toUpperCase() === 'N-FINALIZADO') ? 1 : 0;
+      row.LEITURAS_30 = 0;
     }
 
     if (section === 'notas' || section === 'notas_triangulo' || section === 'notas_mantiqueira') {
@@ -139,5 +147,5 @@ export const fetchSheetData = async (csvUrl: string, section: AppSection): Promi
     data.push(row);
   }
 
-  return { data, lastUpdate: cellW1, cellC2: cellM1, cellT1: null };
+  return { data, lastUpdate: cellW1, cellO1: cellO1, cellC2: null, cellT1: null };
 };

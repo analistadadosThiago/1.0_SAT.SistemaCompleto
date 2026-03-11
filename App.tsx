@@ -62,28 +62,47 @@ const CustomTooltip = ({ active, payload, label, section, theme }: any) => {
     
     let labelRealizar = 'Geradas:';
     if (isTransmissao) labelRealizar = 'A Realizar:';
-    if (isConsistencia) labelRealizar = 'Qtd Consistência:';
+    if (isConsistencia) labelRealizar = 'Cons. a realizar:';
 
     let labelRealizadas = 'Concluídas:';
     if (isTransmissao) labelRealizadas = 'Realizadas:';
-    if (isConsistencia) labelRealizadas = 'Realizadas:';
+    if (isConsistencia) labelRealizadas = 'Realizada:';
 
     return (
       <div className={`${isDark ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border-gray-200 text-gray-800'} p-4 border shadow-2xl rounded-xl text-sm min-w-[180px]`}>
         <p className={`font-black mb-3 text-base border-b pb-2 ${isDark ? 'border-gray-700' : 'border-gray-100'}`}>{label || data.name}</p>
         <div className="space-y-2">
-          <p className={`flex justify-between gap-6 font-bold ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
-            <span>{labelRealizar}</span> 
-            <span>{data.aRealizar?.toLocaleString()}</span>
-          </p>
-          <p className={`flex justify-between gap-6 font-bold ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
-            <span>{labelRealizadas}</span> 
-            <span>{data.realizadas?.toLocaleString()}</span>
-          </p>
-          <p className={`flex justify-between gap-6 font-black border-t pt-2 mt-2 ${isDark ? 'text-red-400 border-gray-700' : 'text-red-700 border-gray-100'}`}>
-            <span>{isConsistencia ? 'Pendência:' : 'Pendências:'}</span> 
-            <span>{data.value?.toLocaleString()}</span>
-          </p>
+          {isConsistencia ? (
+            <>
+              <p className={`flex justify-between gap-6 font-bold ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
+                <span>Cons. a realizar:</span> 
+                <span>{data.aRealizar?.toLocaleString()}</span>
+              </p>
+              <p className={`flex justify-between gap-6 font-bold ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
+                <span>Realizada:</span> 
+                <span>{data.realizadas?.toLocaleString()}</span>
+              </p>
+              <p className={`flex justify-between gap-6 font-black border-t pt-2 mt-2 ${isDark ? 'text-red-400 border-gray-700' : 'text-red-700 border-gray-100'}`}>
+                <span>N-Realizada:</span> 
+                <span>{data.nRealizadas?.toLocaleString()}</span>
+              </p>
+            </>
+          ) : (
+            <>
+              <p className={`flex justify-between gap-6 font-bold ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
+                <span>{labelRealizar}</span> 
+                <span>{data.aRealizar?.toLocaleString()}</span>
+              </p>
+              <p className={`flex justify-between gap-6 font-bold ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
+                <span>{labelRealizadas}</span> 
+                <span>{data.realizadas?.toLocaleString()}</span>
+              </p>
+              <p className={`flex justify-between gap-6 font-black border-t pt-2 mt-2 ${isDark ? 'text-red-400 border-gray-700' : 'text-red-700 border-gray-100'}`}>
+                <span>Pendências:</span> 
+                <span>{data.value?.toLocaleString()}</span>
+              </p>
+            </>
+          )}
         </div>
       </div>
     );
@@ -91,11 +110,11 @@ const CustomTooltip = ({ active, payload, label, section, theme }: any) => {
   return null;
 };
 
-const DonutTooltip = ({ active, payload, baseBreakdown, theme }: any) => {
+const DonutTooltip = ({ active, payload, breakdown, theme }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     const statusType = data.name; 
-    const isOK = statusType === 'OK' || statusType === 'Concluído';
+    const isOK = statusType === 'OK' || statusType === 'Concluído' || statusType === 'Finalizado';
     const isDark = theme !== 'white';
     
     return (
@@ -107,12 +126,12 @@ const DonutTooltip = ({ active, payload, baseBreakdown, theme }: any) => {
           <span className={`font-bold ${isDark ? 'text-blue-300' : 'text-gray-500'}`}>Total: {data.value.toLocaleString()}</span>
         </div>
         <div className="space-y-2.5 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
-          {Object.entries(baseBreakdown).map(([base, stats]: [string, any]) => {
+          {breakdown && Object.entries(breakdown).map(([name, stats]: [string, any]) => {
             const count = isOK ? stats.ok : stats.nok;
             if (count === 0) return null;
             return (
-              <div key={base} className="flex justify-between items-center gap-4">
-                <span className={`${isDark ? 'text-blue-200' : 'text-gray-600'} font-bold truncate max-w-[140px]`}>{base}</span>
+              <div key={name} className="flex justify-between items-center gap-4">
+                <span className={`${isDark ? 'text-blue-200' : 'text-gray-600'} font-bold truncate max-w-[140px]`}>{name}</span>
                 <span className={`font-black text-sm ${isOK ? 'text-emerald-500' : 'text-red-500'}`}>{count.toLocaleString()}</span>
               </div>
             );
@@ -192,8 +211,11 @@ export default function App() {
   const [fPrazos, setFPrazos] = useState<string[]>([]);
   const [fPrazosPendente, setFPrazosPendente] = useState<string[]>([]);
 
+  const isNotas = activeSection === 'notas' || activeSection === 'notas_triangulo' || activeSection === 'notas_mantiqueira';
+  const isConsistencia = activeSection === 'consistencia';
+
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 15;
+  const pageSize = isConsistencia ? 5 : 15;
 
   const currentRawData = activeSection === 'transmissao' ? transmissaoRawData : 
                      (activeSection === 'notas' ? notasRawData : 
@@ -209,9 +231,6 @@ export default function App() {
                      (activeSection === 'notas' ? notasMeta.lastUpdate : 
                      (activeSection === 'notas_triangulo' ? notasTrianguloMeta.lastUpdate : 
                      (activeSection === 'notas_mantiqueira' ? notasMantiqueiraMeta.lastUpdate : consistenciaMeta.lastUpdate)));
-
-  const isNotas = activeSection === 'notas' || activeSection === 'notas_triangulo' || activeSection === 'notas_mantiqueira';
-  const isConsistencia = activeSection === 'consistencia';
 
   const sectionTitle = activeSection === 'transmissao' ? 'Transmissão' : 
                        (activeSection === 'notas' ? 'Notas AM: Contrato de Divinopolis' : 
@@ -245,7 +264,7 @@ export default function App() {
         setNotasMantiqueiraMeta({ lastUpdate: response.lastUpdate });
       } else if (targetSection === 'consistencia') {
         setConsistenciaRawData(response.data);
-        setConsistenciaMeta({ lastUpdate: response.cellC2, tipo: response.cellC2 }); // Usando cellC2 para ambos como solicitado (M2 mapeado para cellC2)
+        setConsistenciaMeta({ lastUpdate: response.cellO1, tipo: response.cellO1 });
       }
       setCurrentPage(1);
     } catch (err: any) { 
@@ -287,12 +306,13 @@ export default function App() {
         return {
           "MÊS": row.MES,
           "ANO": row.ANO,
+          "RZ": row.RAZAO,
+          "UL": row.UL,
           "BASE": row.BASE,
           "CONTRATO": row.CONTRATO,
-          "QUANTIDADE DE CONSISTENCIA": row.LEITURAS_A_REALIZAR,
-          "QUANTIDADE DE REALIZADAS": row.LEITURAS_100,
-          "QUANTIDADE DE PENDENCIA": row.LEITURAS_NAO_REALIZADAS,
-          "STATUS": row.STATUS,
+          "CONS. A REALIZAR": row.CARD_A_REALIZAR,
+          "REALIZADA": row.CARD_REALIZADAS,
+          "N-REALIZADA": row.CARD_NAO_REALIZADAS,
           "PRAZO": row.PRAZO
         };
       } else {
@@ -364,14 +384,47 @@ export default function App() {
     return dataStatus;
   }, [dataStatus, fStatus, fPrazosPendente, isNotas]);
 
+  const tableData = useMemo(() => {
+    if (!isConsistencia) return filteredData;
+    
+    const map: Record<string, any> = {};
+    filteredData.forEach((d: any) => {
+      const key = `${d.RAZAO}-${d.BASE}`;
+      if (!map[key]) {
+        map[key] = {
+          MES: d.MES,
+          ANO: d.ANO,
+          RAZAO: d.RAZAO,
+          BASE: d.BASE,
+          CONTRATO: d.CONTRATO,
+          CARD_A_REALIZAR: 0,
+          CARD_REALIZADAS: 0,
+          CARD_NAO_REALIZADAS: 0,
+          PRAZO: d.PRAZO
+        };
+      }
+      map[key].CARD_A_REALIZAR += (d.CARD_A_REALIZAR || 0);
+      map[key].CARD_REALIZADAS += (d.CARD_REALIZADAS || 0);
+      map[key].CARD_NAO_REALIZADAS += (d.CARD_NAO_REALIZADAS || 0);
+    });
+    return Object.values(map);
+  }, [filteredData, isConsistencia]);
+
   const stats = useMemo<DashboardStats>(() => {
     if (!filteredData.length) return { totalToPerform: 0, totalPerformed: 0, totalPending: 0, totalNotSent: 0, successRate: 0, pendingRate: 0 };
     let tP = 0, tR = 0, tPend = 0, tNotSent = 0;
-    if (activeSection === 'transmissao' || activeSection === 'consistencia') {
+    if (activeSection === 'transmissao') {
       filteredData.forEach((d: any) => { 
         tP += (d.LEITURAS_A_REALIZAR || 0); 
         tR += (d.LEITURAS_100 || 0) + (d.LEITURAS_30 || 0); 
         tPend += (d.LEITURAS_NAO_REALIZADAS || 0);
+        if (d.STATUS?.toString().toUpperCase() === 'NÃO ENVIADA') tNotSent++;
+      });
+    } else if (activeSection === 'consistencia') {
+      filteredData.forEach((d: any) => { 
+        tP += (d.CARD_A_REALIZAR || 0); 
+        tR += (d.CARD_REALIZADAS || 0); 
+        tPend += (d.CARD_NAO_REALIZADAS || 0);
         if (d.STATUS?.toString().toUpperCase() === 'NÃO ENVIADA') tNotSent++;
       });
     } else {
@@ -395,13 +448,22 @@ export default function App() {
   const baseChartData = useMemo(() => {
     const map: Record<string, any> = {};
     filteredData.forEach((d: any) => {
-      if (!map[d.BASE]) map[d.BASE] = { name: d.BASE, value: 0, aRealizar: 0, realizadas: 0 };
-      if (activeSection === 'transmissao' || activeSection === 'consistencia') { 
+      if (!map[d.BASE]) map[d.BASE] = { name: d.BASE, value: 0, aRealizar: 0, realizadas: 0, nRealizadas: 0 };
+      if (activeSection === 'transmissao') { 
         map[d.BASE].value += (d.LEITURAS_NAO_REALIZADAS || 0); 
         map[d.BASE].aRealizar += (d.LEITURAS_A_REALIZAR || 0); 
         map[d.BASE].realizadas += (d.LEITURAS_100 || 0) + (d.LEITURAS_30 || 0); 
+      } else if (activeSection === 'consistencia') {
+        map[d.BASE].value += (d.CARD_A_REALIZAR || 0); 
+        map[d.BASE].aRealizar += (d.CARD_A_REALIZAR || 0); 
+        map[d.BASE].realizadas += (d.CARD_REALIZADAS || 0);
+        map[d.BASE].nRealizadas += (d.CARD_NAO_REALIZADAS || 0);
       }
-      else { map[d.BASE].value += d.NOTAS_PENDENTES; map[d.BASE].aRealizar += d.NOTAS_GERADAS; map[d.BASE].realizadas += d.NOTAS_CONCLUIDAS; }
+      else { 
+        map[d.BASE].value += d.NOTAS_PENDENTES; 
+        map[d.BASE].aRealizar += d.NOTAS_GERADAS; 
+        map[d.BASE].realizadas += d.NOTAS_CONCLUIDAS; 
+      }
     });
     return Object.values(map).sort((a: any, b: any) => b.value - a.value);
   }, [filteredData, activeSection]);
@@ -410,11 +472,16 @@ export default function App() {
     const map: Record<string, any> = {};
     filteredData.forEach((d: any) => {
       const name = d.CONTRATO || 'Não Informado';
-      if (!map[name]) map[name] = { name, value: 0, aRealizar: 0, realizadas: 0 };
-      if (activeSection === 'transmissao' || activeSection === 'consistencia') { 
+      if (!map[name]) map[name] = { name, value: 0, aRealizar: 0, realizadas: 0, nRealizadas: 0 };
+      if (activeSection === 'transmissao') { 
         map[name].value += (d.LEITURAS_NAO_REALIZADAS || 0); 
         map[name].aRealizar += (d.LEITURAS_A_REALIZAR || 0); 
         map[name].realizadas += ((d.LEITURAS_100 || 0) + (d.LEITURAS_30 || 0)); 
+      } else if (activeSection === 'consistencia') {
+        map[name].value += (d.CARD_A_REALIZAR || 0); 
+        map[name].aRealizar += (d.CARD_A_REALIZAR || 0); 
+        map[name].realizadas += (d.CARD_REALIZADAS || 0);
+        map[name].nRealizadas += (d.CARD_NAO_REALIZADAS || 0);
       }
       else { 
         map[name].value += (d.NOTAS_PENDENTES || 0); 
@@ -440,6 +507,9 @@ export default function App() {
       if (activeSection === 'transmissao') {
         map[key].realizadas += ((d.LEITURAS_100 || 0) + (d.LEITURAS_30 || 0));
         map[key].pendentes += (d.LEITURAS_NAO_REALIZADAS || 0);
+      } else if (activeSection === 'consistencia') {
+        map[key].realizadas += (d.CARD_REALIZADAS || 0);
+        map[key].pendentes += (d.CARD_NAO_REALIZADAS || 0);
       } else {
         map[key].realizadas += (d.NOTAS_CONCLUIDAS || 0);
         map[key].pendentes += (d.NOTAS_PENDENTES || 0);
@@ -477,8 +547,10 @@ export default function App() {
     if (isConsistencia) {
       const map: Record<string, number> = {};
       filteredData.forEach((d: any) => {
-        const s = d.STATUS || 'NÃO INFORMADO';
-        map[s] = (map[s] || 0) + 1;
+        const s = (d.STATUS || '').toString().trim();
+        if (s) {
+          map[s] = (map[s] || 0) + 1;
+        }
       });
       return Object.entries(map).map(([name, value]) => ({ name, value }));
     }
@@ -496,9 +568,31 @@ export default function App() {
       if (activeSection === 'transmissao') {
         map[baseName].ok += (d.LEITURAS_100 + d.LEITURAS_30);
         map[baseName].nok += d.LEITURAS_NAO_REALIZADAS;
+      } else if (activeSection === 'consistencia') {
+        map[baseName].ok += (d.CARD_REALIZADAS || 0);
+        map[baseName].nok += (d.CARD_NAO_REALIZADAS || 0);
       } else {
         map[baseName].ok += d.NOTAS_CONCLUIDAS;
         map[baseName].nok += d.NOTAS_PENDENTES;
+      }
+    });
+    return map;
+  }, [filteredData, activeSection]);
+
+  const contratoBreakdown = useMemo(() => {
+    const map: Record<string, { ok: number, nok: number }> = {};
+    filteredData.forEach((d: any) => {
+      const name = d.CONTRATO || 'Não Informado';
+      if (!map[name]) map[name] = { ok: 0, nok: 0 };
+      if (activeSection === 'transmissao') {
+        map[name].ok += (d.LEITURAS_100 + d.LEITURAS_30);
+        map[name].nok += d.LEITURAS_NAO_REALIZADAS;
+      } else if (activeSection === 'consistencia') {
+        map[name].ok += (d.CARD_REALIZADAS || 0);
+        map[name].nok += (d.CARD_NAO_REALIZADAS || 0);
+      } else {
+        map[name].ok += d.NOTAS_CONCLUIDAS;
+        map[name].nok += d.NOTAS_PENDENTES;
       }
     });
     return map;
@@ -811,7 +905,7 @@ export default function App() {
                       </div>
                       <div className="h-[400px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                          <ComposedChart data={baseChartData} margin={{ bottom: 100, top: 40 }}>
+                          <ComposedChart data={baseChartData} margin={{ bottom: 100, top: 60 }}>
                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme !== 'white' ? 'rgba(255,255,255,0.1)' : '#f1f5f9'} />
                           <XAxis 
                             dataKey="name" 
@@ -829,8 +923,8 @@ export default function App() {
                           />
                           <YAxis axisLine={false} tickLine={false} tick={false} />
                           <Tooltip content={<CustomTooltip section={activeSection} theme={theme} />} cursor={{fill: theme !== 'white' ? 'rgba(255,255,255,0.05)' : '#f8fafc'}} />
-                          <Bar dataKey="value" fill="#ef4444" radius={[8, 8, 0, 0]} barSize={45}>
-                            <LabelList dataKey="value" position="top" style={{ fontSize: '16px', fontWeight: 900, fill: theme !== 'white' ? '#fca5a5' : '#1e40af' }} />
+                          <Bar dataKey="value" fill={isConsistencia ? "#3b82f6" : "#ef4444"} radius={[8, 8, 0, 0]} barSize={45}>
+                            <LabelList dataKey="value" position="top" style={{ fontSize: '14px', fontWeight: 900, fill: theme !== 'white' ? '#93c5fd' : '#1e40af' }} offset={10} />
                           </Bar>
                         </ComposedChart>
                       </ResponsiveContainer>
@@ -880,12 +974,12 @@ export default function App() {
                     </div>
                     <div className="h-[400px] w-full">
                       <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart layout="vertical" data={contratoChartData}>
+                        <ComposedChart layout="vertical" data={contratoChartData} margin={{ left: 20, right: 60 }}>
                           <XAxis type="number" hide />
                           <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 700, fill: theme !== 'white' ? '#93c5fd' : '#64748b' }} width={140} />
                           <Tooltip content={<CustomTooltip section={activeSection} theme={theme} />} cursor={{fill: theme !== 'white' ? 'rgba(255,255,255,0.05)' : '#f8fafc'}} />
-                          <Bar dataKey="value" fill="#ef4444" radius={[0, 8, 8, 0]} barSize={18}>
-                            <LabelList dataKey="value" position="right" style={{ fontSize: '16px', fontWeight: 900, fill: theme !== 'white' ? '#fca5a5' : '#b91c1c' }} />
+                          <Bar dataKey="value" fill={isConsistencia ? "#3b82f6" : "#ef4444"} radius={[0, 8, 8, 0]} barSize={18}>
+                            <LabelList dataKey="value" position="right" style={{ fontSize: '14px', fontWeight: 900, fill: theme !== 'white' ? '#93c5fd' : '#1e40af' }} offset={10} />
                           </Bar>
                         </ComposedChart>
                       </ResponsiveContainer>
@@ -894,24 +988,25 @@ export default function App() {
 
                   <div className={`${theme !== 'white' ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[500px] flex flex-col items-center`}>
                     <h3 className={`font-black text-sm uppercase tracking-widest self-start mb-10 ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>Relação de Status</h3>
-                    <div className="h-[300px] w-full">
+                    <div className="h-[400px] w-full">
                       <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={statusDonutData}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={80}
-                            outerRadius={120}
-                            paddingAngle={10}
-                            dataKey="value"
-                          >
-                            {statusDonutData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <Tooltip content={<DonutTooltip baseBreakdown={baseBreakdown} theme={theme} />} />
-                        </PieChart>
+                          <PieChart>
+                            <Pie
+                              data={statusDonutData}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={100}
+                              outerRadius={150}
+                              paddingAngle={10}
+                              dataKey="value"
+                              label={({ name, value }) => `${name}: ${value}`}
+                            >
+                              {statusDonutData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.name === 'OK' || entry.name === 'Concluído' || entry.name === 'Finalizado' ? '#10b981' : '#ef4444'} />
+                              ))}
+                            </Pie>
+                            <Tooltip content={<DonutTooltip breakdown={isConsistencia ? contratoBreakdown : baseBreakdown} theme={theme} />} />
+                          </PieChart>
                       </ResponsiveContainer>
                     </div>
                     <div className="mt-8 flex flex-wrap gap-6">
@@ -919,7 +1014,7 @@ export default function App() {
                         statusDonutData.map((entry, index) => (
                           <div key={index} className="flex flex-col items-center gap-1">
                             <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
+                              <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: entry.name === 'Finalizado' ? '#10b981' : '#ef4444' }}></div>
                               <span className={`text-lg font-black ${theme !== 'white' ? 'text-white' : 'text-gray-800'}`}>{entry.value.toLocaleString()}</span>
                             </div>
                             <span className={`text-[9px] font-black uppercase tracking-widest ${theme !== 'white' ? 'text-blue-300' : 'text-gray-400'}`}>{entry.name}</span>
@@ -1052,12 +1147,12 @@ export default function App() {
                             <tr>
                               <th className="px-8 py-5">Mês</th>
                               <th className="px-8 py-5">Ano</th>
+                              <th className="px-8 py-5">RZ</th>
                               <th className="px-8 py-5">Base</th>
                               <th className="px-8 py-5">Contrato</th>
-                              <th className="px-8 py-5 text-center">Quantidade de Consistência</th>
-                              <th className="px-8 py-5 text-center">Quantidade de Realizadas</th>
-                              <th className="px-8 py-5 text-center">Quantidade de Pendência</th>
-                              <th className="px-8 py-5 text-center">Status</th>
+                              <th className="px-8 py-5 text-center">Cons. a realizar</th>
+                              <th className="px-8 py-5 text-center">Realizada</th>
+                              <th className="px-8 py-5 text-center">N-Realizada</th>
                               <th className="px-8 py-5">Prazo</th>
                             </tr>
                           </thead>
@@ -1076,7 +1171,7 @@ export default function App() {
                           </thead>
                         )}
                         <tbody className={`divide-y text-[12px] font-bold ${theme !== 'white' ? 'divide-blue-800/50' : 'divide-gray-50'}`}>
-                          {(view === 'table' ? filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize) : filteredData).map((row: any, i) => (
+                          {(view === 'table' ? tableData.slice((currentPage - 1) * pageSize, currentPage * pageSize) : tableData).map((row: any, i) => (
                             <tr key={i} className={`transition-colors ${theme !== 'white' ? 'hover:bg-blue-800/20' : 'hover:bg-blue-50/10'}`}>
                               {isNotas ? (
                                 <>
@@ -1110,23 +1205,12 @@ export default function App() {
                                 <>
                                   <td className={`px-8 py-5 ${theme !== 'white' ? 'text-blue-400' : 'text-gray-400'}`}>{row.MES}</td>
                                   <td className={`px-8 py-5 ${theme !== 'white' ? 'text-blue-400' : 'text-gray-400'}`}>{row.ANO}</td>
+                                  <td className={`px-8 py-5 truncate max-w-[200px] ${theme !== 'white' ? 'text-white' : 'text-gray-700'}`}>{row.RAZAO}</td>
                                   <td className={`px-8 py-5 font-black ${theme !== 'white' ? 'text-blue-300' : 'text-blue-600'}`}>{row.BASE}</td>
                                   <td className={`px-8 py-5 ${theme !== 'white' ? 'text-blue-100' : 'text-gray-600'}`}>{row.CONTRATO}</td>
-                                  <td className={`px-8 py-5 text-center ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>{row.LEITURAS_A_REALIZAR}</td>
-                                  <td className={`px-8 py-5 text-center font-black ${theme !== 'white' ? 'text-emerald-400' : 'text-emerald-600'}`}>{row.LEITURAS_100}</td>
-                                  <td className={`px-8 py-5 text-center font-black ${theme !== 'white' ? 'text-red-400' : 'text-red-600'}`}>{row.LEITURAS_NAO_REALIZADAS}</td>
-                                  <td className="px-8 py-5 text-center">
-                                    <span className={`px-2 py-1 text-[9px] font-black rounded-lg uppercase tracking-widest ${
-                                      (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'OK' || 
-                                      (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'CONCLUIDO' ||
-                                      (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'CONCLUIDA'
-                                      ? (theme !== 'white' ? 'bg-emerald-900/50 text-emerald-400' : 'bg-emerald-100 text-emerald-600') : 
-                                      (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'N-OK' || 
-                                      (row.STATUS || '').toString().trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 'PENDENTE' 
-                                      ? (theme !== 'white' ? 'bg-red-900/50 text-red-400' : 'bg-red-100 text-red-600') : (theme !== 'white' ? 'bg-blue-800/50 text-blue-300' : 'bg-gray-100 text-gray-500')}`}>
-                                      {row.STATUS || '-'}
-                                    </span>
-                                  </td>
+                                  <td className={`px-8 py-5 text-center ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>{row.CARD_A_REALIZAR}</td>
+                                  <td className={`px-8 py-5 text-center font-black ${theme !== 'white' ? 'text-emerald-400' : 'text-emerald-600'}`}>{row.CARD_REALIZADAS}</td>
+                                  <td className={`px-8 py-5 text-center font-black ${theme !== 'white' ? 'text-red-400' : 'text-red-600'}`}>{row.CARD_NAO_REALIZADAS}</td>
                                   <td className={`px-8 py-5 ${theme !== 'white' ? 'text-blue-200' : 'text-gray-500'}`}>{row.PRAZO || '-'}</td>
                                 </>
                               ) : (
@@ -1147,11 +1231,11 @@ export default function App() {
                       </table>
                    </div>
                    <div className={`p-6 border-t flex items-center justify-between no-print ${theme !== 'white' ? 'bg-gray-800/20 border-gray-700/50' : 'bg-gray-50/20 border-gray-50'}`}>
-                      <span className={`text-[10px] font-black uppercase tracking-widest ${theme !== 'white' ? 'text-blue-400' : 'text-gray-400'}`}>Registros: {filteredData.length}</span>
+                      <span className={`text-[10px] font-black uppercase tracking-widest ${theme !== 'white' ? 'text-blue-400' : 'text-gray-400'}`}>Registros: {tableData.length}</span>
                       <div className="flex gap-2">
                          <button onClick={() => setCurrentPage(p => Math.max(1, p-1))} className={`p-3 border rounded-xl shadow-sm transition-all ${theme !== 'white' ? 'bg-gray-800 border-gray-700 hover:bg-gray-700 text-blue-300' : 'bg-white border-gray-100 hover:bg-gray-50'}`}><ChevronLeft className="w-4 h-4"/></button>
-                         <div className={`px-6 py-3 border rounded-xl text-xs font-black shadow-sm ${theme !== 'white' ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-100'}`}>PÁG {currentPage} / {Math.ceil(filteredData.length / pageSize) || 1}</div>
-                         <button onClick={() => setCurrentPage(p => Math.min(Math.ceil(filteredData.length / pageSize), p+1))} className={`p-3 border rounded-xl shadow-sm transition-all ${theme !== 'white' ? 'bg-gray-800 border-gray-700 hover:bg-gray-700 text-blue-300' : 'bg-white border-gray-100 hover:bg-gray-50'}`}><ChevronRight className="w-4 h-4"/></button>
+                         <div className={`px-6 py-3 border rounded-xl text-xs font-black shadow-sm ${theme !== 'white' ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-100'}`}>PÁG {currentPage} / {Math.ceil(tableData.length / pageSize) || 1}</div>
+                         <button onClick={() => setCurrentPage(p => Math.min(Math.ceil(tableData.length / pageSize), p+1))} className={`p-3 border rounded-xl shadow-sm transition-all ${theme !== 'white' ? 'bg-gray-800 border-gray-700 hover:bg-gray-700 text-blue-300' : 'bg-white border-gray-100 hover:bg-gray-50'}`}><ChevronRight className="w-4 h-4"/></button>
                       </div>
                    </div>
                 </div>
