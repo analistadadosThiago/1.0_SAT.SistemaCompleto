@@ -395,6 +395,7 @@ export default function App() {
           MES: d.MES,
           ANO: d.ANO,
           RAZAO: d.RAZAO,
+          UL: d.UL,
           BASE: d.BASE,
           CONTRATO: d.CONTRATO,
           CARD_A_REALIZAR: 0,
@@ -1148,6 +1149,7 @@ export default function App() {
                               <th className="px-8 py-5">Mês</th>
                               <th className="px-8 py-5">Ano</th>
                               <th className="px-8 py-5">RZ</th>
+                              <th className="px-8 py-5">UL</th>
                               <th className="px-8 py-5">Base</th>
                               <th className="px-8 py-5">Contrato</th>
                               <th className="px-8 py-5 text-center">Cons. a realizar</th>
@@ -1206,6 +1208,7 @@ export default function App() {
                                   <td className={`px-8 py-5 ${theme !== 'white' ? 'text-blue-400' : 'text-gray-400'}`}>{row.MES}</td>
                                   <td className={`px-8 py-5 ${theme !== 'white' ? 'text-blue-400' : 'text-gray-400'}`}>{row.ANO}</td>
                                   <td className={`px-8 py-5 truncate max-w-[200px] ${theme !== 'white' ? 'text-white' : 'text-gray-700'}`}>{row.RAZAO}</td>
+                                  <td className={`px-8 py-5 font-black ${theme !== 'white' ? 'text-blue-300' : 'text-blue-600'}`}>{row.UL || '-'}</td>
                                   <td className={`px-8 py-5 font-black ${theme !== 'white' ? 'text-blue-300' : 'text-blue-600'}`}>{row.BASE}</td>
                                   <td className={`px-8 py-5 ${theme !== 'white' ? 'text-blue-100' : 'text-gray-600'}`}>{row.CONTRATO}</td>
                                   <td className={`px-8 py-5 text-center ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>{row.CARD_A_REALIZAR}</td>
