@@ -110,14 +110,35 @@ export const fetchSheetData = async (csvUrl: string, section: AppSection): Promi
     });
 
     if (section === 'consistencia') {
-      const valC = values.length > 2 ? values[2].trim() : '';
+      const valA = values.length > 0 ? values[0].trim() : ''; // Mês/Ano
+      const valC = values.length > 2 ? values[2].trim() : ''; // UL
+      const valD = values.length > 3 ? values[3].trim() : ''; // RZ
       const valF = values.length > 5 ? values[5].trim() : ''; // Base
+      const valG = values.length > 6 ? values[6].trim() : ''; // Contrato
       const valK = values.length > 10 ? values[10].trim() : ''; // Status
+      const valL = values.length > 11 ? values[11].trim() : ''; // Prazo
       
+      // Tentar extrair Mês e Ano de valA (ex: "JANEIRO/2024" ou "01/2024")
+      let mes = valA;
+      let ano = '';
+      if (valA.includes('/')) {
+        [mes, ano] = valA.split('/');
+      } else if (valA.includes(' ')) {
+        [mes, ano] = valA.split(' ');
+      }
+
+      row.MES = mes.trim().toUpperCase();
+      row.ANO = ano.trim();
+      row.RAZAO = valD;
       row.UL = valC;
+      row.BASE = valF;
+      row.CONTRATO = valG;
+      row.STATUS = valK;
+      row.PRAZO = valL;
+      
       row.CARD_A_REALIZAR = valF ? 1 : 0;
-      row.CARD_REALIZADAS = (valF && valK.toUpperCase() === 'FINALIZADO') ? 1 : 0;
-      row.CARD_NAO_REALIZADAS = (valF && valK.toUpperCase() === 'N-FINALIZADO') ? 1 : 0;
+      row.CARD_REALIZADAS = (valF && valK.toUpperCase().includes('FINALIZADO') && !valK.toUpperCase().includes('N-FINALIZADO')) ? 1 : 0;
+      row.CARD_NAO_REALIZADAS = (valF && valK.toUpperCase().includes('N-FINALIZADO')) ? 1 : 0;
       row.LEITURAS_30 = 0;
     }
 

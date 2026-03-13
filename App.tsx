@@ -118,21 +118,21 @@ const DonutTooltip = ({ active, payload, breakdown, theme }: any) => {
     const isDark = theme !== 'white';
     
     return (
-      <div className={`${isDark ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border-gray-100 text-gray-800'} p-5 border shadow-2xl rounded-2xl text-xs min-w-[240px]`}>
-        <div className={`flex items-center justify-between mb-4 pb-2 border-b ${isDark ? 'border-gray-700' : 'border-gray-50'}`}>
-          <span className={`font-black uppercase tracking-widest text-sm ${isOK ? 'text-emerald-500' : 'text-red-500'}`}>
-            Status: {statusType}
+      <div className={`${isDark ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border-gray-100 text-gray-800'} p-6 border shadow-2xl rounded-3xl text-sm min-w-[280px]`}>
+        <div className={`flex items-center justify-between mb-5 pb-3 border-b ${isDark ? 'border-gray-700' : 'border-gray-50'}`}>
+          <span className={`font-black uppercase tracking-widest text-base ${isOK ? 'text-emerald-500' : 'text-red-500'}`}>
+            {statusType}
           </span>
-          <span className={`font-bold ${isDark ? 'text-blue-300' : 'text-gray-500'}`}>Total: {data.value.toLocaleString()}</span>
+          <span className={`font-black ${isDark ? 'text-blue-300' : 'text-gray-900'}`}>{data.value.toLocaleString()}</span>
         </div>
-        <div className="space-y-2.5 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
+        <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
           {breakdown && Object.entries(breakdown).map(([name, stats]: [string, any]) => {
             const count = isOK ? stats.ok : stats.nok;
             if (count === 0) return null;
             return (
-              <div key={name} className="flex justify-between items-center gap-4">
-                <span className={`${isDark ? 'text-blue-200' : 'text-gray-600'} font-bold truncate max-w-[140px]`}>{name}</span>
-                <span className={`font-black text-sm ${isOK ? 'text-emerald-500' : 'text-red-500'}`}>{count.toLocaleString()}</span>
+              <div key={name} className="flex justify-between items-center gap-6">
+                <span className={`${isDark ? 'text-blue-200' : 'text-gray-600'} font-black text-xs uppercase tracking-tighter truncate max-w-[160px]`}>{name}</span>
+                <span className={`font-black text-base ${isOK ? 'text-emerald-500' : 'text-red-500'}`}>{count.toLocaleString()}</span>
               </div>
             );
           })}
@@ -236,7 +236,7 @@ export default function App() {
                        (activeSection === 'notas' ? 'Notas AM: Contrato de Divinopolis' : 
                        (activeSection === 'notas_triangulo' ? 'Notas AM: contrato do Triângulo' : 
                        (activeSection === 'notas_mantiqueira' ? 'Notas AM: Contrato da Mantiqueira' : 
-                       (activeSection === 'consistencia' ? 'Acompanhamento de Consistência' : 'Detalhamento de Transmissão'))));
+                       (activeSection === 'consistencia' ? 'Relação de Unidades de Leituras' : 'Detalhamento de Transmissão'))));
 
   const handleLoadData = useCallback(async (sectionOverride?: AppSection) => {
     const targetSection = sectionOverride || activeSection;
@@ -250,20 +250,24 @@ export default function App() {
       const csvUrl = parseGoogleSheetUrl(url);
       if (!csvUrl) throw new Error('Link inválido. Copie o endereço completo da aba do navegador.');
       const response = await fetchSheetData(csvUrl, targetSection);
+      
+      // Deduplicação de registros para evitar erros de contagem
+      const uniqueData = Array.from(new Map(response.data.map((item: any) => [JSON.stringify(item), item])).values());
+
       if (targetSection === 'transmissao') {
-        setTransmissaoRawData(response.data);
+        setTransmissaoRawData(uniqueData);
         setTransmissaoMeta({ lastUpdate: response.lastUpdate });
       } else if (targetSection === 'notas') {
-        setNotasRawData(response.data);
+        setNotasRawData(uniqueData);
         setNotasMeta({ lastUpdate: response.lastUpdate });
       } else if (targetSection === 'notas_triangulo') {
-        setNotasTrianguloRawData(response.data);
+        setNotasTrianguloRawData(uniqueData);
         setNotasTrianguloMeta({ lastUpdate: response.lastUpdate });
       } else if (targetSection === 'notas_mantiqueira') {
-        setNotasMantiqueiraRawData(response.data);
+        setNotasMantiqueiraRawData(uniqueData);
         setNotasMantiqueiraMeta({ lastUpdate: response.lastUpdate });
       } else if (targetSection === 'consistencia') {
-        setConsistenciaRawData(response.data);
+        setConsistenciaRawData(uniqueData);
         setConsistenciaMeta({ lastUpdate: response.cellO1, tipo: response.cellO1 });
       }
       setCurrentPage(1);
@@ -349,67 +353,41 @@ export default function App() {
   }, [activeSection]);
 
   const contratos = useMemo(() => Array.from(new Set(currentRawData.map((d: any) => d.CONTRATO).filter(Boolean))).sort(), [currentRawData]);
-  const dataContrato = useMemo(() => currentRawData.filter(d => fContrato.length === 0 || fContrato.includes(d.CONTRATO)), [currentRawData, fContrato]);
-  
-  const meses = useMemo(() => ['Tudo', ...Array.from(new Set(dataContrato.map(d => d.MES).filter(Boolean))).sort()], [dataContrato]);
-  const dataMes = useMemo(() => dataContrato.filter(d => fMes === 'Tudo' || d.MES === fMes), [dataContrato, fMes]);
-  
-  const anos = useMemo(() => ['Tudo', ...Array.from(new Set(dataMes.map(d => d.ANO).filter(Boolean))).sort()], [dataMes]);
-  const dataAno = useMemo(() => dataMes.filter(d => fAno === 'Tudo' || d.ANO === fAno), [dataMes, fAno]);
-  
-  const bases = useMemo(() => Array.from(new Set(dataAno.map(d => d.BASE).filter(Boolean))).sort(), [dataAno]);
-  const dataBase = useMemo(() => dataAno.filter(d => fBase.length === 0 || fBase.includes(d.BASE)), [dataAno, fBase]);
-
-  const prazos = useMemo(() => Array.from(new Set(dataBase.map((d: any) => d.PRAZO).filter(Boolean))).sort(), [dataBase]);
-  const dataPrazo = useMemo(() => {
-    if (fPrazos.length === 0) return dataBase;
-    return dataBase.filter((d: any) => fPrazos.includes(d.PRAZO));
-  }, [dataBase, fPrazos]);
-  
-  const razoes = useMemo(() => Array.from(new Set(dataPrazo.map(d => d.RAZAO).filter(Boolean))).sort(), [dataPrazo]);
-  const dataRazao = useMemo(() => dataPrazo.filter(d => fRazao.length === 0 || fRazao.includes(d.RAZAO)), [dataPrazo, fRazao]);
-  
+  const meses = useMemo(() => ['Tudo', ...Array.from(new Set(currentRawData.map((d: any) => d.MES).filter(Boolean))).sort()], [currentRawData]);
+  const anos = useMemo(() => ['Tudo', ...Array.from(new Set(currentRawData.map((d: any) => d.ANO).filter(Boolean))).sort()], [currentRawData]);
+  const bases = useMemo(() => Array.from(new Set(currentRawData.map((d: any) => d.BASE).filter(Boolean))).sort(), [currentRawData]);
+  const prazos = useMemo(() => Array.from(new Set(currentRawData.map((d: any) => d.PRAZO).filter(Boolean))).sort(), [currentRawData]);
+  const razoes = useMemo(() => Array.from(new Set(currentRawData.map((d: any) => d.RAZAO).filter(Boolean))).sort(), [currentRawData]);
   const statuses = useMemo(() => ['Tudo', ...Array.from(new Set(currentRawData.map((d: any) => d.STATUS).filter(Boolean))).sort()], [currentRawData]);
-  const dataStatus = useMemo(() => dataRazao.filter((d: any) => fStatus === 'Tudo' || d.STATUS === fStatus), [dataRazao, fStatus]);
+
+  // Lógica de Filtragem Crítica: Cruzamento simultâneo de TODOS os seletores ativos
+  const filteredData = useMemo(() => {
+    return currentRawData.filter((d: any) => {
+      const matchContrato = fContrato.length === 0 || fContrato.includes(d.CONTRATO);
+      const matchMes = fMes === 'Tudo' || d.MES === fMes;
+      const matchAno = fAno === 'Tudo' || d.ANO === fAno;
+      const matchBase = fBase.length === 0 || fBase.includes(d.BASE);
+      const matchPrazo = fPrazos.length === 0 || fPrazos.includes(d.PRAZO);
+      const matchRazao = fRazao.length === 0 || fRazao.includes(d.RAZAO);
+      const matchStatus = fStatus === 'Tudo' || d.STATUS === fStatus;
+      
+      let matchPrazosPendente = true;
+      if (isNotas && fStatus === 'Pendente' && fPrazosPendente.length > 0) {
+        matchPrazosPendente = fPrazosPendente.includes(d.PRAZO);
+      }
+
+      return matchContrato && matchMes && matchAno && matchBase && matchPrazo && matchRazao && matchStatus && matchPrazosPendente;
+    });
+  }, [currentRawData, fContrato, fMes, fAno, fBase, fPrazos, fRazao, fStatus, fPrazosPendente, isNotas]);
 
   const prazosPendenteDisponiveis = useMemo(() => {
     if (!isNotas || fStatus !== 'Pendente') return [];
-    return Array.from(new Set(dataStatus.map((d: any) => d.PRAZO).filter(Boolean))).sort();
-  }, [dataStatus, fStatus, isNotas]);
-
-  const filteredData = useMemo(() => {
-    if (isNotas && fStatus === 'Pendente' && fPrazosPendente.length > 0) {
-      return dataStatus.filter((d: any) => fPrazosPendente.includes(d.PRAZO));
-    }
-    return dataStatus;
-  }, [dataStatus, fStatus, fPrazosPendente, isNotas]);
+    return Array.from(new Set(filteredData.map((d: any) => d.PRAZO).filter(Boolean))).sort();
+  }, [filteredData, fStatus, isNotas]);
 
   const tableData = useMemo(() => {
-    if (!isConsistencia) return filteredData;
-    
-    const map: Record<string, any> = {};
-    filteredData.forEach((d: any) => {
-      const key = `${d.RAZAO}-${d.BASE}`;
-      if (!map[key]) {
-        map[key] = {
-          MES: d.MES,
-          ANO: d.ANO,
-          RAZAO: d.RAZAO,
-          UL: d.UL,
-          BASE: d.BASE,
-          CONTRATO: d.CONTRATO,
-          CARD_A_REALIZAR: 0,
-          CARD_REALIZADAS: 0,
-          CARD_NAO_REALIZADAS: 0,
-          PRAZO: d.PRAZO
-        };
-      }
-      map[key].CARD_A_REALIZAR += (d.CARD_A_REALIZAR || 0);
-      map[key].CARD_REALIZADAS += (d.CARD_REALIZADAS || 0);
-      map[key].CARD_NAO_REALIZADAS += (d.CARD_NAO_REALIZADAS || 0);
-    });
-    return Object.values(map);
-  }, [filteredData, isConsistencia]);
+    return filteredData;
+  }, [filteredData]);
 
   const stats = useMemo<DashboardStats>(() => {
     if (!filteredData.length) return { totalToPerform: 0, totalPerformed: 0, totalPending: 0, totalNotSent: 0, successRate: 0, pendingRate: 0 };
@@ -445,6 +423,25 @@ export default function App() {
       pendingRate: tP > 0 ? (tPend / tP) * 100 : 0 
     };
   }, [filteredData, activeSection]);
+
+  // Verificação de Consistência de Dados (Requisito Crítico)
+  useEffect(() => {
+    if (isConsistencia && filteredData.length > 0) {
+      const totalArealizarCard = stats.totalToPerform;
+      const totalArealizarTabela = tableData.reduce((acc, curr) => acc + (curr.CARD_A_REALIZAR || 0), 0);
+      
+      if (Math.abs(totalArealizarCard - totalArealizarTabela) > 0.001) {
+        console.warn(`[VERIFICAÇÃO] Mismatch detectado: Card (${totalArealizarCard}) vs Tabela (${totalArealizarTabela})`);
+      }
+    }
+  }, [filteredData, stats.totalToPerform, tableData, isConsistencia]);
+
+  const isDataConsistent = useMemo(() => {
+    if (!isConsistencia || filteredData.length === 0) return true;
+    const totalArealizarCard = stats.totalToPerform;
+    const totalArealizarTabela = tableData.reduce((acc, curr) => acc + (curr.CARD_A_REALIZAR || 0), 0);
+    return Math.abs(totalArealizarCard - totalArealizarTabela) < 0.001;
+  }, [filteredData, stats.totalToPerform, tableData, isConsistencia]);
 
   const baseChartData = useMemo(() => {
     const map: Record<string, any> = {};
@@ -795,12 +792,69 @@ export default function App() {
               )}
 
               {currentRawData.length > 0 ? (
-            <div className="space-y-8 animate-in fade-in duration-500">
-              <div className={`p-8 rounded-[2.5rem] border shadow-sm space-y-8 no-print ${theme !== 'white' ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100'}`}>
-                <div className={`flex items-center justify-between border-b pb-4 ${theme !== 'white' ? 'border-gray-700/50' : 'border-gray-50'}`}>
-                  <div className="flex items-center gap-2">
-                    <Filter className={`w-5 h-5 ${theme !== 'white' ? 'text-blue-300' : 'text-blue-600'}`} />
-                    <span className={`text-xs font-black uppercase tracking-widest ${theme !== 'white' ? 'text-blue-400' : 'text-gray-400'}`}>Menus de Seleção de Dados</span>
+                <div className="space-y-8 animate-in fade-in duration-500">
+                  {filteredData.length === 0 ?
+                    <div className={`p-12 rounded-[2.5rem] border shadow-sm text-center flex flex-col items-center justify-center ${theme !== 'white' ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100'}`}>
+                      <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center text-red-400 mb-6 border border-red-100 shadow-sm">
+                        <Filter className="w-10 h-10" />
+                      </div>
+                      <h3 className={`text-xl font-black uppercase tracking-tighter mb-4 ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>
+                        Nenhum registro encontrado
+                      </h3>
+                      <p className={`text-sm font-bold mb-8 max-w-md ${theme !== 'white' ? 'text-gray-400' : 'text-gray-500'}`}>
+                        Não encontramos dados para os filtros selecionados. Tente ajustar os critérios abaixo:
+                      </p>
+                      
+                      <div className="flex flex-wrap justify-center gap-3 max-w-2xl">
+                        {fContrato.length > 0 && <span className="px-4 py-2 bg-blue-50 text-blue-700 rounded-xl text-[10px] font-black uppercase border border-blue-100">Contrato: {fContrato.join(', ')}</span>}
+                        {fMes !== 'Tudo' && <span className="px-4 py-2 bg-blue-50 text-blue-700 rounded-xl text-[10px] font-black uppercase border border-blue-100">Mês: {fMes}</span>}
+                        {fAno !== 'Tudo' && <span className="px-4 py-2 bg-blue-50 text-blue-700 rounded-xl text-[10px] font-black uppercase border border-blue-100">Ano: {fAno}</span>}
+                        {fBase.length > 0 && <span className="px-4 py-2 bg-blue-50 text-blue-700 rounded-xl text-[10px] font-black uppercase border border-blue-100">Base: {fBase.join(', ')}</span>}
+                        {fRazao.length > 0 && <span className="px-4 py-2 bg-blue-50 text-blue-700 rounded-xl text-[10px] font-black uppercase border border-blue-100">Razão: {fRazao.join(', ')}</span>}
+                        {fPrazos.length > 0 && <span className="px-4 py-2 bg-blue-50 text-blue-700 rounded-xl text-[10px] font-black uppercase border border-blue-100">Prazo: {fPrazos.join(', ')}</span>}
+                        {fStatus !== 'Tudo' && <span className="px-4 py-2 bg-blue-50 text-blue-700 rounded-xl text-[10px] font-black uppercase border border-blue-100">Status: {fStatus}</span>}
+                      </div>
+
+                      <div className="flex gap-4 mt-10">
+                        <button 
+                          onClick={() => {
+                            setFContrato([]); setFMes('Tudo'); setFAno('Tudo');
+                            setFBase([]); setFRazao([]); setFStatus('Tudo');
+                            setFPrazos([]); setFPrazosPendente([]);
+                          }}
+                          className="flex items-center gap-2 px-8 py-4 bg-gray-100 text-gray-600 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-gray-200 transition-all"
+                        >
+                          <RefreshCw className="w-4 h-4" />
+                          Limpar Filtros
+                        </button>
+                        <button 
+                          onClick={() => handleLoadData()}
+                          className="flex items-center gap-2 px-8 py-4 bg-blue-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
+                        >
+                          <Database className="w-4 h-4" />
+                          Sincronizar Agora
+                        </button>
+                      </div>
+                    </div>
+                  :
+                    <div className="space-y-8">
+                      <div className={`p-8 rounded-[2.5rem] border shadow-sm space-y-8 no-print ${theme !== 'white' ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100'}`}>
+                <div className="flex items-center justify-between border-b pb-4 ${theme !== 'white' ? 'border-gray-700/50' : 'border-gray-50'}">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <Filter className={`w-5 h-5 ${theme !== 'white' ? 'text-blue-300' : 'text-blue-600'}`} />
+                      <span className={`text-xs font-black uppercase tracking-widest ${theme !== 'white' ? 'text-blue-400' : 'text-gray-400'}`}>Menus de Seleção de Dados</span>
+                    </div>
+                    {isConsistencia && (
+                      <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                        isDataConsistent 
+                          ? (theme !== 'white' ? 'bg-emerald-900/30 border-emerald-800 text-emerald-400' : 'bg-emerald-50 border-emerald-100 text-emerald-600')
+                          : (theme !== 'white' ? 'bg-red-900/30 border-red-800 text-red-400' : 'bg-red-50 border-red-100 text-red-600')
+                      }`}>
+                        {isDataConsistent ? <ShieldCheck className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
+                        {isDataConsistent ? 'Dados Sincronizados' : 'Erro de Sincronização'}
+                      </div>
+                    )}
                   </div>
                   <button 
                     onClick={() => handleLoadData()} 
@@ -810,14 +864,14 @@ export default function App() {
                   </button>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-7 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7 gap-6">
                   <MultiSelectFilter label="Contrato" selected={fContrato} onChange={setFContrato} options={contratos} icon={<Database className="w-3 h-3"/>} theme={theme}/>
                   <FilterDropdown label="Mês" value={fMes} onChange={setFMes} options={meses} icon={<CalendarDays className="w-3 h-3"/>} theme={theme}/>
                   <FilterDropdown label="Ano" value={fAno} onChange={setFAno} options={anos} icon={<CalendarDays className="w-3 h-3"/>} theme={theme}/>
                   <MultiSelectFilter label="Base" selected={fBase} onChange={setFBase} options={bases} icon={<MapPin className="w-3 h-3"/>} theme={theme}/>
                   <MultiSelectFilter label="Prazo" selected={fPrazos} onChange={setFPrazos} options={prazos} icon={<Clock className="w-3 h-3"/>} theme={theme}/>
                   <MultiSelectFilter label="Razão" selected={fRazao} onChange={setFRazao} options={razoes} icon={<FileText className="w-3 h-3"/>} theme={theme}/>
-                  <FilterDropdown label="Status" value={fStatus} onChange={setFStatus} options={statuses} icon={<Activity className="w-3 h-3"/>} theme={theme}/>
+                  <FilterDropdown label="Status" value={fStatus} onChange={setFStatus} options={statuses} icon={<ShieldCheck className="w-3 h-3"/>} theme={theme}/>
                 </div>
 
                 {isNotas && fStatus === 'Pendente' && prazosPendenteDisponiveis.length > 0 && (
@@ -1000,13 +1054,31 @@ export default function App() {
                               outerRadius={150}
                               paddingAngle={10}
                               dataKey="value"
-                              label={({ name, value }) => `${name}: ${value}`}
+                              label={({ cx, cy, midAngle, innerRadius, outerRadius, value, name }) => {
+                                const RADIAN = Math.PI / 180;
+                                const radius = outerRadius + 30;
+                                const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                                const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                                return (
+                                  <text
+                                    x={x}
+                                    y={y}
+                                    fill={theme !== 'white' ? '#fff' : '#1e293b'}
+                                    textAnchor={x > cx ? 'start' : 'end'}
+                                    dominantBaseline="central"
+                                    style={{ fontSize: '12px', fontWeight: 900, textTransform: 'uppercase' }}
+                                  >
+                                    {`${name}: ${value}`}
+                                  </text>
+                                );
+                              }}
+                              labelLine={{ stroke: theme !== 'white' ? '#475569' : '#cbd5e1', strokeWidth: 2 }}
                             >
                               {statusDonutData.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={entry.name === 'OK' || entry.name === 'Concluído' || entry.name === 'Finalizado' ? '#10b981' : '#ef4444'} />
                               ))}
                             </Pie>
-                            <Tooltip content={<DonutTooltip breakdown={isConsistencia ? contratoBreakdown : baseBreakdown} theme={theme} />} />
+                            <Tooltip content={<DonutTooltip breakdown={baseBreakdown} theme={theme} />} />
                           </PieChart>
                       </ResponsiveContainer>
                     </div>
@@ -1112,7 +1184,7 @@ export default function App() {
             ) : (
                 <div className={`rounded-[2.5rem] border shadow-sm overflow-hidden mb-10 print-full-table ${theme !== 'white' ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100'}`}>
                    <div className={`p-6 border-b flex justify-between items-center no-print ${theme !== 'white' ? 'border-gray-700/50' : 'border-gray-50'}`}>
-                     <h2 className={`font-black text-xs uppercase tracking-widest ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>Base de Dados - {sectionTitle.toUpperCase()}</h2>
+                     <h2 className={`font-black text-xs uppercase tracking-widest ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>{isConsistencia ? sectionTitle.toUpperCase() : "Base de Dados - " + sectionTitle.toUpperCase()}</h2>
                      <div className="flex gap-3">
                         <button onClick={exportToExcel} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all ${theme !== 'white' ? 'bg-emerald-900/30 text-emerald-400 hover:bg-emerald-800/30' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'}`}>
                           <FileSpreadsheet className="w-4 h-4"/> Exportar em Excel
@@ -1146,10 +1218,10 @@ export default function App() {
                         ) : isConsistencia ? (
                           <thead className={`${theme !== 'white' ? 'bg-gray-800 text-blue-300' : 'bg-gray-50/50 text-gray-400'} text-[10px] font-black uppercase tracking-widest`}>
                             <tr>
+                              <th className="px-8 py-5">UL</th>
                               <th className="px-8 py-5">Mês</th>
                               <th className="px-8 py-5">Ano</th>
                               <th className="px-8 py-5">RZ</th>
-                              <th className="px-8 py-5">UL</th>
                               <th className="px-8 py-5">Base</th>
                               <th className="px-8 py-5">Contrato</th>
                               <th className="px-8 py-5 text-center">Cons. a realizar</th>
@@ -1205,10 +1277,10 @@ export default function App() {
                                 </>
                               ) : isConsistencia ? (
                                 <>
+                                  <td className={`px-8 py-5 font-black ${theme !== 'white' ? 'text-blue-300' : 'text-blue-600'}`}>{row.UL || '-'}</td>
                                   <td className={`px-8 py-5 ${theme !== 'white' ? 'text-blue-400' : 'text-gray-400'}`}>{row.MES}</td>
                                   <td className={`px-8 py-5 ${theme !== 'white' ? 'text-blue-400' : 'text-gray-400'}`}>{row.ANO}</td>
                                   <td className={`px-8 py-5 truncate max-w-[200px] ${theme !== 'white' ? 'text-white' : 'text-gray-700'}`}>{row.RAZAO}</td>
-                                  <td className={`px-8 py-5 font-black ${theme !== 'white' ? 'text-blue-300' : 'text-blue-600'}`}>{row.UL || '-'}</td>
                                   <td className={`px-8 py-5 font-black ${theme !== 'white' ? 'text-blue-300' : 'text-blue-600'}`}>{row.BASE}</td>
                                   <td className={`px-8 py-5 ${theme !== 'white' ? 'text-blue-100' : 'text-gray-600'}`}>{row.CONTRATO}</td>
                                   <td className={`px-8 py-5 text-center ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>{row.CARD_A_REALIZAR}</td>
@@ -1240,33 +1312,35 @@ export default function App() {
                          <div className={`px-6 py-3 border rounded-xl text-xs font-black shadow-sm ${theme !== 'white' ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-100'}`}>PÁG {currentPage} / {Math.ceil(tableData.length / pageSize) || 1}</div>
                          <button onClick={() => setCurrentPage(p => Math.min(Math.ceil(tableData.length / pageSize), p+1))} className={`p-3 border rounded-xl shadow-sm transition-all ${theme !== 'white' ? 'bg-gray-800 border-gray-700 hover:bg-gray-700 text-blue-300' : 'bg-white border-gray-100 hover:bg-gray-50'}`}><ChevronRight className="w-4 h-4"/></button>
                       </div>
-                   </div>
+                    </div>
+                  </div>
+                  )}
                 </div>
-              )}
+              }
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in duration-700">
-               <div className="w-32 h-32 bg-white rounded-[3rem] flex items-center justify-center text-blue-200 mb-10 border border-blue-50 shadow-sm"><HelpCircle className="w-16 h-16"/></div>
-               <h3 className="text-2xl font-black text-gray-900 mb-4 uppercase tracking-tighter">
-                {sectionTitle} Não Conectada
-               </h3>
-               <p className="text-gray-400 max-w-md text-base leading-relaxed mb-12">Para carregar o dashboard, clique em sincronizar ou cole o link direto da aba correspondente no campo superior.</p>
-               
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
+              <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in duration-700">
+                <div className="w-32 h-32 bg-white rounded-[3rem] flex items-center justify-center text-blue-200 mb-10 border border-blue-50 shadow-sm"><HelpCircle className="w-16 h-16"/></div>
+                <h3 className="text-2xl font-black text-gray-900 mb-4 uppercase tracking-tighter">
+                  {sectionTitle} Não Conectada
+                </h3>
+                <p className="text-gray-400 max-w-md text-base leading-relaxed mb-12">Para carregar o dashboard, clique em sincronizar ou cole o link direto da aba correspondente no campo superior.</p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
                   <div className="bg-white p-8 rounded-[2rem] border border-gray-100 text-left shadow-sm">
-                     <p className="text-[10px] font-black text-blue-600 uppercase mb-4 flex items-center gap-2"><ExternalLink className="w-4 h-4"/> 1. Acesse a Aba Correta</p>
-                     <p className="text-sm text-gray-600 leading-relaxed">No Google Sheets, clique exatamente no nome da aba inferior <strong>{activeSection === 'transmissao' ? 'Transmissao' : sectionTitle}</strong>.</p>
+                    <p className="text-[10px] font-black text-blue-600 uppercase mb-4 flex items-center gap-2"><ExternalLink className="w-4 h-4"/> 1. Acesse a Aba Correta</p>
+                    <p className="text-sm text-gray-600 leading-relaxed">No Google Sheets, clique exatamente no nome da aba inferior <strong>{activeSection === 'transmissao' ? 'Transmissao' : sectionTitle}</strong>.</p>
                   </div>
                   <div className="bg-white p-8 rounded-[2rem] border border-gray-100 text-left shadow-sm">
-                     <p className="text-[10px] font-black text-emerald-600 uppercase mb-4 flex items-center gap-2"><ExternalLink className="w-4 h-4"/> 2. Copie o Link da Aba</p>
-                     <p className="text-sm text-gray-600 leading-relaxed">Cada aba tem um link próprio (gid). Copie todo o endereço que aparece no navegador e cole aqui.</p>
+                    <p className="text-[10px] font-black text-emerald-600 uppercase mb-4 flex items-center gap-2"><ExternalLink className="w-4 h-4"/> 2. Copie o Link da Aba</p>
+                    <p className="text-sm text-gray-600 leading-relaxed">Cada aba tem um link próprio (gid). Copie todo o endereço que aparece no navegador e cole aqui.</p>
                   </div>
-               </div>
-            </div>
-          )}
-        </>
-      )}
-    </div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
   </main>
     </div>
   );
@@ -1296,6 +1370,14 @@ function FilterDropdown({ label, value, onChange, options, icon, theme }: any) {
 
 function MultiSelectFilter({ label, selected, onChange, options, icon, theme }: any) {
   const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredOptions = useMemo(() => {
+    if (!searchTerm) return options;
+    return options.filter((option: string) => 
+      option.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [options, searchTerm]);
 
   return (
     <div className="flex flex-col gap-2 relative">
@@ -1318,42 +1400,64 @@ function MultiSelectFilter({ label, selected, onChange, options, icon, theme }: 
       {isOpen && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)}></div>
-          <div className={`absolute top-full left-0 right-0 mt-2 border rounded-2xl shadow-2xl z-20 max-h-60 overflow-y-auto p-2 custom-scrollbar ${
+          <div className={`absolute top-full left-0 right-0 mt-2 border rounded-2xl shadow-2xl z-20 max-h-80 overflow-hidden flex flex-col ${
             theme !== 'white' ? 'bg-gray-800 border-gray-700' : 
             'bg-white border-gray-100'
           }`}>
-            <div className="flex flex-col gap-1">
-              <div className={`flex justify-between items-center px-3 py-2 border-b mb-1 ${theme !== 'white' ? 'border-gray-700' : 'border-gray-50'}`}>
-                <button 
-                  onClick={() => onChange(options)}
-                  className={`text-[9px] font-black uppercase tracking-widest ${theme !== 'white' ? 'text-emerald-400 hover:text-emerald-300' : 'text-emerald-600 hover:text-emerald-700'}`}
-                >
-                  Selecionar Tudo
-                </button>
-                <button 
-                  onClick={() => onChange([])}
-                  className={`text-[9px] font-black uppercase tracking-widest ${theme !== 'white' ? 'text-red-400 hover:text-red-300' : 'text-red-600 hover:text-red-700'}`}
-                >
-                  Limpar
-                </button>
+            <div className={`p-2 border-b ${theme !== 'white' ? 'border-gray-700' : 'border-gray-50'}`}>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder={`Pesquisar ${label}...`}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className={`w-full text-[11px] font-bold py-2 pl-8 pr-3 rounded-xl border outline-none focus:ring-2 focus:ring-blue-500/50 transition-all ${
+                    theme !== 'white' ? 'bg-gray-900 border-gray-600 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-400'
+                  }`}
+                />
+                <Filter className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
               </div>
-              {options.map((option: string) => (
-                <label key={option} className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors ${theme !== 'white' ? 'hover:bg-blue-800' : 'hover:bg-gray-50'}`}>
-                  <input 
-                    type="checkbox" 
-                    checked={selected.includes(option)}
-                    onChange={() => {
-                      if (selected.includes(option)) {
-                        onChange(selected.filter((s: string) => s !== option));
-                      } else {
-                        onChange([...selected, option]);
-                      }
-                    }}
-                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className={`text-xs font-bold ${theme !== 'white' ? 'text-blue-100' : 'text-gray-700'}`}>{option}</span>
-                </label>
-              ))}
+            </div>
+            
+            <div className={`flex justify-between items-center px-3 py-2 border-b ${theme !== 'white' ? 'border-gray-700' : 'border-gray-50'}`}>
+              <button 
+                onClick={() => onChange(options)}
+                className={`text-[9px] font-black uppercase tracking-widest ${theme !== 'white' ? 'text-emerald-400 hover:text-emerald-300' : 'text-emerald-600 hover:text-emerald-700'}`}
+              >
+                Tudo
+              </button>
+              <button 
+                onClick={() => onChange([])}
+                className={`text-[9px] font-black uppercase tracking-widest ${theme !== 'white' ? 'text-red-400 hover:text-red-300' : 'text-red-600 hover:text-red-700'}`}
+              >
+                Limpar
+              </button>
+            </div>
+
+            <div className="overflow-y-auto p-2 custom-scrollbar max-h-48">
+              <div className="flex flex-col gap-1">
+                {filteredOptions.length === 0 ? (
+                  <div className="py-4 text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest">Nenhum item encontrado</div>
+                ) : (
+                  filteredOptions.map((option: string) => (
+                    <label key={option} className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors ${theme !== 'white' ? 'hover:bg-blue-800' : 'hover:bg-gray-50'}`}>
+                      <input 
+                        type="checkbox" 
+                        checked={selected.includes(option)}
+                        onChange={() => {
+                          if (selected.includes(option)) {
+                            onChange(selected.filter((s: string) => s !== option));
+                          } else {
+                            onChange([...selected, option]);
+                          }
+                        }}
+                        className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className={`text-xs font-bold ${theme !== 'white' ? 'text-blue-100' : 'text-gray-700'}`}>{option}</span>
+                    </label>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         </>
