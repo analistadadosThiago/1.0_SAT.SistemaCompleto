@@ -205,7 +205,7 @@ export default function App() {
   const [fContrato, setFContrato] = useState('Tudo');
   const [fMes, setFMes] = useState('Tudo');
   const [fAno, setFAno] = useState('Tudo');
-  const [fBase, setFBase] = useState('Tudo');
+  const [fBase, setFBase] = useState<string[]>([]);
   const [fRazao, setFRazao] = useState('Tudo');
   const [fStatus, setFStatus] = useState('Tudo');
   const [fPrazos, setFPrazos] = useState<string[]>([]);
@@ -343,7 +343,7 @@ export default function App() {
 
   useEffect(() => {
     setFContrato('Tudo'); setFMes('Tudo'); setFAno('Tudo');
-    setFBase('Tudo'); setFRazao('Tudo'); setFStatus('Tudo');
+    setFBase([]); setFRazao('Tudo'); setFStatus('Tudo');
     setFPrazos([]); setFPrazosPendente([]);
     setCurrentPage(1); setError(null);
   }, [activeSection]);
@@ -357,8 +357,8 @@ export default function App() {
   const anos = useMemo(() => ['Tudo', ...Array.from(new Set(dataMes.map(d => d.ANO).filter(Boolean))).sort()], [dataMes]);
   const dataAno = useMemo(() => dataMes.filter(d => fAno === 'Tudo' || d.ANO === fAno), [dataMes, fAno]);
   
-  const bases = useMemo(() => ['Tudo', ...Array.from(new Set(dataAno.map(d => d.BASE).filter(Boolean))).sort()], [dataAno]);
-  const dataBase = useMemo(() => dataAno.filter(d => fBase === 'Tudo' || d.BASE === fBase), [dataAno, fBase]);
+  const bases = useMemo(() => Array.from(new Set(dataAno.map(d => d.BASE).filter(Boolean))).sort(), [dataAno]);
+  const dataBase = useMemo(() => dataAno.filter(d => fBase.length === 0 || fBase.includes(d.BASE)), [dataAno, fBase]);
 
   const prazos = useMemo(() => Array.from(new Set(dataBase.map((d: any) => d.PRAZO).filter(Boolean))).sort(), [dataBase]);
   const dataPrazo = useMemo(() => {
@@ -604,7 +604,7 @@ export default function App() {
     if (fContrato !== 'Tudo') parts.push(`Contrato: ${fContrato}`);
     if (fMes !== 'Tudo') parts.push(`Mês: ${fMes}`);
     if (fAno !== 'Tudo') parts.push(`Ano: ${fAno}`);
-    if (fBase !== 'Tudo') parts.push(`Base: ${fBase}`);
+    if (fBase.length > 0) parts.push(`Base: ${fBase.join(', ')}`);
     if (fPrazos.length > 0) parts.push(`Prazos: ${fPrazos.join(', ')}`);
     if (fRazao !== 'Tudo') parts.push(`Razão: ${fRazao}`);
     if (fStatus !== 'Tudo') parts.push(`Status: ${fStatus}`);
@@ -814,7 +814,7 @@ export default function App() {
                   <FilterDropdown label="Contrato" value={fContrato} onChange={setFContrato} options={contratos} icon={<Database className="w-3 h-3"/>} theme={theme}/>
                   <FilterDropdown label="Mês" value={fMes} onChange={setFMes} options={meses} icon={<CalendarDays className="w-3 h-3"/>} theme={theme}/>
                   <FilterDropdown label="Ano" value={fAno} onChange={setFAno} options={anos} icon={<CalendarDays className="w-3 h-3"/>} theme={theme}/>
-                  <FilterDropdown label="Base" value={fBase} onChange={setFBase} options={bases} icon={<MapPin className="w-3 h-3"/>} theme={theme}/>
+                  <MultiSelectFilter label="Base" selected={fBase} onChange={setFBase} options={bases} icon={<MapPin className="w-3 h-3"/>} theme={theme}/>
                   <MultiSelectFilter label="Prazo" selected={fPrazos} onChange={setFPrazos} options={prazos} icon={<Clock className="w-3 h-3"/>} theme={theme}/>
                   <FilterDropdown label="Razão" value={fRazao} onChange={setFRazao} options={razoes} icon={<FileText className="w-3 h-3"/>} theme={theme}/>
                   <FilterDropdown label="Status" value={fStatus} onChange={setFStatus} options={statuses} icon={<Activity className="w-3 h-3"/>} theme={theme}/>
@@ -1323,12 +1323,20 @@ function MultiSelectFilter({ label, selected, onChange, options, icon, theme }: 
             'bg-white border-gray-100'
           }`}>
             <div className="flex flex-col gap-1">
-              <button 
-                onClick={() => { onChange([]); setIsOpen(false); }}
-                className={`text-left px-3 py-2 text-[10px] font-black uppercase rounded-lg ${theme !== 'white' ? 'text-blue-200 hover:bg-blue-800' : 'text-blue-600 hover:bg-blue-50'}`}
-              >
-                Limpar Tudo
-              </button>
+              <div className={`flex justify-between items-center px-3 py-2 border-b mb-1 ${theme !== 'white' ? 'border-gray-700' : 'border-gray-50'}`}>
+                <button 
+                  onClick={() => onChange(options)}
+                  className={`text-[9px] font-black uppercase tracking-widest ${theme !== 'white' ? 'text-emerald-400 hover:text-emerald-300' : 'text-emerald-600 hover:text-emerald-700'}`}
+                >
+                  Selecionar Tudo
+                </button>
+                <button 
+                  onClick={() => onChange([])}
+                  className={`text-[9px] font-black uppercase tracking-widest ${theme !== 'white' ? 'text-red-400 hover:text-red-300' : 'text-red-600 hover:text-red-700'}`}
+                >
+                  Limpar
+                </button>
+              </div>
               {options.map((option: string) => (
                 <label key={option} className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors ${theme !== 'white' ? 'hover:bg-blue-800' : 'hover:bg-gray-50'}`}>
                   <input 
