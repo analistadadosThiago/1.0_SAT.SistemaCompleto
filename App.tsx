@@ -202,11 +202,11 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [fContrato, setFContrato] = useState('Tudo');
+  const [fContrato, setFContrato] = useState<string[]>([]);
   const [fMes, setFMes] = useState('Tudo');
   const [fAno, setFAno] = useState('Tudo');
   const [fBase, setFBase] = useState<string[]>([]);
-  const [fRazao, setFRazao] = useState('Tudo');
+  const [fRazao, setFRazao] = useState<string[]>([]);
   const [fStatus, setFStatus] = useState('Tudo');
   const [fPrazos, setFPrazos] = useState<string[]>([]);
   const [fPrazosPendente, setFPrazosPendente] = useState<string[]>([]);
@@ -342,14 +342,14 @@ export default function App() {
   };
 
   useEffect(() => {
-    setFContrato('Tudo'); setFMes('Tudo'); setFAno('Tudo');
-    setFBase([]); setFRazao('Tudo'); setFStatus('Tudo');
+    setFContrato([]); setFMes('Tudo'); setFAno('Tudo');
+    setFBase([]); setFRazao([]); setFStatus('Tudo');
     setFPrazos([]); setFPrazosPendente([]);
     setCurrentPage(1); setError(null);
   }, [activeSection]);
 
-  const contratos = useMemo(() => ['Tudo', ...Array.from(new Set(currentRawData.map((d: any) => d.CONTRATO).filter(Boolean))).sort()], [currentRawData]);
-  const dataContrato = useMemo(() => currentRawData.filter(d => fContrato === 'Tudo' || d.CONTRATO === fContrato), [currentRawData, fContrato]);
+  const contratos = useMemo(() => Array.from(new Set(currentRawData.map((d: any) => d.CONTRATO).filter(Boolean))).sort(), [currentRawData]);
+  const dataContrato = useMemo(() => currentRawData.filter(d => fContrato.length === 0 || fContrato.includes(d.CONTRATO)), [currentRawData, fContrato]);
   
   const meses = useMemo(() => ['Tudo', ...Array.from(new Set(dataContrato.map(d => d.MES).filter(Boolean))).sort()], [dataContrato]);
   const dataMes = useMemo(() => dataContrato.filter(d => fMes === 'Tudo' || d.MES === fMes), [dataContrato, fMes]);
@@ -366,8 +366,8 @@ export default function App() {
     return dataBase.filter((d: any) => fPrazos.includes(d.PRAZO));
   }, [dataBase, fPrazos]);
   
-  const razoes = useMemo(() => ['Tudo', ...Array.from(new Set(dataPrazo.map(d => d.RAZAO).filter(Boolean))).sort()], [dataPrazo]);
-  const dataRazao = useMemo(() => dataPrazo.filter(d => fRazao === 'Tudo' || d.RAZAO === fRazao), [dataPrazo, fRazao]);
+  const razoes = useMemo(() => Array.from(new Set(dataPrazo.map(d => d.RAZAO).filter(Boolean))).sort(), [dataPrazo]);
+  const dataRazao = useMemo(() => dataPrazo.filter(d => fRazao.length === 0 || fRazao.includes(d.RAZAO)), [dataPrazo, fRazao]);
   
   const statuses = useMemo(() => ['Tudo', ...Array.from(new Set(currentRawData.map((d: any) => d.STATUS).filter(Boolean))).sort()], [currentRawData]);
   const dataStatus = useMemo(() => dataRazao.filter((d: any) => fStatus === 'Tudo' || d.STATUS === fStatus), [dataRazao, fStatus]);
@@ -601,12 +601,12 @@ export default function App() {
 
   const summaryText = useMemo(() => {
     const parts = [];
-    if (fContrato !== 'Tudo') parts.push(`Contrato: ${fContrato}`);
+    if (fContrato.length > 0) parts.push(`Contrato: ${fContrato.join(', ')}`);
     if (fMes !== 'Tudo') parts.push(`Mês: ${fMes}`);
     if (fAno !== 'Tudo') parts.push(`Ano: ${fAno}`);
     if (fBase.length > 0) parts.push(`Base: ${fBase.join(', ')}`);
     if (fPrazos.length > 0) parts.push(`Prazos: ${fPrazos.join(', ')}`);
-    if (fRazao !== 'Tudo') parts.push(`Razão: ${fRazao}`);
+    if (fRazao.length > 0) parts.push(`Razão: ${fRazao.join(', ')}`);
     if (fStatus !== 'Tudo') parts.push(`Status: ${fStatus}`);
     if (fPrazosPendente.length > 0) parts.push(`Prazos Sel.: ${fPrazosPendente.join(', ')}`);
     
@@ -811,12 +811,12 @@ export default function App() {
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-7 gap-6">
-                  <FilterDropdown label="Contrato" value={fContrato} onChange={setFContrato} options={contratos} icon={<Database className="w-3 h-3"/>} theme={theme}/>
+                  <MultiSelectFilter label="Contrato" selected={fContrato} onChange={setFContrato} options={contratos} icon={<Database className="w-3 h-3"/>} theme={theme}/>
                   <FilterDropdown label="Mês" value={fMes} onChange={setFMes} options={meses} icon={<CalendarDays className="w-3 h-3"/>} theme={theme}/>
                   <FilterDropdown label="Ano" value={fAno} onChange={setFAno} options={anos} icon={<CalendarDays className="w-3 h-3"/>} theme={theme}/>
                   <MultiSelectFilter label="Base" selected={fBase} onChange={setFBase} options={bases} icon={<MapPin className="w-3 h-3"/>} theme={theme}/>
                   <MultiSelectFilter label="Prazo" selected={fPrazos} onChange={setFPrazos} options={prazos} icon={<Clock className="w-3 h-3"/>} theme={theme}/>
-                  <FilterDropdown label="Razão" value={fRazao} onChange={setFRazao} options={razoes} icon={<FileText className="w-3 h-3"/>} theme={theme}/>
+                  <MultiSelectFilter label="Razão" selected={fRazao} onChange={setFRazao} options={razoes} icon={<FileText className="w-3 h-3"/>} theme={theme}/>
                   <FilterDropdown label="Status" value={fStatus} onChange={setFStatus} options={statuses} icon={<Activity className="w-3 h-3"/>} theme={theme}/>
                 </div>
 
