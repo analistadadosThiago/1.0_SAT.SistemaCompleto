@@ -172,6 +172,102 @@ const ProcedenciaTooltip = ({ active, payload, label, theme }: any) => {
   return null;
 };
 
+const MatriculaTooltip = ({ active, payload, theme }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    const isDark = theme !== 'white';
+    return (
+      <div className={`${isDark ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border-gray-200 text-gray-800'} p-4 border shadow-2xl rounded-2xl text-xs min-w-[220px] pointer-events-none z-50`}>
+        <div className={`flex items-center justify-between border-b pb-2 mb-2 ${isDark ? 'border-gray-700' : 'border-gray-100'}`}>
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Matrícula</p>
+            <p className={`text-sm font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>{data.matricula || data.name}</p>
+          </div>
+          {data.nomeMatricula && data.nomeMatricula !== 'Sem dados' && (
+            <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${isDark ? 'bg-gray-800 text-blue-300' : 'bg-blue-50 text-blue-600'}`}>
+              {data.nomeMatricula}
+            </span>
+          )}
+        </div>
+        
+        <div className="space-y-1.5">
+          <div className="flex justify-between items-center py-1 font-black">
+            <span className={isDark ? 'text-gray-300' : 'text-gray-600'}>Total de Pendências:</span>
+            <span className="text-red-500 text-sm font-black">{Number(data.value).toLocaleString()}</span>
+          </div>
+
+          <div className={`pt-2 border-t space-y-1 text-[11px] ${isDark ? 'border-gray-700/60' : 'border-gray-100'}`}>
+            <p className="text-[9px] font-black uppercase tracking-wider text-gray-400 mb-1">Detalhamento por Categoria:</p>
+            <div className="flex justify-between items-center">
+              <span className="flex items-center gap-1.5 font-bold text-blue-500">
+                <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                Urbano:
+              </span>
+              <span className="font-black">{Number(data.urbano || 0).toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="flex items-center gap-1.5 font-bold text-amber-500">
+                <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                Povoado:
+              </span>
+              <span className="font-black">{Number(data.povoado || 0).toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="flex items-center gap-1.5 font-bold text-emerald-500">
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                Rural:
+              </span>
+              <span className="font-black">{Number(data.rural || 0).toLocaleString()}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
+const TipoLeituraTooltip = ({ active, payload, theme }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    const isDark = theme !== 'white';
+    const razaoEntries = Object.entries(data.byRazao || {}).sort((a: any, b: any) => b[1] - a[1]);
+    return (
+      <div className={`${isDark ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border-gray-200 text-gray-800'} p-4 border shadow-2xl rounded-2xl text-xs min-w-[220px] pointer-events-none z-50`}>
+        <div className={`flex items-center justify-between border-b pb-2 mb-2 ${isDark ? 'border-gray-700' : 'border-gray-100'}`}>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: data.color || '#3b82f6' }}></span>
+            <p className={`text-sm font-black uppercase ${isDark ? 'text-white' : 'text-gray-900'}`}>{data.name}</p>
+          </div>
+          <span className="text-[10px] font-black uppercase text-gray-400">Tipo de Leitura</span>
+        </div>
+        
+        <div className="space-y-1.5">
+          <div className="flex justify-between items-center py-1 font-black">
+            <span className={isDark ? 'text-gray-300' : 'text-gray-600'}>Total Pendências:</span>
+            <span className="text-red-500 text-sm font-black">{Number(data.value).toLocaleString()}</span>
+          </div>
+
+          <div className={`pt-2 border-t space-y-1 text-[11px] ${isDark ? 'border-gray-700/60' : 'border-gray-100'}`}>
+            <p className="text-[9px] font-black uppercase tracking-wider text-gray-400 mb-1">Detalhamento por Razão:</p>
+            {razaoEntries.length > 0 ? (
+              razaoEntries.map(([rz, qty]) => (
+                <div key={rz} className="flex justify-between items-center py-0.5">
+                  <span className={`font-bold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Razão {rz}:</span>
+                  <span className="font-black text-red-500">{Number(qty).toLocaleString()}</span>
+                </div>
+              ))
+            ) : (
+              <span className="text-gray-400 italic">Sem pendências registradas</span>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 export default function App() {
   const [activeSection, setActiveSection] = useState<AppSection>('transmissao');
   const [view, setView] = useState<'dashboard' | 'table'>('dashboard');
@@ -321,16 +417,17 @@ export default function App() {
         };
       } else {
         return {
-          "MÊS": row.MES,
-          "ANO": row.ANO,
-          "CONTRATO": row.CONTRATO,
-          "BASE": row.BASE,
-          "CIDADE": row.CIDADE,
-          "UL": row.UL,
-          "RAZÃO": row.RAZAO,
-          "A REALIZAR": row.LEITURAS_A_REALIZAR,
-          "REALIZADAS": (row.LEITURAS_100 + row.LEITURAS_30),
-          "PENDENTES": row.LEITURAS_NAO_REALIZADAS
+          "Período": `${row.MES}/${row.ANO}`,
+          "Base": row.BASE,
+          "Cidade": row.CIDADE,
+          "Razão": row.RAZAO,
+          "UL": row.UL || '-',
+          "Tipo": row.TIPO || '-',
+          "Matrícula": row.MATRICULA || '-',
+          "Leituras": row.LEITURAS ?? 0,
+          "A Fazer": row.LEITURAS_A_REALIZAR ?? 0,
+          "Executadas": ((row.LEITURAS_100 || 0) + (row.LEITURAS_30 || 0)),
+          "Pendentes": row.LEITURAS_NAO_REALIZADAS ?? 0
         };
       }
     });
@@ -367,9 +464,9 @@ export default function App() {
       const matchMes = fMes === 'Tudo' || d.MES === fMes;
       const matchAno = fAno === 'Tudo' || d.ANO === fAno;
       const matchBase = fBase.length === 0 || fBase.includes(d.BASE);
-      const matchPrazo = fPrazos.length === 0 || fPrazos.includes(d.PRAZO);
+      const matchPrazo = activeSection === 'transmissao' || fPrazos.length === 0 || fPrazos.includes(d.PRAZO);
       const matchRazao = fRazao.length === 0 || fRazao.includes(d.RAZAO);
-      const matchStatus = fStatus === 'Tudo' || d.STATUS === fStatus;
+      const matchStatus = activeSection === 'transmissao' || fStatus === 'Tudo' || d.STATUS === fStatus;
       
       let matchPrazosPendente = true;
       if (isNotas && fStatus === 'Pendente' && fPrazosPendente.length > 0) {
@@ -378,7 +475,7 @@ export default function App() {
 
       return matchContrato && matchMes && matchAno && matchBase && matchPrazo && matchRazao && matchStatus && matchPrazosPendente;
     });
-  }, [currentRawData, fContrato, fMes, fAno, fBase, fPrazos, fRazao, fStatus, fPrazosPendente, isNotas]);
+  }, [currentRawData, fContrato, fMes, fAno, fBase, fPrazos, fRazao, fStatus, fPrazosPendente, isNotas, activeSection]);
 
   const prazosPendenteDisponiveis = useMemo(() => {
     if (!isNotas || fStatus !== 'Pendente') return [];
@@ -558,6 +655,105 @@ export default function App() {
     ];
   }, [filteredData, stats, isNotas, isConsistencia]);
 
+  const matriculaChartData = useMemo(() => {
+    if (activeSection !== 'transmissao') return [];
+    const map: Record<string, {
+      name: string;
+      matricula: string;
+      nomeMatricula?: string;
+      value: number;
+      urbano: number;
+      povoado: number;
+      rural: number;
+      outros: number;
+    }> = {};
+
+    filteredData.forEach((d: any) => {
+      const mat = (d.MATRICULA || '').toString().trim();
+      const nome = (d.NOME_MATRICULA || '').toString().trim();
+      const pend = Number(d.LEITURAS_NAO_REALIZADAS) || 0;
+      const tipoRaw = (d.TIPO || '').toString().trim();
+      const tipoNorm = tipoRaw.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+      const key = mat || 'Sem Matrícula';
+      if (!map[key]) {
+        map[key] = {
+          name: key,
+          matricula: key,
+          nomeMatricula: nome,
+          value: 0,
+          urbano: 0,
+          povoado: 0,
+          rural: 0,
+          outros: 0
+        };
+      }
+      map[key].value += pend;
+      if (tipoNorm.includes('urban')) {
+        map[key].urbano += pend;
+      } else if (tipoNorm.includes('povo')) {
+        map[key].povoado += pend;
+      } else if (tipoNorm.includes('rur')) {
+        map[key].rural += pend;
+      } else {
+        map[key].outros += pend;
+      }
+    });
+
+    return Object.values(map)
+      .filter(item => item.value > 0 || (item.matricula !== 'Sem Matrícula' && item.matricula !== ''))
+      .sort((a, b) => b.value - a.value);
+  }, [filteredData, activeSection]);
+
+  const tipoLeituraDonutData = useMemo(() => {
+    if (activeSection !== 'transmissao') return [];
+    const map: Record<string, {
+      name: string;
+      value: number;
+      byRazao: Record<string, number>;
+      color: string;
+    }> = {};
+
+    filteredData.forEach((d: any) => {
+      const pend = Number(d.LEITURAS_NAO_REALIZADAS) || 0;
+      const tipoRaw = (d.TIPO || 'Outros').toString().trim();
+      const tipoNorm = tipoRaw.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      let tipoStandard = 'Outros';
+      let color = '#94a3b8';
+
+      if (tipoNorm.includes('rur')) {
+        tipoStandard = 'Rural';
+        color = '#10b981';
+      } else if (tipoNorm.includes('povo')) {
+        tipoStandard = 'Povoado';
+        color = '#f59e0b';
+      } else if (tipoNorm.includes('urban')) {
+        tipoStandard = 'Urbano';
+        color = '#3b82f6';
+      } else if (tipoRaw) {
+        tipoStandard = tipoRaw;
+      }
+
+      const razao = (d.RAZAO || 'Não informada').toString().trim();
+
+      if (!map[tipoStandard]) {
+        map[tipoStandard] = {
+          name: tipoStandard,
+          value: 0,
+          byRazao: {},
+          color
+        };
+      }
+
+      map[tipoStandard].value += pend;
+      map[tipoStandard].byRazao[razao] = (map[tipoStandard].byRazao[razao] || 0) + pend;
+    });
+
+    return Object.values(map)
+      .filter(item => item.value > 0)
+      .sort((a, b) => b.value - a.value);
+  }, [filteredData, activeSection]);
+
   const baseBreakdown = useMemo(() => {
     const map: Record<string, { ok: number, nok: number }> = {};
     filteredData.forEach((d: any) => {
@@ -602,14 +798,14 @@ export default function App() {
     if (fMes !== 'Tudo') parts.push(`Mês: ${fMes}`);
     if (fAno !== 'Tudo') parts.push(`Ano: ${fAno}`);
     if (fBase.length > 0) parts.push(`Base: ${fBase.join(', ')}`);
-    if (fPrazos.length > 0) parts.push(`Prazos: ${fPrazos.join(', ')}`);
+    if (activeSection !== 'transmissao' && fPrazos.length > 0) parts.push(`Prazos: ${fPrazos.join(', ')}`);
     if (fRazao.length > 0) parts.push(`Razão: ${fRazao.join(', ')}`);
-    if (fStatus !== 'Tudo') parts.push(`Status: ${fStatus}`);
-    if (fPrazosPendente.length > 0) parts.push(`Prazos Sel.: ${fPrazosPendente.join(', ')}`);
+    if (activeSection !== 'transmissao' && fStatus !== 'Tudo') parts.push(`Status: ${fStatus}`);
+    if (activeSection !== 'transmissao' && fPrazosPendente.length > 0) parts.push(`Prazos Sel.: ${fPrazosPendente.join(', ')}`);
     
     if (parts.length === 0) return 'Visualizando Todos os Dados';
     return `Selecionado: ${parts.join(' | ')}`;
-  }, [fContrato, fMes, fAno, fBase, fPrazos, fRazao, fStatus, fPrazosPendente]);
+  }, [fContrato, fMes, fAno, fBase, fPrazos, fRazao, fStatus, fPrazosPendente, activeSection]);
 
   return (
     <div className={`min-h-screen flex font-sans relative transition-colors duration-500 ${theme === 'blue' ? 'bg-blue-400' : theme === 'dark' ? 'bg-black' : 'bg-[#f8fafc]'}`}>
@@ -864,14 +1060,18 @@ export default function App() {
                   </button>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7 gap-6">
+                <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ${activeSection === 'transmissao' ? 'xl:grid-cols-5' : 'xl:grid-cols-4 2xl:grid-cols-7'} gap-6`}>
                   <MultiSelectFilter label="Contrato" selected={fContrato} onChange={setFContrato} options={contratos} icon={<Database className="w-3 h-3"/>} theme={theme}/>
                   <FilterDropdown label="Mês" value={fMes} onChange={setFMes} options={meses} icon={<CalendarDays className="w-3 h-3"/>} theme={theme}/>
                   <FilterDropdown label="Ano" value={fAno} onChange={setFAno} options={anos} icon={<CalendarDays className="w-3 h-3"/>} theme={theme}/>
                   <MultiSelectFilter label="Base" selected={fBase} onChange={setFBase} options={bases} icon={<MapPin className="w-3 h-3"/>} theme={theme}/>
-                  <MultiSelectFilter label="Prazo" selected={fPrazos} onChange={setFPrazos} options={prazos} icon={<Clock className="w-3 h-3"/>} theme={theme}/>
+                  {activeSection !== 'transmissao' && (
+                    <MultiSelectFilter label="Prazo" selected={fPrazos} onChange={setFPrazos} options={prazos} icon={<Clock className="w-3 h-3"/>} theme={theme}/>
+                  )}
                   <MultiSelectFilter label="Razão" selected={fRazao} onChange={setFRazao} options={razoes} icon={<FileText className="w-3 h-3"/>} theme={theme}/>
-                  <FilterDropdown label="Status" value={fStatus} onChange={setFStatus} options={statuses} icon={<ShieldCheck className="w-3 h-3"/>} theme={theme}/>
+                  {activeSection !== 'transmissao' && (
+                    <FilterDropdown label="Status" value={fStatus} onChange={setFStatus} options={statuses} icon={<ShieldCheck className="w-3 h-3"/>} theme={theme}/>
+                  )}
                 </div>
 
                 {isNotas && fStatus === 'Pendente' && prazosPendenteDisponiveis.length > 0 && (
@@ -986,7 +1186,48 @@ export default function App() {
                     </div>
                   </div>
 
-                    {!isConsistencia && (
+                    {activeSection === 'transmissao' ? (
+                      <div className={`${theme !== 'white' ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[500px] relative`}>
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                          <div>
+                            <h3 className={`font-black text-sm uppercase tracking-widest ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>
+                              Pendência por Matrícula
+                            </h3>
+                            <p className={`text-[10px] uppercase tracking-tighter mt-1 ${theme !== 'white' ? 'text-blue-300' : 'text-gray-400'}`}>
+                              <b className="italic font-bold">Passe o cursor sobre as barras para ver o detalhamento por categoria (Urbano, Povoado, Rural)</b>
+                            </p>
+                          </div>
+                          <div className={`${theme !== 'white' ? 'bg-red-900/30 border-red-800/50' : 'bg-red-50 border-red-100'} px-4 py-2 rounded-xl border flex items-center gap-3`}>
+                            <span className={`text-xs font-black uppercase ${theme !== 'white' ? 'text-red-300' : 'text-red-600'}`}>Total Pendências:</span>
+                            <span className={`text-base font-black ${theme !== 'white' ? 'text-red-400' : 'text-red-700'}`}>{stats.totalPending.toLocaleString()}</span>
+                          </div>
+                        </div>
+                        <div className="h-[400px] w-full">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <ComposedChart data={matriculaChartData} margin={{ bottom: 70, top: 40, left: 10, right: 10 }}>
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme !== 'white' ? 'rgba(255,255,255,0.1)' : '#f1f5f9'} />
+                              <XAxis 
+                                dataKey="name" 
+                                axisLine={false} 
+                                tickLine={false} 
+                                interval={0}
+                                tick={{ 
+                                  fontSize: 11, 
+                                  fontWeight: 900, 
+                                  fill: theme !== 'white' ? '#93c5fd' : '#1e40af', 
+                                  dy: 8
+                                }} 
+                              />
+                              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: theme !== 'white' ? '#93c5fd' : '#64748b' }} />
+                              <Tooltip content={<MatriculaTooltip theme={theme} />} cursor={{fill: theme !== 'white' ? 'rgba(255,255,255,0.05)' : '#f8fafc'}} />
+                              <Bar dataKey="value" fill="#ef4444" radius={[8, 8, 0, 0]} barSize={42}>
+                                <LabelList dataKey="value" position="top" style={{ fontSize: '13px', fontWeight: 900, fill: theme !== 'white' ? '#93c5fd' : '#1e40af' }} offset={10} />
+                              </Bar>
+                            </ComposedChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
+                    ) : !isConsistencia ? (
                       <div className={`${theme !== 'white' ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[400px] relative`}>
                         <h3 className={`font-black text-sm uppercase tracking-widest mb-8 ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>Tendência Mensal</h3>
                         <div className="h-[300px] w-full">
@@ -1015,7 +1256,7 @@ export default function App() {
                           </ResponsiveContainer>
                         </div>
                       </div>
-                    )}
+                    ) : null}
                   </div>
 
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
@@ -1041,22 +1282,37 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className={`${theme !== 'white' ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[500px] flex flex-col items-center`}>
-                    <h3 className={`font-black text-sm uppercase tracking-widest self-start mb-10 ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>Relação de Status</h3>
-                    <div className="h-[400px] w-full">
-                      <ResponsiveContainer width="100%" height="100%">
+                  {activeSection === 'transmissao' ? (
+                    <div className={`${theme !== 'white' ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[500px] flex flex-col items-center relative`}>
+                      <div className="w-full flex justify-between items-start mb-6">
+                        <div>
+                          <h3 className={`font-black text-sm uppercase tracking-widest ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>
+                            Relação por Tipo de Leitura
+                          </h3>
+                          <p className={`text-[10px] uppercase tracking-tighter mt-1 ${theme !== 'white' ? 'text-blue-300' : 'text-gray-400'}`}>
+                            <b className="italic font-bold">Passe o cursor sobre os segmentos para ver o detalhamento por Razão</b>
+                          </p>
+                        </div>
+                        <div className={`${theme !== 'white' ? 'bg-blue-900/30 border-blue-800/50' : 'bg-blue-50 border-blue-100'} px-4 py-2 rounded-xl border flex items-center gap-2`}>
+                          <span className={`text-xs font-black uppercase ${theme !== 'white' ? 'text-blue-300' : 'text-blue-600'}`}>Pendências:</span>
+                          <span className={`text-base font-black ${theme !== 'white' ? 'text-blue-400' : 'text-blue-700'}`}>{stats.totalPending.toLocaleString()}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="h-[380px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
                           <PieChart>
                             <Pie
-                              data={statusDonutData}
+                              data={tipoLeituraDonutData}
                               cx="50%"
                               cy="50%"
-                              innerRadius={100}
-                              outerRadius={150}
-                              paddingAngle={10}
+                              innerRadius={95}
+                              outerRadius={145}
+                              paddingAngle={6}
                               dataKey="value"
                               label={({ cx, cy, midAngle, innerRadius, outerRadius, value, name }) => {
                                 const RADIAN = Math.PI / 180;
-                                const radius = outerRadius + 30;
+                                const radius = outerRadius + 28;
                                 const x = cx + radius * Math.cos(-midAngle * RADIAN);
                                 const y = cy + radius * Math.sin(-midAngle * RADIAN);
                                 return (
@@ -1068,51 +1324,107 @@ export default function App() {
                                     dominantBaseline="central"
                                     style={{ fontSize: '12px', fontWeight: 900, textTransform: 'uppercase' }}
                                   >
-                                    {`${name}: ${value}`}
+                                    {`${name}: ${Number(value).toLocaleString()}`}
                                   </text>
                                 );
                               }}
                               labelLine={{ stroke: theme !== 'white' ? '#475569' : '#cbd5e1', strokeWidth: 2 }}
                             >
-                              {statusDonutData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.name === 'OK' || entry.name === 'Concluído' || entry.name === 'Finalizado' ? '#10b981' : '#ef4444'} />
+                              {tipoLeituraDonutData.map((entry, index) => (
+                                <Cell key={`tipo-cell-${index}`} fill={entry.color} />
                               ))}
                             </Pie>
-                            <Tooltip content={<DonutTooltip breakdown={baseBreakdown} theme={theme} />} />
+                            <Tooltip content={<TipoLeituraTooltip theme={theme} />} />
                           </PieChart>
-                      </ResponsiveContainer>
+                        </ResponsiveContainer>
+                      </div>
+
+                      <div className="mt-6 flex flex-wrap justify-center gap-6">
+                        {tipoLeituraDonutData.map((entry, index) => (
+                          <div key={index} className={`flex items-center gap-3 px-4 py-2 rounded-xl border ${theme !== 'white' ? 'bg-gray-800/60 border-gray-700' : 'bg-gray-50 border-gray-100'}`}>
+                            <div className="w-3.5 h-3.5 rounded-full shadow-sm" style={{ backgroundColor: entry.color }}></div>
+                            <div className="flex flex-col">
+                              <span className={`text-[10px] font-black uppercase tracking-wider ${theme !== 'white' ? 'text-gray-300' : 'text-gray-600'}`}>{entry.name}</span>
+                              <span className={`text-base font-black ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>{Number(entry.value).toLocaleString()}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <div className="mt-8 flex flex-wrap gap-6">
-                      {isConsistencia ? (
-                        statusDonutData.map((entry, index) => (
-                          <div key={index} className="flex flex-col items-center gap-1">
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: entry.name === 'Finalizado' ? '#10b981' : '#ef4444' }}></div>
-                              <span className={`text-lg font-black ${theme !== 'white' ? 'text-white' : 'text-gray-800'}`}>{entry.value.toLocaleString()}</span>
+                  ) : (
+                    <div className={`${theme !== 'white' ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100'} p-8 rounded-[2.5rem] border shadow-sm min-h-[500px] flex flex-col items-center`}>
+                      <h3 className={`font-black text-sm uppercase tracking-widest self-start mb-10 ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>Relação de Status</h3>
+                      <div className="h-[400px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={statusDonutData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={100}
+                                outerRadius={150}
+                                paddingAngle={10}
+                                dataKey="value"
+                                label={({ cx, cy, midAngle, innerRadius, outerRadius, value, name }) => {
+                                  const RADIAN = Math.PI / 180;
+                                  const radius = outerRadius + 30;
+                                  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                                  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                                  return (
+                                    <text
+                                      x={x}
+                                      y={y}
+                                      fill={theme !== 'white' ? '#fff' : '#1e293b'}
+                                      textAnchor={x > cx ? 'start' : 'end'}
+                                      dominantBaseline="central"
+                                      style={{ fontSize: '12px', fontWeight: 900, textTransform: 'uppercase' }}
+                                    >
+                                      {`${name}: ${value}`}
+                                    </text>
+                                  );
+                                }}
+                                labelLine={{ stroke: theme !== 'white' ? '#475569' : '#cbd5e1', strokeWidth: 2 }}
+                              >
+                                {statusDonutData.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={entry.name === 'OK' || entry.name === 'Concluído' || entry.name === 'Finalizado' ? '#10b981' : '#ef4444'} />
+                                ))}
+                              </Pie>
+                              <Tooltip content={<DonutTooltip breakdown={baseBreakdown} theme={theme} />} />
+                            </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+                      <div className="mt-8 flex flex-wrap gap-6">
+                        {isConsistencia ? (
+                          statusDonutData.map((entry, index) => (
+                            <div key={index} className="flex flex-col items-center gap-1">
+                              <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: entry.name === 'Finalizado' ? '#10b981' : '#ef4444' }}></div>
+                                <span className={`text-lg font-black ${theme !== 'white' ? 'text-white' : 'text-gray-800'}`}>{entry.value.toLocaleString()}</span>
+                              </div>
+                              <span className={`text-[9px] font-black uppercase tracking-widest ${theme !== 'white' ? 'text-blue-300' : 'text-gray-400'}`}>{entry.name}</span>
                             </div>
-                            <span className={`text-[9px] font-black uppercase tracking-widest ${theme !== 'white' ? 'text-blue-300' : 'text-gray-400'}`}>{entry.name}</span>
-                          </div>
-                        ))
-                      ) : (
-                        <>
-                          <div className="flex flex-col items-center gap-1">
-                            <div className="flex items-center gap-2">
-                              <div className="w-4 h-4 rounded-full bg-emerald-500 shadow-md"></div>
-                              <span className={`text-xl font-black ${theme !== 'white' ? 'text-white' : 'text-gray-800'}`}>{stats.totalPerformed.toLocaleString()}</span>
+                          ))
+                        ) : (
+                          <>
+                            <div className="flex flex-col items-center gap-1">
+                              <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 rounded-full bg-emerald-500 shadow-md"></div>
+                                <span className={`text-xl font-black ${theme !== 'white' ? 'text-white' : 'text-gray-800'}`}>{stats.totalPerformed.toLocaleString()}</span>
+                              </div>
+                              <span className={`text-[10px] font-black uppercase tracking-widest ${theme !== 'white' ? 'text-blue-300' : 'text-gray-400'}`}>{isNotas ? 'Concluído' : 'OK'}</span>
                             </div>
-                            <span className={`text-[10px] font-black uppercase tracking-widest ${theme !== 'white' ? 'text-blue-300' : 'text-gray-400'}`}>{isNotas ? 'Concluído' : 'OK'}</span>
-                          </div>
-                          <div className="flex flex-col items-center gap-1">
-                            <div className="flex items-center gap-2">
-                              <div className="w-4 h-4 rounded-full bg-red-500 shadow-md"></div>
-                              <span className={`text-xl font-black ${theme !== 'white' ? 'text-white' : 'text-gray-800'}`}>{stats.totalPending.toLocaleString()}</span>
+                            <div className="flex flex-col items-center gap-1">
+                              <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 rounded-full bg-red-500 shadow-md"></div>
+                                <span className={`text-xl font-black ${theme !== 'white' ? 'text-white' : 'text-gray-800'}`}>{stats.totalPending.toLocaleString()}</span>
+                              </div>
+                              <span className={`text-[10px] font-black uppercase tracking-widest ${theme !== 'white' ? 'text-blue-300' : 'text-gray-400'}`}>{isNotas ? 'Pendente' : 'N-OK'}</span>
                             </div>
-                            <span className={`text-[10px] font-black uppercase tracking-widest ${theme !== 'white' ? 'text-blue-300' : 'text-gray-400'}`}>{isNotas ? 'Pendente' : 'N-OK'}</span>
-                          </div>
-                        </>
-                      )}
+                          </>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                   {/* GRÁFICO: Procedência da Reclamação por Leiturista - ATUALIZADO COM CORES VERMELHO CLARO */}
@@ -1231,16 +1543,19 @@ export default function App() {
                             </tr>
                           </thead>
                         ) : (
-                          <thead className={`${theme !== 'white' ? 'bg-gray-800 text-blue-300' : 'bg-gray-50/50 text-gray-400'} text-[10px] font-black uppercase tracking-widest`}>
+                          <thead className={`${theme !== 'white' ? 'bg-gray-800 text-blue-300' : 'bg-gray-50/80 text-gray-500'} text-[10px] font-black uppercase tracking-wider`}>
                             <tr>
-                              <th className="px-8 py-5">Período</th>
-                              <th className="px-8 py-5">Base</th>
-                              <th className="px-8 py-5">Cidade</th>
-                              <th className="px-8 py-5">Razão</th>
-                              <th className="px-8 py-5">UL</th>
-                              <th className="px-8 py-5 text-center">Leituras a Fazer</th>
-                              <th className="px-8 py-5 text-center">Executadas</th>
-                              <th className="px-8 py-5 text-center">Pendentes</th>
+                              <th className="px-4 py-3.5">Período</th>
+                              <th className="px-4 py-3.5">Base</th>
+                              <th className="px-4 py-3.5">Cidade</th>
+                              <th className="px-4 py-3.5">Razão</th>
+                              <th className="px-4 py-3.5">UL</th>
+                              <th className="px-4 py-3.5 text-center">Tipo</th>
+                              <th className="px-4 py-3.5 text-center">Matrícula</th>
+                              <th className="px-4 py-3.5 text-center">Leituras</th>
+                              <th className="px-4 py-3.5 text-center">A Fazer</th>
+                              <th className="px-4 py-3.5 text-center">Executadas</th>
+                              <th className="px-4 py-3.5 text-center">Pendentes</th>
                             </tr>
                           </thead>
                         )}
@@ -1290,14 +1605,33 @@ export default function App() {
                                 </>
                               ) : (
                                 <>
-                                  <td className={`px-8 py-5 ${theme !== 'white' ? 'text-blue-400' : 'text-gray-400'}`}>{row.MES}/{row.ANO}</td>
-                                  <td className={`px-8 py-5 font-black ${theme !== 'white' ? 'text-blue-300' : 'text-blue-600'}`}>{row.BASE}</td>
-                                  <td className={`px-8 py-5 ${theme !== 'white' ? 'text-blue-100' : 'text-gray-600'}`}>{row.CIDADE}</td>
-                                  <td className={`px-8 py-5 truncate max-w-[250px] ${theme !== 'white' ? 'text-blue-200' : 'text-gray-500'}`}>{row.RAZAO}</td>
-                                  <td className={`px-8 py-5 font-black ${theme !== 'white' ? 'text-blue-300' : 'text-blue-600'}`}>{row.UL || '-'}</td>
-                                  <td className={`px-8 py-5 text-center ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>{row.LEITURAS_A_REALIZAR}</td>
-                                  <td className={`px-8 py-5 text-center font-black ${theme !== 'white' ? 'text-emerald-400' : 'text-emerald-600'}`}>{(row.LEITURAS_100 + row.LEITURAS_30)}</td>
-                                  <td className={`px-8 py-5 text-center font-black ${theme !== 'white' ? 'text-red-400' : 'text-red-600'}`}>{row.LEITURAS_NAO_REALIZADAS}</td>
+                                  <td className={`px-4 py-3.5 ${theme !== 'white' ? 'text-blue-400' : 'text-gray-400'}`}>{row.MES}/{row.ANO}</td>
+                                  <td className={`px-4 py-3.5 font-black ${theme !== 'white' ? 'text-blue-300' : 'text-blue-600'}`}>{row.BASE}</td>
+                                  <td className={`px-4 py-3.5 ${theme !== 'white' ? 'text-blue-100' : 'text-gray-700'}`}>{row.CIDADE}</td>
+                                  <td className={`px-4 py-3.5 truncate max-w-[200px] ${theme !== 'white' ? 'text-blue-200' : 'text-gray-600'}`}>{row.RAZAO}</td>
+                                  <td className={`px-4 py-3.5 font-black ${theme !== 'white' ? 'text-blue-300' : 'text-blue-600'}`}>{row.UL || '-'}</td>
+                                  <td className="px-4 py-3.5 text-center">
+                                    <span className={`px-2.5 py-1 text-[9px] font-black rounded-lg uppercase tracking-wider ${
+                                      (row.TIPO || '').toLowerCase().includes('rural')
+                                        ? (theme !== 'white' ? 'bg-emerald-900/40 text-emerald-400 border border-emerald-800/50' : 'bg-emerald-50 text-emerald-700 border border-emerald-100')
+                                        : (row.TIPO || '').toLowerCase().includes('povo')
+                                        ? (theme !== 'white' ? 'bg-amber-900/40 text-amber-400 border border-amber-800/50' : 'bg-amber-50 text-amber-700 border border-amber-100')
+                                        : (row.TIPO || '').toLowerCase().includes('urban')
+                                        ? (theme !== 'white' ? 'bg-blue-900/40 text-blue-400 border border-blue-800/50' : 'bg-blue-50 text-blue-700 border border-blue-100')
+                                        : (theme !== 'white' ? 'bg-gray-800 text-gray-400' : 'bg-gray-100 text-gray-600')
+                                    }`}>
+                                      {row.TIPO || '-'}
+                                    </span>
+                                  </td>
+                                  <td className="px-4 py-3.5 text-center">
+                                    <span className={`px-2.5 py-1 text-[10px] font-black rounded-lg ${theme !== 'white' ? 'bg-purple-900/40 text-purple-300 border border-purple-800/50' : 'bg-purple-50 text-purple-700 border border-purple-100'}`}>
+                                      {row.MATRICULA || '-'}
+                                    </span>
+                                  </td>
+                                  <td className={`px-4 py-3.5 text-center ${theme !== 'white' ? 'text-white' : 'text-gray-800'}`}>{Number(row.LEITURAS || 0).toLocaleString()}</td>
+                                  <td className={`px-4 py-3.5 text-center ${theme !== 'white' ? 'text-white' : 'text-gray-900'}`}>{Number(row.LEITURAS_A_REALIZAR || 0).toLocaleString()}</td>
+                                  <td className={`px-4 py-3.5 text-center font-black ${theme !== 'white' ? 'text-emerald-400' : 'text-emerald-600'}`}>{Number((row.LEITURAS_100 || 0) + (row.LEITURAS_30 || 0)).toLocaleString()}</td>
+                                  <td className={`px-4 py-3.5 text-center font-black ${theme !== 'white' ? 'text-red-400' : 'text-red-600'}`}>{Number(row.LEITURAS_NAO_REALIZADAS || 0).toLocaleString()}</td>
                                 </>
                               )}
                             </tr>

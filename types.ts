@@ -10,6 +10,8 @@ export interface ReadingData {
   LOCAL: string;
   ROTA: string;
   TIPO: string;
+  MATRICULA?: string;
+  NOME_MATRICULA?: string;
   LEITURISTA?: string;
   LEITURAS_A_REALIZAR: number;
   LEITURAS_100: number;
